@@ -51,6 +51,7 @@ from . import ag_agent as AG
 from . import help_chat as HC
 from . import web_ag as WA
 from . import ag_studio as STUDIO
+from . import ag_light as LIGHTW
 
 CHAT_PER_10_MIN = 5      # AI chat: at most 5 questions per 10 minutes ...
 CHAT_PER_RUN = 20        # ... and 20 per run (cost and abuse cap)
@@ -1958,7 +1959,8 @@ DEV_MOVES = {
 # ---------------------------------------------------------------- money check (read-only)
 SKIP_WORDS = {"no_ai": "AI not connected", "no_api_key": "no xAI key on this computer", "disabled": "AI is off in your settings",
               "ai_off": "AI summary is off in your settings", "zdr_not_confirmed": "zero data retention not confirmed",
-              "zdr_header_not_true": "xAI did not confirm zero data retention", "rate_limited": "AI rate limit reached"}
+              "zdr_header_not_true": "xAI did not confirm zero data retention", "rate_limited": "AI rate limit reached",
+              "judge_ai_limit": "Judge AI limit reached, showing sample answer"}
 
 
 def _skip_text(why) -> str:
@@ -2199,6 +2201,9 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
             port = self.server.server_address[1]
             return self.headers.get("Host", "") in (f"127.0.0.1:{port}", f"localhost:{port}")
 
+        def _session_judge_key(self) -> str:
+            return ""          # hosted.py: the judge key this session logged in with ("" = owner / local)
+
         def _logged_in(self) -> bool:
             c = SimpleCookie()
             try:
@@ -2305,7 +2310,7 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
             routes = {"/", "/money", "/ask", "/history", "/settings", "/settings/change", "/status.json", "/export.json",
                       "/export.txt", "/report", "/report.txt", "/lock", "/moves.json", "/history/move",
                       "/money-map.json", "/ag-studio/config.json", "/ag-studio/data.json",
-                      "/ag-studio/panel"}
+                      "/ag-studio/panel", "/ag-studio/light.json"}
             if url.path not in routes and not url.path.startswith("/static/"):
                 return self._deny("not found", 404)
             if not self._logged_in():
@@ -2341,6 +2346,11 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
                     return self._deny("not found", 404)
                 body = STUDIO.config(app) if url.path.endswith("config.json") else WA.studio_data(app)
                 return self._send(json.dumps(body), ctype="application/json", extra={"Cache-Control": "no-store"})
+            if url.path == "/ag-studio/light.json":        # v6: the BW Light widget (read-only + one-time tokens)
+                if not STUDIO.ready():
+                    return self._deny("not found", 404)
+                return self._send(json.dumps(LIGHTW.state(app)), ctype="application/json",
+                                  extra={"Cache-Control": "no-store"})
             if url.path == "/history/move":
                 aid = urllib.parse.parse_qs(url.query).get("id", [""])[0][:80]
                 body = move_page(app, aid)
@@ -2416,6 +2426,8 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
                 return self._deny("wrong host", 421)
             if self.path == "/ag-studio/v1/responses":
                 return self._studio_chat()
+            if self.path == "/ag-studio/light":
+                return self._studio_light()
             if self.path == "/judges/theme":
                 return self._judges_theme()
             if self.path not in ("/decide", "/act"):
@@ -2451,6 +2463,40 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
                                   code=429, ctype="application/json")
             code, body = STUDIO.proxy(app.gate, raw)
             return self._send(json.dumps(body), code=code, ctype="application/json", extra={"Cache-Control": "no-store"})
+
+        def _studio_light(self):
+            """The BW Light widget's two owner buttons. Owner login, same origin, JSON, one-time token bound to the
+            step and the light it was shown for. Runs only BW's existing owner rules (ag_light.step). No money path."""
+            if not STUDIO.ready():
+                return self._deny("not found", 404)
+            if not self._logged_in():
+                return self._deny("not logged in", 401)
+            if not self._same_origin_post() or not self.headers.get("Origin"):
+                return self._deny("cross-site request refused")
+            if self.headers.get("Content-Type", "").split(";")[0].strip() != "application/json":
+                return self._deny("wrong content type", 415)
+            try:
+                n = int(self.headers.get("Content-Length", "0"))
+            except ValueError:
+                return self._deny("bad length", 400)
+            if n < 0 or n > 2000:
+                return self._deny("request too large", 413)
+            try:
+                req = json.loads(self.rfile.read(n).decode("utf-8"))
+                stp, tok = str(req["step"]), str(req["token"])
+            except (UnicodeDecodeError, ValueError, KeyError, TypeError):
+                return self._deny("bad request", 400)
+            with app.lock:
+                purpose = (app.nonces.get(tok) or ("",))[0]
+            if (not purpose.startswith(f"{LIGHTW.PURPOSE}{stp}:") or stp not in LIGHTW.STEPS
+                    or app.take_nonce(tok, purpose) is None):
+                return self._send(json.dumps({"ok": False, "why": "This button has expired or was already used."}),
+                                  code=403, ctype="application/json", extra={"Cache-Control": "no-store"})
+            r = LIGHTW.step(app, purpose)
+            if r["ok"]:
+                r["say"] = ack_light_say(app.gate)
+            return self._send(json.dumps(r), code=200 if r["ok"] else 409, ctype="application/json",
+                              extra={"Cache-Control": "no-store"})
 
         def _incident(self, choice):
             """Red-light choices. They can only block, explain, or mark as seen. Never send money."""
@@ -2630,7 +2676,8 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
                     app.say("Email did not go out. Use Download proof instead.", "warn")
                 return self._redirect("/history")
             if purpose == "alert:test":
-                r = app.alert_test.start(judge_key=form.get("judge_key", [""])[0][:200],
+                r = app.alert_test.start(judge_key=(self._session_judge_key() or   # hosted judge login: always counted
+                                                    form.get("judge_key", [""])[0][:200]),
                                          call_name=form.get("call_name", [""])[0][:200],   # this call only, never logged
                                          call_voice=form.get("call_voice", [""])[0][:80])   # this test call only
                 if r["started"]:

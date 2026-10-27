@@ -23,12 +23,15 @@ import re
 from pathlib import Path
 
 from . import help_chat as H
+from . import judge_ai as JA
 
 VERSION = "3.0.0"
 BUNDLE = "ag-studio.min.js"
 PINNED_SHA256 = "41b525170d224be3b5ceb4116d0952b39601a7198e0c44148bfa48aabf556a8e"   # npm ag-studio@3.0.0 dist/umd
 VENDOR_DIR = Path(__file__).resolve().parent / "vendor" / "ag-studio"
 GLUE = "bw-studio.js"
+WIDGET = "bw-light-widget.js"      # v6: the BW Light custom widget (owner buttons call BW's own rules)
+OWN = (WIDGET, GLUE)              # our two files, loaded after the pinned bundle, widget first
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 LICENSE_ENV = "BW_AG_STUDIO_LICENSE_KEY"
 XAI_RESPONSES_URL = "https://api.x.ai/v1/responses"
@@ -66,31 +69,38 @@ def bundle():
 
 
 def ready() -> bool:
-    return bundle() is not None and _file(STATIC_DIR / GLUE) is not None
+    return bundle() is not None and all(_file(STATIC_DIR / n) is not None for n in OWN)
 
 
 def static(name: str):
-    """Serve only the two Studio files, and only when ready."""
+    """Serve only the Studio files (pinned bundle + our widget + our glue), and only when ready."""
     if not ready():
         return None
     if name == "vendor/" + BUNDLE:
         return bundle()
-    if name == GLUE:
-        f = _file(STATIC_DIR / GLUE)
+    if name in OWN:
+        f = _file(STATIC_DIR / name)
         return f[0], f[2]
     return None
 
 
 def csp_hashes() -> str:
-    return " ".join(f"'{static(n)[1]}'" for n in ("vendor/" + BUNDLE, GLUE)) if ready() else ""
+    return " ".join(f"'{static(n)[1]}'" for n in ("vendor/" + BUNDLE,) + OWN) if ready() else ""
 
 
 def scripts() -> str:
     return "".join(f'<script src="/static/{n}" integrity="{static(n)[1]}"></script>'
-                   for n in ("vendor/" + BUNDLE, GLUE))
+                   for n in ("vendor/" + BUNDLE,) + OWN)
 
 
 PANEL_TITLE = "BW AG Grid agent, AG Studio dashboard and chat"
+# v6: BW theming for the Studio panel: a white header with Trey's BW logo (served by /assets/brand/, allowlisted).
+HEAD_CSS = ('.bw-head{display:flex;align-items:center;gap:10px;padding:8px 14px;background:#FFFFFF;color:#0B1220;'
+            'border-bottom:1px solid #E5E7EB}.bw-head img{width:32px;height:32px}.bw-head b{font-size:15px}'
+            '.bw-head small{color:#4B5563;margin-left:auto}')
+HEAD_HTML = ('<header class="bw-head"><img src="/assets/brand/bw-mark-navy-v7b.png" '
+             'srcset="/assets/brand/bw-mark-navy-v7b@2x.png 2x" alt="Bridge Warden"><b>Bridge Warden</b>'
+             '<span>AG Studio: BW Light + spending</span><small>Only you can turn the light green.</small></header>')
 
 
 def panel_html() -> str:
@@ -99,8 +109,8 @@ def panel_html() -> str:
     spilled over History and covered the owner's buttons. Isolated here, only this frame allows inline STYLES.
     Scripts are still only the two hash-pinned files. The frame has no forms and cannot navigate the page."""
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8"><title>' + PANEL_TITLE + '</title><style>html,body{margin:0;font:14px system-ui,sans-serif}#bw-studio{height:740px}'
-            '#bw-studio-usage{margin:4px 8px;font-size:12px}</style></head>'
-            '<body><div id="bw-studio" class="bw-studio" role="region" aria-label="' + PANEL_TITLE + '" hidden></div>'
+            '#bw-studio-usage{margin:4px 8px;font-size:12px}' + HEAD_CSS + '</style></head>'
+            '<body>' + HEAD_HTML + '<div id="bw-studio" class="bw-studio" role="region" aria-label="' + PANEL_TITLE + '" hidden></div>'
             '<p id="bw-studio-usage" aria-live="polite"></p>' + scripts() + '</body></html>')
 
 
@@ -130,8 +140,16 @@ def config(app, env=None) -> dict:
     else:
         why = ai.skip_reason()
     return {"license_key": license_key(env), "ai_ready": why is None, "ai_note": why or "",
-            "name": "BW AG Grid agent", "cost_note": "Each answer uses your own xAI key (billed to you). Under each "
-            "answer: what xAI says it used. Remaining credit: " + H.NO_LIMIT + "."}
+            "name": "BW AG Grid agent", "cost_note": _cost_note()}
+
+
+def _cost_note() -> str:
+    key, counter = JA.current()
+    if key and counter is not None:      # a judge on the hosted demo: our key, free to them, capped
+        return (f"Real xAI, free to you on our key. You have {counter.left(key)} of {counter.limit} judge AI "
+                "messages left. Under each answer: what xAI says it used.")
+    return ("Each answer uses your own xAI key (billed to you). Under each answer: what xAI says it used. "
+            "Remaining credit: " + H.NO_LIMIT + ".")
 
 
 def _clean_request(raw: bytes):
@@ -167,9 +185,14 @@ def proxy(gate, raw: bytes, by: str = "owner (web)"):
         if ai._zdr_state is None:
             try:
                 ai._preflight_zdr()
+            except JA.JudgeAiLimit:
+                why = JA.SKIP
             except Exception:
                 ai._record(False)
-        why = None if ai._zdr_state else "zdr_header_not_true"
+        why = why or (None if ai._zdr_state else "zdr_header_not_true")
+    if why == JA.SKIP:          # judge allowance used up: nothing sent, no cost
+        gate.audit.write(EVENT, action_id="-", by=by, sent=False, why=JA.SKIP)
+        return 429, {"error": {"message": JA.LIMIT_NOTE + ". Bridge Warden's own History chat still works."}}
     if why:
         gate.audit.write(EVENT, action_id="-", by=by, sent=False, why=str(why)[:120])
         return 503, {"error": {"message": f"AI not used: {why}. Bridge Warden's own History chat still works."}}
@@ -184,6 +207,9 @@ def proxy(gate, raw: bytes, by: str = "owner (web)"):
         if status != 200 or not isinstance(data, dict):
             raise ValueError(f"HTTP {status}")
         ai._record(True)
+    except JA.JudgeAiLimit:
+        gate.audit.write(EVENT, action_id="-", by=by, sent=False, why=JA.SKIP)
+        return 429, {"error": {"message": JA.LIMIT_NOTE + ". Bridge Warden's own History chat still works."}}
     except Exception as ex:
         ai._record(False)
         gate.audit.write(EVENT, action_id="-", by=by, sent=True, ok=False, why=ai._scrub(type(ex).__name__)[:80])

@@ -146,26 +146,37 @@
     if (cfg.license_key && S.AgStudioLicenseManager) { S.AgStudioLicenseManager.setLicenseKey(cfg.license_key); }
     if (S.AgStudioModuleRegistry && S.AgStudioAiModule) { S.AgStudioModuleRegistry.registerModules([S.AgStudioAiModule]); }
     var dark = page.documentElement.getAttribute('data-theme') === 'dark';
+    // v6: BW Light (bw-light-widget.js) sits next to the spending chart, above the AG Grid view.
+    var L = window.BWLight, light = !!(L && L.widgets);
+    var widgets = {
+      'by-group': {type: 'column-chart-grouped',
+        dataMapping: {categoryKey: [{id: 'spending.group'}], valueKey: [{id: 'spending.amount', aggregation: 'sum'}]},
+        format: {caption: {enabled: true, text: 'Spending by group' + (data.sample ? ' (SAMPLE)' : '')}}},
+      'lines': {type: 'grid',
+        dataMapping: {cols: [{id: 'spending.month'}, {id: 'spending.group'}, {id: 'spending.kind'},
+                             {id: 'spending.amount', aggregation: 'sum'}, {id: 'spending.flag'}]},
+        format: {caption: {enabled: true, text: 'By month and group'}}}
+    };
+    var top = light ? 26 : 14;
+    var layout = {'by-group': {xTrack: light ? 10 : 0, yTrack: 0, xSpan: light ? 14 : 24, ySpan: top},
+                  'lines': {xTrack: 0, yTrack: top, xSpan: 24, ySpan: 16}};
+    if (light) {
+      widgets['bw-light'] = {type: L.ID};
+      layout['bw-light'] = {xTrack: 0, yTrack: 0, xSpan: 10, ySpan: top};
+    }
     var props = {
       mode: 'edit',
+      widgets: light ? L.widgets(S) : undefined,
       data: {sources: [{id: 'spending', data: data.rows}]},
       initialState: {
         pages: [{
           id: 'main', name: 'Where my money goes',
-          widgets: {
-            'by-group': {type: 'column-chart-grouped',
-              dataMapping: {categoryKey: [{id: 'spending.group'}], valueKey: [{id: 'spending.amount', aggregation: 'sum'}]},
-              format: {caption: {enabled: true, text: 'Spending by group' + (data.sample ? ' (SAMPLE)' : '')}}},
-            'lines': {type: 'grid',
-              dataMapping: {cols: [{id: 'spending.month'}, {id: 'spending.group'}, {id: 'spending.kind'},
-                                   {id: 'spending.amount', aggregation: 'sum'}, {id: 'spending.flag'}]},
-              format: {caption: {enabled: true, text: 'By month and group'}}}
-          },
-          widgetLayout: {'by-group': {xTrack: 0, yTrack: 0, xSpan: 24, ySpan: 14},
-                         'lines': {xTrack: 0, yTrack: 14, xSpan: 24, ySpan: 16}}
+          widgets: widgets,
+          widgetLayout: layout
         }],
         selectedPageId: 'main',
-        panels: {ai: {collapsed: false}}
+        // the agent chat stays open; the edit side panels start folded so the BW Light and grid views have room
+        panels: {ai: {collapsed: false, width: 280}, filters: {collapsed: true}, edit: {collapsed: true}, data: {collapsed: true}}
       },
       ai: function (o) {
         var api = o.api, mine = tools(api, data);
@@ -189,7 +200,8 @@
     };
     if (S.studioTheme) {
       props.theme = S.studioTheme.withParams(dark ? {accentColor: '#22D3EE', backgroundColor: '#1A2333', foregroundColor: '#E5E7EB', browserColorScheme: 'dark'}
-                                                  : {accentColor: '#0E7490', backgroundColor: '#FFFFFF', foregroundColor: '#0B1220', browserColorScheme: 'light'});
+                                                  : {accentColor: '#0E7490', backgroundColor: '#FFFFFF', foregroundColor: '#0B1220', browserColorScheme: 'light',
+                                                     headerBackgroundColor: '#FFFFFF', headerTextColor: '#0B1220', widgetBackgroundColor: '#FFFFFF'});
     }
     box.hidden = false;
     S.createStudio(box, props);
