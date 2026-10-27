@@ -1,0 +1,20 @@
+{
+  "_about": "EXAMPLE prices for the Bridge Warden demo only. These are made-up round numbers, NOT real store prices and NOT a claim about what any product costs. Swap this file for a real price source later (see bridge_warden/market_price.py).",
+  "_credit": "Made by @Nefarious_Trey, with Grok. Copyright 2026 Douglas Gibbons III. Apache-2.0 like the code.",
+  "source": "example",
+  "currency": "USD",
+  "items": [
+    {"name": "Game console", "keywords": ["console", "game console", "gaming console"], "example_price": 450.00},
+    {"name": "Wireless earbuds", "keywords": ["earbuds", "ear buds", "wireless earbuds"], "example_price": 120.00},
+    {"name": "Headphones", "keywords": ["headphones", "headset"], "example_price": 150.00},
+    {"name": "Phone charger", "keywords": ["charger", "charging cable", "usb-c cable"], "example_price": 20.00},
+    {"name": "Laptop", "keywords": ["laptop", "notebook computer"], "example_price": 900.00},
+    {"name": "Tablet", "keywords": ["tablet"], "example_price": 400.00},
+    {"name": "Smart watch", "keywords": ["smart watch", "smartwatch"], "example_price": 250.00},
+    {"name": "Sneakers", "keywords": ["sneakers", "running shoes"], "example_price": 110.00},
+    {"name": "Concert ticket", "keywords": ["concert ticket", "show ticket"], "example_price": 90.00},
+    {"name": "Used bike", "keywords": ["bike", "bicycle"], "example_price": 300.00},
+    {"name": "Office chair", "keywords": ["office chair", "desk chair"], "example_price": 200.00},
+    {"name": "Graphics card", "keywords": ["graphics card", "gpu"], "example_price": 500.00}
+  ]
+}

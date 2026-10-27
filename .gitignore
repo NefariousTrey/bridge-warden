@@ -1,0 +1,65 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+policy.json
+audit/
+# v1 raw run logs carry the author's sandbox account email; v2 proof files use placeholders
+proof/live-demo-20261026-0612.jsonl
+proof/live-demo-20261026-0612-b.jsonl
+proof/live-demo-20261026-0612-b.txt
+*.bak-*
+.audit_hmac.key
+*.lock
+policy_history/
+proof/SPONSORS_PLAN.md
+proof/PRIZE_STACK.md
+# Your own data folder (hosted / local copy). Never commit it.
+bw-data/
+
+# v6: AG Studio is commercial (AG Grid Ltd). Fetched locally by scripts/fetch_ag_studio.sh, never committed.
+bridge_warden/vendor/
+
+# Audit fixes 2026-10-27: keep keys, private notes, backups and vendor code out of the ship set
+*.bak
+*.bak-*
+*.env
+*.key
+*.pem
+*_key*.env
+private/
+proof/scripts/RUN_ON_TREYS_PC*.md
+cloudflared*.log
+*.cloudflared.log
+.cloudflared/
+bridge_warden/vendor/
+bridge_warden/vendor/ag-studio/
+policy.json
+proof/live-demo-*
+
+# Slim ship set 2026-10-27 (Trey OK): files stay on disk, not in the public repo
+proof/demo/
+proof/ui/
+proof/ui-old-20261026-1020/
+proof/video/
+proof/ag-agent/
+proof/ACCTWATCH_E2E_RESULT_20261027.md
+proof/ACCTWATCH_E2E_RESULT_PC_20261027.md
+proof/HARDENING_PROOF_20261026.md
+proof/SANDBOX_PROOF_20261026.md
+proof/SANDBOX_PROOF_V2_20261026.md
+proof/XAI_LIVE_PROOF_20261026.md
+proof/scripts/shots*.py
+proof/scripts/demo.py
+proof/scripts/render_demo.py
+proof/scripts/judge_shots.py
+proof/scripts/brand_sheet.py
+proof/scripts/bw_harness.py
+proof/scripts/contrast.py
+DEVPOST_TOOLS_DRAFT.md
+DEMO_VIDEO_SCRIPT.md
+UI_RESEARCH.md
+assets/dots-proposal-20261026/
+*.mp4
+*.webm

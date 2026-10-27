@@ -1,0 +1,261 @@
+{
+ "_note": "What PayPal says to do, per situation. Plain words from PayPal's own public help and policy pages; each step cites its page. Nothing added that the page does not say. Never a phone number: always 'use the number on paypal.com'. Shared by notify.py, the browser demo (web.py) and the call Worker (call-worker/src/steps.js, generated; a test keeps them equal).",
+ "fetched": "2026-10-26",
+ "situations": {
+  "unauthorized": {
+   "name": "A payment you did not make",
+   "steps": [
+    {
+     "say": "Open PayPal yourself. Type paypal.com or use the PayPal app. Do not use a link.",
+     "short": "opened PayPal yourself",
+     "source": "https://www.paypal.com/us/security/protect-your-account"
+    },
+    {
+     "say": "Check your recent activity. Make sure it was not a family member or an automatic payment, like a subscription.",
+     "short": "checked recent activity",
+     "source": "https://www.paypal.com/us/cshelp/article/how-do-i-report-an-unauthorized-transaction-or-account-activity-help136"
+    },
+    {
+     "say": "Change your password and your security questions.",
+     "short": "changed password and security questions",
+     "source": "https://www.paypal.com/us/cshelp/article/how-do-i-report-potential-fraud-spoof-or-unauthorized-transactions-to-paypal-help165"
+    },
+    {
+     "say": "Turn on 2-step verification.",
+     "short": "turned on 2-step verification",
+     "source": "https://www.paypal.com/us/security/protect-your-account"
+    },
+    {
+     "say": "Go to the Resolution Center. Choose Report a problem, pick the payment, then choose I want to report unauthorized activity.",
+     "short": "reported it in the Resolution Center",
+     "source": "https://www.paypal.com/us/cshelp/article/how-do-i-report-an-unauthorized-transaction-or-account-activity-help136"
+    },
+    {
+     "say": "Do it now. PayPal's User Agreement says to tell PayPal at once. If you wait more than 60 days after the statement that shows it, you may not get back money lost after that.",
+     "short": "know the 60 day limit",
+     "source": "https://www.paypal.com/us/legalhub/paypal/useragreement-full"
+    },
+    {
+     "say": "PayPal says it will email you within 10 days. If you need to call PayPal, use the number on paypal.com. Never use a number from a message or a call.",
+     "short": "know what happens next",
+     "source": "https://www.paypal.com/us/cshelp/article/how-do-i-report-an-unauthorized-transaction-or-account-activity-help136"
+    }
+   ]
+  },
+  "takeover": {
+   "name": "A login you do not know",
+   "steps": [
+    {
+     "say": "Open PayPal yourself. Type paypal.com or use the PayPal app. Do not use a link.",
+     "short": "opened PayPal yourself",
+     "source": "https://www.paypal.com/us/security/protect-your-account"
+    },
+    {
+     "say": "Change your password right away.",
+     "short": "changed password",
+     "source": "https://www.paypal.com/us/security/protect-your-account"
+    },
+    {
+     "say": "Update your security questions.",
+     "short": "updated security questions",
+     "source": "https://www.paypal.com/us/cshelp/article/how-do-i-report-potential-fraud-spoof-or-unauthorized-transactions-to-paypal-help165"
+    },
+    {
+     "say": "Go to Settings, then Security, then Manage your logins. Remove any device you do not know.",
+     "short": "removed unknown devices",
+     "source": "https://www.paypal.com/us/cshelp/article/what-is-multi-factor-authentication-and-a-remembered-device-help1156"
+    },
+    {
+     "say": "Turn on 2-step verification. Never share the code. PayPal will never ask you for it.",
+     "short": "turned on 2-step verification",
+     "source": "https://www.paypal.com/us/security/protect-your-account"
+    },
+    {
+     "say": "Check your recent activity. If you see a payment you did not make, report it in the Resolution Center.",
+     "short": "checked recent activity",
+     "source": "https://www.paypal.com/us/cshelp/article/how-do-i-report-an-unauthorized-transaction-or-account-activity-help136"
+    },
+    {
+     "say": "If you need to call PayPal, use the number on paypal.com. Never use a number from a message or a call.",
+     "short": "know to use the number on paypal.com",
+     "source": "https://www.paypal.com/us/cshelp/article/what-are-common-scams-and-how-do-i-spot-them-help201"
+    }
+   ]
+  },
+  "phishing": {
+   "name": "A fake PayPal email, text or call",
+   "steps": [
+    {
+     "say": "Do not click links, open attachments, or call any number in the message.",
+     "short": "did not click or call",
+     "source": "https://www.paypal.com/us/security/report-suspicious-messages"
+    },
+    {
+     "say": "Forward the whole email to phishing at paypal dot com. Then delete it.",
+     "short": "forwarded and deleted the email",
+     "source": "https://www.paypal.com/us/security/report-suspicious-messages"
+    },
+    {
+     "say": "For a text, forward it to phishing at paypal dot com, block the sender, then delete it.",
+     "short": "forwarded and blocked the text",
+     "source": "https://www.paypal.com/us/security/report-suspicious-messages"
+    },
+    {
+     "say": "If you clicked a link, open PayPal yourself, check your payments, and change your password.",
+     "short": "checked payments and password",
+     "source": "https://www.paypal.com/us/cshelp/article/how-do-i-remove-a-limitation-from-my-account-help535"
+    },
+    {
+     "say": "If you need to call PayPal, use the number on paypal.com. Never use a number from a message or a call.",
+     "short": "know to use the number on paypal.com",
+     "source": "https://www.paypal.com/us/cshelp/article/what-are-common-scams-and-how-do-i-spot-them-help201"
+    }
+   ]
+  },
+  "scam_buy": {
+   "name": "A risky buy",
+   "steps": [
+    {
+     "say": "Do not pay an invoice or money request for something you did not order. Do not call a number in its note. Report it by logging in to PayPal.",
+     "short": "did not pay and reported the request",
+     "source": "https://www.paypal.com/us/cshelp/article/what-are-common-scams-and-how-do-i-spot-them-help201"
+    },
+    {
+     "say": "When you buy from someone you do not know, pay with Goods and Services, not Friends and Family. A seller who pushes Friends and Family is a red flag.",
+     "short": "used Goods and Services",
+     "source": "https://www.paypal.com/us/security/learn-about-scams"
+    },
+    {
+     "say": "If something went wrong, contact the seller first.",
+     "short": "contacted the seller",
+     "source": "https://www.paypal.com/us/legalhub/paypal/buyer-protection"
+    },
+    {
+     "say": "Then go to the Resolution Center, choose Report a problem, pick the payment, and pick the reason.",
+     "short": "opened a dispute",
+     "source": "https://www.paypal.com/us/cshelp/article/how-do-i-open-a-dispute-with-a-seller-help160"
+    },
+    {
+     "say": "Watch the time. Item not received: open it within 180 days of paying. Not as described: within 30 days of delivery, or 180 days of paying, whichever is sooner.",
+     "short": "know the time limits",
+     "source": "https://www.paypal.com/us/legalhub/paypal/buyer-protection"
+    },
+    {
+     "say": "If you need to call PayPal, use the number on paypal.com. Never use a number from a message or a call.",
+     "short": "know to use the number on paypal.com",
+     "source": "https://www.paypal.com/us/cshelp/article/what-are-common-scams-and-how-do-i-spot-them-help201"
+    }
+   ]
+  },
+  "risky_sell": {
+   "name": "A risky sale or a chargeback",
+   "steps": [
+    {
+     "say": "A real buyer won't overpay you. If a buyer overpays and asks you to send back the difference, do not send it. Think about canceling the order.",
+     "short": "did not send money back",
+     "source": "https://www.paypal.com/us/cshelp/article/what-are-common-scams-and-how-do-i-spot-them-help201"
+    },
+    {
+     "say": "Do not accept a shipping label from the buyer. Ship only to the address on the Transaction Details page.",
+     "short": "shipped to the right address",
+     "source": "https://www.paypal.com/us/cshelp/article/what-are-common-scams-and-how-do-i-spot-them-help201"
+    },
+    {
+     "say": "Keep proof that you shipped it and that it was delivered.",
+     "short": "kept proof of shipping",
+     "source": "https://www.paypal.com/us/legalhub/paypal/seller-protection"
+    },
+    {
+     "say": "If you get a chargeback, go to the Resolution Center, choose the case, and click Respond Now. Give tracking or proof of a refund.",
+     "short": "responded to the chargeback",
+     "source": "https://www.paypal.com/us/cshelp/article/what-is-a-chargeback-and-why-did-i-get-one-help607"
+    },
+    {
+     "say": "Answer PayPal's requests for papers on time.",
+     "short": "answered PayPal on time",
+     "source": "https://www.paypal.com/us/legalhub/paypal/seller-protection"
+    },
+    {
+     "say": "If you need to call PayPal, use the number on paypal.com. Never use a number from a message or a call.",
+     "short": "know to use the number on paypal.com",
+     "source": "https://www.paypal.com/us/cshelp/article/what-are-common-scams-and-how-do-i-spot-them-help201"
+    }
+   ]
+  },
+  "limited": {
+   "name": "A limited account",
+   "steps": [
+    {
+     "say": "Open PayPal yourself. Type paypal.com or use the PayPal app. Do not use a link in the email.",
+     "short": "opened PayPal yourself",
+     "source": "https://www.paypal.com/us/security/protect-your-account"
+    },
+    {
+     "say": "Go to the Resolution Center, or tap the bell at the top of your Dashboard, to see why.",
+     "short": "checked why",
+     "source": "https://www.paypal.com/us/cshelp/article/why-is-my-paypal-account-limited-help534"
+    },
+    {
+     "say": "Finish every step PayPal asks for. If it asks for proof of identity, like a driver's license, upload it in your Notifications Center.",
+     "short": "finished PayPal's steps",
+     "source": "https://www.paypal.com/us/cshelp/article/why-is-my-paypal-account-limited-help534"
+    },
+    {
+     "say": "If an email says you are limited but nothing shows in the Resolution Center, it may be fake. Forward it to phishing at paypal dot com and delete it.",
+     "short": "checked for a fake email",
+     "source": "https://www.paypal.com/us/cshelp/article/why-is-my-paypal-account-limited-help534"
+    },
+    {
+     "say": "Then wait for PayPal to contact you. PayPal says that in most cases its phone team can't remove a limitation.",
+     "short": "know to wait",
+     "source": "https://www.paypal.com/us/cshelp/article/why-is-my-paypal-account-limited-help534"
+    },
+    {
+     "say": "If you need to call PayPal, use the number on paypal.com. Never use a number from a message or a call.",
+     "short": "know to use the number on paypal.com",
+     "source": "https://www.paypal.com/us/cshelp/article/what-are-common-scams-and-how-do-i-spot-them-help201"
+    }
+   ]
+  }
+ },
+ "walk": {
+  "lead_real": "Okay. I will walk you through what PayPal says to do.",
+  "step": "Step {n} of {total}.",
+  "prompt": "Press 1 or say done when finished, press 2 or say repeat, press 3 or say skip.",
+  "not_heard": "Sorry, I did not get that.",
+  "move_on": "Let's move on.",
+  "skipped": "Skipped.",
+  "summary_lead": "Here is what you did.",
+  "summary_done": "Done: {list}.",
+  "summary_skipped": "Skipped: {list}.",
+  "summary_none": "You did not finish any steps.",
+  "real_end": "Bridge Warden keeps anything risky on hold until you decide in the app.",
+  "words": {
+   "done": "1",
+   "finished": "1",
+   "finish": "1",
+   "ok": "1",
+   "okay": "1",
+   "yes": "1",
+   "repeat": "2",
+   "again": "2",
+   "skip": "3",
+   "later": "3"
+  },
+  "solo": {
+   "won": "1",
+   "to": "2",
+   "too": "2",
+   "tree": "3"
+  },
+  "num": {
+   "1": "1",
+   "one": "1",
+   "2": "2",
+   "two": "2",
+   "3": "3",
+   "three": "3"
+  },
+  "max_repeats": 2
+ }
+}

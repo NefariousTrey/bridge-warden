@@ -1,0 +1,202 @@
+# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Douglas Gibbons III.  Apache-2.0.
+"""Judge Guide (/judges), Oct 27 2026: a real BW page, public, plain words, big numbered steps, Light/Dark works,
+no keys or logins on it, and linked from the nav, Home, the judge landing and the hosted login page."""
+import re
+from pathlib import Path
+
+import pytest
+
+from bridge_warden import web
+from test_v4_dots import _server
+from test_v4_judge import clean_env, jsrv, login as jlogin, req as jreq          # noqa: F401 (fixtures)
+import test_v5_render_hosted as HT
+from test_v5_render_hosted import srv as hsrv                                    # noqa: F401 (fixture)
+
+ROOT = Path(__file__).resolve().parent.parent
+LIGHT = '<html lang="en" data-theme="light">'
+DARK = '<html lang="en" data-theme="dark">'
+
+
+@pytest.fixture
+def s(tmp_path):
+    S, srv = _server(tmp_path)
+    S.origin = f"http://127.0.0.1:{srv.server_address[1]}"
+    yield S
+    srv.shutdown()
+
+
+def _text(body):
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", body))
+
+
+def check_guide(body):
+    assert body.startswith("<!doctype html>")
+    assert '<header class="top top-light">' in body                              # same white header
+    assert 'th-light" src="/assets/brand/bw-mark-white-v7b.png"' in body          # white-fill logo, top right
+    assert f"<style>{web.STYLE}</style>" in body                                  # same stylesheet (CSP hash)
+    assert '<a href="/judges" aria-current="page">' in body                       # nav tab is active
+    t = _text(body)
+    for must in ("Judge Guide", "Try it in 5 steps", "What the lights mean", "Red never goes straight to green.",
+                 "Where AG Studio shows up", "Tested in sandbox with sample data to verify it works as intended.",
+                 "[YOUTUBE_LINK]", "[REPO_LINK]", "Free for judges through Dec 15, 2026.",
+                 "Judge login: in the Devpost testing notes.", "Test my alert",
+                 "Judge mode runs the whole flow without a phone.", "The voice call is optional (your own Twilio"):
+        assert must in t, must
+    assert body.count('<ol class="jg-steps"') == 1
+    steps = re.search(r'<ol class="jg-steps"[^>]*>(.*?)</ol>', body, re.S).group(1)
+    assert steps.count("<li>") == 5
+    for c in ("green", "yellow", "red"):
+        assert f"/assets/dots/bw-dot-trey-{c}-full-glyph-48.png" in body
+    assert 'action="/judges/theme"' in body and body.count('name="t" value=') == 2
+    assert "<script>" not in body                                                 # no status poll on a public page
+    low = re.sub(r"<style>.*?</style>", "", body, flags=re.S).lower()
+    for bad in ("cross" + "roads", "bw_login_key", "password", "secret", "token", "L" * 24, "tok-"):
+        assert bad.lower() not in low, bad
+    assert not re.search(r"\b(sk|xai|ghp|rk)[-_][a-z0-9]{8}", low)
+    # short plain sentences: no sentence in the guide body over 20 words
+    guide = _text(re.search(r'<div class="jg">(.*?)</main>', body, re.S).group(1))
+    for sent in re.split(r"(?<=[.!?])\s", guide):
+        assert len(sent.split()) <= 20, sent
+
+
+def test_page_function_and_nav_link():
+    body = web.judges_page()
+    check_guide(body)
+    p = web.page("Home", "<h1>x</h1>", "home", None)
+    assert '<a href="/judges">' in p and 'Judges</a></li>' in p
+
+
+def test_placeholders_become_links_only_for_https():
+    b = web.judges_body(video="https://youtu.be/abc", repo="javascript:alert(1)")
+    assert '<a href="https://youtu.be/abc" rel="noopener">' in b and 'href="javascript' not in b
+
+
+def test_local_judges_public_and_linked_from_home(s):
+    r, body = s.req("GET", "/judges")                                             # no login needed
+    assert r.status == 200
+    check_guide(web.theme_html(body, "light"))
+    assert LIGHT in body
+    r, home = s.get("/")
+    assert r.status == 200 and 'href="/judges"' in home and "Judge Guide: how to try Bridge Warden" in home
+
+
+def test_theme_toggle_on_judges(s):
+    hdr = {"Content-Type": "application/x-www-form-urlencoded", "Origin": s.origin}
+    r, _ = s.req("POST", "/judges/theme", "t=dark", hdr)
+    assert r.status == 303 and r.getheader("Location") == "/judges"
+    ck = r.getheader("Set-Cookie")
+    assert ck.startswith("bw_theme=dark;") and "HttpOnly" in ck and "SameSite=Strict" in ck
+    r, body = s.req("GET", "/judges", headers={"Cookie": "bw_theme=dark"})
+    assert DARK in body and LIGHT not in body
+    r, _ = s.req("POST", "/judges/theme", "t=light", hdr)
+    assert r.getheader("Set-Cookie").startswith("bw_theme=light;")
+    # refused: bad value, cross-site, wrong type
+    assert s.req("POST", "/judges/theme", "t=purple", hdr)[0].status == 400
+    assert s.req("POST", "/judges/theme", "t=dark", {**hdr, "Origin": "https://evil.example"})[0].status == 403
+    assert s.req("POST", "/judges/theme", "t=dark", {**hdr, "Content-Type": "text/plain"})[0].status == 415
+
+
+def test_judge_mode_serves_guide_and_landing_links_it(jsrv):
+    srv, _ = jsrv
+    st, h, body = jreq(srv, "GET", "/judges", host="bw-demo.onrender.com")
+    assert st == 200
+    check_guide(body)
+    assert "Judge demo on practice data." in body
+    st, _, land = jreq(srv, "GET", "/", host="bw-demo.onrender.com")
+    assert 'href="/judges"' in land
+
+
+def test_hosted_guide_is_public_and_login_links_it(hsrv):
+    s, *_ = hsrv
+    st, h, body = HT.req(s, "GET", "/judges")
+    assert st == 200
+    check_guide(body)
+    assert "strict-transport-security" in h
+    st, _, login = HT.req(s, "GET", "/login")
+    assert 'href="/judges"' in login
+
+
+def test_judge_testing_docs_match_page():
+    for f in (ROOT / "proof" / "JUDGE_TESTING.md", ROOT / "JUDGE_TESTING.md"):
+        t = f.read_text()
+        assert "cross" + "roads" not in t.lower()
+    t = (ROOT / "proof" / "JUDGE_TESTING.md").read_text()
+    for must in ("Tested in sandbox with sample data to verify it works as intended.", "[YOUTUBE_LINK]",
+                 "[REPO_LINK]", "Dec 15", "Judge login: in the Devpost testing notes.",
+                 "Red never goes straight to green.", "AG Studio", "/judges"):
+        assert must in t, must
+    assert "proof/JUDGE_TESTING.md" in (ROOT / "JUDGE_TESTING.md").read_text()
+
+
+def test_render_blueprint_free_and_secrets_not_synced():
+    y = (ROOT / "render.yaml").read_text()
+    assert re.search(r"^\s+plan: free$", y, re.M) and "disk:" not in re.sub(r"#.*", "", y)
+    keys = dict(re.findall(r"- key: (\S+)\n\s+((?:sync: false|generateValue: true|value: \S+))", y))
+    for k in ("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM_NUMBER", "BW_OWNER_PHONE"):
+        assert keys[k] == "sync: false"
+    for k in ("BW_LOGIN_KEY", "BW_CALL_LINK_KEY"):
+        assert keys[k] == "generateValue: true"
+    for k in ("BW_SMTP_PASSWORD", "BW_PUBLIC_HOST", "BW_JUDGE_VIDEO_URL"):
+        assert k in y                                                            # optional ones are listed (names only)
+
+
+
+def _form_token(body, text):
+    """Token of the /act form whose button shows `text`."""
+    for m in re.finditer(r'<form method="post" action="/act">(.*?)</form>', body, re.S):
+        if text in m.group(1):
+            return re.search(r'name="token" value="([^"]+)"', m.group(1)).group(1)
+    raise AssertionError("no form for " + text)
+
+
+def test_no_phone_line_is_true_in_judge_mode(jsrv):
+    """The /judges line says judge mode needs no phone. Prove it with NO Twilio set: start, gift-card scam (red),
+    seen (yellow), fixed (green), and Test my alert starts on the dry run (no phone rings)."""
+    import os
+    import urllib.parse
+    from bridge_warden import notify
+    for k in ("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM_NUMBER", "BW_OWNER_PHONE"):
+        assert not os.environ.get(k), k
+    srv, _ = jsrv
+    port = srv.server_address[1]
+    ck = jlogin(srv)
+    form = {"Cookie": ck, "Content-Type": "application/x-www-form-urlencoded", "Origin": f"http://127.0.0.1:{port}"}
+
+    def act(body, text, **more):
+        data = urllib.parse.urlencode({"token": _form_token(body, text), **more})
+        st, h, _ = jreq(srv, "POST", "/act", headers=form, body=data)
+        assert st == 303, (text, st)
+        return jreq(srv, "GET", "/", headers={"Cookie": ck})[2]
+
+    st, _, home = jreq(srv, "GET", "/", headers={"Cookie": ck})
+    assert st == 200
+    gift = re.search(r"<b>Gift-card scam</b>.*?</li>", home, re.S).group(0)
+    home = act(gift, "Send this request")
+    assert "Got it, I" in home                                   # red: the seen button shows
+    home = act(home, "seen the blocked ones")
+    assert 'id="seen-fix"' in home                               # yellow: confirm card
+    home = act(home, "fixed, confirm")
+    assert 'id="seen-fix"' not in home
+    assert isinstance(notify.call_adapter({}, env={}, force=True), notify.DryRunCallAdapter)
+    for f in (ROOT / "proof" / "JUDGE_TESTING.md", ROOT / "JUDGE_TESTING.md"):
+        assert ("Judge mode runs the whole flow without a phone. The voice call is optional "
+                "(your own Twilio, since it's open source).") in f.read_text()
+
+
+def test_top_box_facts_match_the_code():
+    """Trey's top box. Each line is checked against the code, so the page can't drift from it."""
+    from bridge_warden import notify, net, judge
+    b = web.judges_body()
+    top = b.index('id="jg-top-h"')
+    assert top < b.index("Bridge Warden watches the payments")             # the box is at the top
+    for x in web.JUDGE_TOP_FACTS:
+        assert web.html.escape(x) in b, x
+    assert notify.JUDGE_CALL_CAP == 3                                       # "3 real test calls"
+    assert net.PINNED_HOSTS == frozenset({"api-m.sandbox.paypal.com", "api.x.ai"})   # "PayPal is sandbox only"
+    assert "TWILIO_ACCOUNT_SID" in judge.OWNER_SECRET_ENV                  # judge mode never has Twilio
+    assert not re.search(r"\$\s?\d|per minute|/min\b|cents", _text(b), re.I)   # no prices
+    for f in (ROOT / "proof" / "JUDGE_TESTING.md", ROOT / "JUDGE_TESTING.md"):
+        t = f.read_text()
+        assert t.index("Good to know") < t.index("Try it in 5 steps") if "Try it in 5 steps" in t else True
+        for x in web.JUDGE_TOP_FACTS:
+            assert x in t, (f.name, x)

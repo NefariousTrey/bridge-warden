@@ -1,0 +1,64 @@
+{
+  "owner_name": "Demo Owner",
+  "preferred_name": "",
+  "owner_timezone": "America/New_York",
+  "allowed_currencies": [
+    "USD"
+  ],
+  "auto_allow_max": "50.00",
+  "hard_max": "500.00",
+  "daily_cap": "300.00",
+  "max_actions_per_hour": 5,
+  "duplicate_window_minutes": 30,
+  "quiet_hours": [
+    0,
+    6
+  ],
+  "known_payees": [
+    "merchant@business.example.com",
+    "designer@personal.example.com",
+    "writer@personal.example.com",
+    "customer@personal.example.com"
+  ],
+  "blocked_payees": [
+    "scammer@personal.example.com"
+  ],
+  "ai_hold_at": 0.6,
+  "ai_block_at": 0.9,
+  "private_terms": [],
+  "xai": {
+    "enabled": true,
+    "model": "grok-4.20-0309-non-reasoning",
+    "timeout_seconds": 15,
+    "require_zdr": true,
+    "owner_confirmed_zdr": false,
+    "on_ai_failure": "use_local",
+    "review_local_blocks": false,
+    "max_calls_per_minute": 10,
+    "breaker_failures": 3,
+    "breaker_cooldown_seconds": 300
+  },
+  "hold_expires_hours": 24,
+  "mode": "on",
+  "checks": {},
+  "trusted": {
+    "payees": [],
+    "categories": {}
+  },
+  "notify": {
+    "webhook_enabled": false,
+    "webhook_url": "",
+    "call_on_fraud": {
+      "enabled": false,
+      "provider": "dry_run",
+      "experimental": false
+    }
+  },
+  "approval_link_minutes": 15,
+  "money_check": {
+    "subscription_ids": [],
+    "due_soon_days": 7,
+    "lookback_days": 31,
+    "ai_summary": true
+  }
+}

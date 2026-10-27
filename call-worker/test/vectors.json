@@ -1,0 +1,287 @@
+{
+ "_note": "Shared press-or-say cases. Used by test/test_worker.mjs (node), tests/test_v4_call_menu.py (python) and the browser demo test.",
+ "cases": [
+  {
+   "digits": "1",
+   "speech": "",
+   "want": "1"
+  },
+  {
+   "digits": "2",
+   "speech": "",
+   "want": "2"
+  },
+  {
+   "digits": "3",
+   "speech": "",
+   "want": "3"
+  },
+  {
+   "digits": "4",
+   "speech": "",
+   "want": "4"
+  },
+  {
+   "digits": "9",
+   "speech": "",
+   "want": null
+  },
+  {
+   "digits": "",
+   "speech": "One.",
+   "want": "1"
+  },
+  {
+   "digits": "",
+   "speech": "1",
+   "want": "1"
+  },
+  {
+   "digits": "",
+   "speech": "Help.",
+   "want": "1"
+  },
+  {
+   "digits": "",
+   "speech": "help me",
+   "want": "1"
+  },
+  {
+   "digits": "",
+   "speech": "secure my account",
+   "want": "1"
+  },
+  {
+   "digits": "",
+   "speech": "Two.",
+   "want": "2"
+  },
+  {
+   "digits": "",
+   "speech": "Report.",
+   "want": "2"
+  },
+  {
+   "digits": "",
+   "speech": "to",
+   "want": "2"
+  },
+  {
+   "digits": "",
+   "speech": "Three.",
+   "want": "3"
+  },
+  {
+   "digits": "",
+   "speech": "Me.",
+   "want": "3"
+  },
+  {
+   "digits": "",
+   "speech": "It was me.",
+   "want": "3"
+  },
+  {
+   "digits": "",
+   "speech": "that was me",
+   "want": "3"
+  },
+  {
+   "digits": "",
+   "speech": "Four.",
+   "want": "4"
+  },
+  {
+   "digits": "",
+   "speech": "4",
+   "want": "4"
+  },
+  {
+   "digits": "",
+   "speech": "Other.",
+   "want": "4"
+  },
+  {
+   "digits": "",
+   "speech": "something else",
+   "want": "4"
+  },
+  {
+   "digits": "",
+   "speech": "for",
+   "want": "4"
+  },
+  {
+   "digits": "",
+   "speech": "another thing",
+   "want": null
+  },
+  {
+   "digits": "",
+   "speech": "agent",
+   "want": null
+  },
+  {
+   "digits": "",
+   "speech": "person",
+   "want": null
+  },
+  {
+   "digits": "",
+   "speech": "help report",
+   "want": null
+  },
+  {
+   "digits": "",
+   "speech": "banana",
+   "want": null
+  },
+  {
+   "digits": "",
+   "speech": "",
+   "want": null
+  },
+  {
+   "digits": "2",
+   "speech": "three",
+   "want": "2"
+  },
+  {
+   "digits": "",
+   "speech": "the second one",
+   "want": "2"
+  },
+  {
+   "digits": "",
+   "speech": "The first one.",
+   "want": "1"
+  },
+  {
+   "digits": "",
+   "speech": "third",
+   "want": "3"
+  },
+  {
+   "digits": "",
+   "speech": "the fourth one",
+   "want": "4"
+  },
+  {
+   "digits": "",
+   "speech": "the last one",
+   "want": "4"
+  },
+  {
+   "digits": "",
+   "speech": "hold on a second",
+   "want": null
+  },
+  {
+   "digits": "",
+   "speech": "one second",
+   "want": null
+  },
+  {
+   "digits": "",
+   "speech": "just a sec, two",
+   "want": "2"
+  },
+  {
+   "digits": "",
+   "speech": "the first one no the third",
+   "want": null
+  },
+  {
+   "digits": "",
+   "speech": "second option please",
+   "want": "2"
+  }
+ ],
+ "walk_cases": [
+  {
+   "digits": "1",
+   "speech": "",
+   "want": "1"
+  },
+  {
+   "digits": "2",
+   "speech": "",
+   "want": "2"
+  },
+  {
+   "digits": "3",
+   "speech": "",
+   "want": "3"
+  },
+  {
+   "digits": "4",
+   "speech": "",
+   "want": null
+  },
+  {
+   "digits": "",
+   "speech": "Done.",
+   "want": "1"
+  },
+  {
+   "digits": "",
+   "speech": "I'm finished",
+   "want": "1"
+  },
+  {
+   "digits": "",
+   "speech": "okay",
+   "want": "1"
+  },
+  {
+   "digits": "",
+   "speech": "repeat",
+   "want": "2"
+  },
+  {
+   "digits": "",
+   "speech": "say again",
+   "want": "2"
+  },
+  {
+   "digits": "",
+   "speech": "one more time",
+   "want": "2"
+  },
+  {
+   "digits": "",
+   "speech": "skip",
+   "want": "3"
+  },
+  {
+   "digits": "",
+   "speech": "later",
+   "want": "3"
+  },
+  {
+   "digits": "",
+   "speech": "to",
+   "want": "2"
+  },
+  {
+   "digits": "",
+   "speech": "tree",
+   "want": "3"
+  },
+  {
+   "digits": "",
+   "speech": "done skip",
+   "want": null
+  },
+  {
+   "digits": "",
+   "speech": "banana",
+   "want": null
+  },
+  {
+   "digits": "",
+   "speech": "",
+   "want": null
+  }
+ ]
+}

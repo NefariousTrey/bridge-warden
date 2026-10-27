@@ -1,0 +1,17 @@
+# Bridge Warden call helper (Twilio voice endpoints). Free workers.dev address only. NOT deployed yet.
+# Secrets are set with `wrangler secret put` (never here): TWILIO_AUTH_TOKEN, XAI_API_KEY (optional).
+name = "bridge-warden-call"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+# no routes, no custom domain, no KV, no logs of caller data
+
+# CALLFIX 2026-10-26: logs ON only for our one refused-request line (key names, no caller data).
+# Request logs (invocation_logs) stay OFF.
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+invocation_logs = false

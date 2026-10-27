@@ -1,0 +1,90 @@
+Bridge Warden
+Copyright 2026 Douglas Gibbons III
+Made by @Nefarious_Trey,
+with Grok.
+
+This product includes software developed by @Nefarious_Trey.
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+MIT License (separate from the Apache code and from the all-rights-reserved art):
+  - Trey's status dot art in assets/dots-trey-energy-20261026/,
+    assets/dots-trey-energy-full-20261026/ and assets/dots-trey-cvd-20261026/.
+    Each of those folders has its own LICENSE (MIT) and NOTICE.md.
+
+NOT covered (all rights reserved, Copyright 2026 Douglas Gibbons III):
+  - The Bridge Warden logo, name, wordmark and brand marks.
+  - Any music or audio (including Suno tracks) used with the project or its videos.
+  See ASSETS_NOTICE.md.
+
+Third-party: AG Grid Community, MIT License, see bridge_warden/static/AG-GRID-LICENSE.txt.
+
+==============================================================================
+Third-party services and software (full list, v6, 2026-10-27)
+==============================================================================
+Bridge Warden is ours. Everything below is NOT ours. Each one is used only for the
+job written next to it. Keys are the owner's own, read from env, never logged.
+
+Outside services (you sign up yourself; their terms apply to you):
+  - PayPal REST APIs (sandbox by default; Orders/Payouts/Webhooks): the money moves
+    Bridge Warden guards. Terms: https://www.paypal.com/us/legalhub/paypal/useragreement-full
+    Docs: https://developer.paypal.com/api/rest/
+  - xAI API (Grok models; /v1/chat/completions and /v1/responses): optional second
+    opinion, the two help chats, and the AG Studio chat panel. Off without XAI_API_KEY.
+    Terms: https://x.ai/legal/terms-of-service-enterprise
+  - Twilio Programmable Voice and SMS: the optional "a payment needs you" phone call /
+    text. Terms: https://www.twilio.com/en-us/legal/tos
+    Acceptable use: https://www.twilio.com/en-us/legal/aup
+  - Google Cloud Text-to-Speech "Chirp3-HD" voice (default Google.en-US-Chirp3-HD-Charon),
+    used ONLY through Twilio's <Say> (we never call Google directly; Twilio bills it).
+    Twilio TTS docs: https://www.twilio.com/docs/voice/twiml/say/text-speech
+    Google terms: https://cloud.google.com/terms/service-terms
+    (Amazon Polly voices are also allowed through Twilio if the owner picks one.)
+  - Cloudflare Workers (call-worker/, optional, owner deploys with wrangler): the phone
+    menu endpoints. Terms: https://www.cloudflare.com/terms/
+  - Render (render.yaml / render-judge.yaml blueprints, optional): hosting your own copy.
+    Terms: https://render.com/terms
+  - Channel3 product price API (optional, off without CHANNEL3_API_KEY): soft
+    "too cheap?" price check. Terms: https://www.trychannel3.com/terms
+  - npm public registry: scripts/fetch_ag_studio.sh downloads ag-studio@3.0.0 once
+    (hash-pinned). Terms: https://docs.npmjs.com/policies/terms
+  - Suno: NOT used by the code. Only music Trey may add to the demo video (all rights
+    reserved, see ASSETS_NOTICE.md). Terms: https://suno.com/terms
+
+Software shipped in this repo:
+  - AG Grid Community 36.2.0 (ag-grid-community, with ag-stack and ag-charts-types,
+    all MIT), Copyright (c) 2015-2026 AG GRID LTD. Self-hosted UMD file
+    bridge_warden/static/ag-grid-community.min.js. Full licence text:
+    bridge_warden/static/AG-GRID-LICENSE.txt (also
+    https://github.com/ag-grid/ag-grid/blob/latest/LICENSE.txt).
+    Used for: the History grids and the BW AG Grid agent spending grid.
+
+Software NOT shipped (optional, fetched by the owner, commercial):
+  - AG Studio 3.0.0 (npm "ag-studio", licence "Commercial", by AG Grid Ltd). Its UMD
+    bundle also contains ag-grid-enterprise 36.2.0 and ag-charts-enterprise 14.2.0
+    (both Commercial) and tslib (0BSD). Used for: the "Ask the BW AG Grid agent"
+    dashboard + AI chat panel on History. Fetched only by scripts/fetch_ag_studio.sh
+    into bridge_warden/vendor/ (git-ignored). Terms (AG Grid EULA, also saved as
+    bridge_warden/vendor/ag-studio/AG-STUDIO-LICENSE.html):
+    https://www.ag-grid.com/eula/AG-Grid-Enterprise-License-Latest.html
+    Without a licence key it runs in trial mode with a watermark and console notices.
+    Licence/trial key: https://www.ag-grid.com/studio/license-pricing/?tab=trial
+    (put it in BW_AG_STUDIO_LICENSE_KEY). The rest of Bridge Warden works without it.
+
+Runtime dependencies: none. The app is Python 3.10+ standard library only
+(Python Software Foundation License: https://docs.python.org/3/license.html).
+The call Worker has no npm dependencies (package.json lists none).
+
+Developer / proof tools only (not shipped, not needed to run Bridge Warden):
+  - pytest 9.1.1 (MIT) with pluggy 1.7.0 (MIT), iniconfig 2.3.1 (MIT),
+    packaging 26.3 (Apache-2.0 or BSD-2-Clause): tests.
+  - Playwright for Python 1.64.1 (Apache-2.0) with greenlet 3.5.6 (MIT AND PSF-2.0),
+    pyee 14.0.0 (MIT), typing_extensions 4.16.0 (PSF-2.0): headless screenshots in proof/.
+  - Google Chrome (Google Chrome Terms of Service): the headless browser for screenshots.
+  - Pillow (MIT-CMU), NumPy (BSD-3-Clause), SciPy (BSD-3-Clause): one-off scripts in
+    proof/scripts/ that made the dot and logo PNGs. Not used by the app.
+  - FFmpeg (LGPL-2.1+/GPL-2+ depending on build): stitched proof/video/*.mp4 from PNGs.
+  - Node.js (MIT) and Wrangler (Cloudflare's CLI, MIT OR Apache-2.0): tests for the
+    call Worker and the owner's own optional Worker deploy.
+  - cloudflared (Cloudflare Tunnel client, Apache-2.0): optional, the owner's own tunnel for
+    PayPal sandbox webhooks during a live test. Not shipped.
+  - Grok (xAI): coding assistant. Designed and built by @Nefarious_Trey, with Grok as a coding assistant.

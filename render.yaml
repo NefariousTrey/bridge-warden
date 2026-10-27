@@ -1,0 +1,70 @@
+# Bridge Warden: YOUR OWN copy on Render. Used by the "Deploy to Render" button (this file must stay at the repo root).
+# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Douglas Gibbons III.  Apache-2.0 (see LICENSE).
+#
+# Render is only how YOU host your copy. Nothing here is deployed by Bridge Warden, and nobody else sees your keys.
+# Docs: Blueprint spec https://render.com/docs/blueprint-spec
+#       Deploy to Render button https://render.com/docs/deploy-to-render
+#       Free instances https://render.com/docs/free
+# The judge demo Blueprint moved to render-judge.yaml.
+#
+# What you fill in when you deploy (sync: false = Render asks you once, at Blueprint creation):
+#   TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER  your own Twilio account (you pay Twilio; call logs
+#                                                             stay in YOUR Twilio account only)
+#   BW_OWNER_PHONE     your phone, like +15551234567
+#   BW_PREFERRED_NAME  what the call calls you ("Hi Trey"). Blank = plain greeting.
+#   BW_CALL_VOICE      blank or "man" = Twilio's free voice. "Google.en-US-Chirp3-HD-Charon" = our pick (Twilio bills about $0.039/call + minutes).
+# Made for you (generateValue: true = random 256-bit value, never in this file):
+#   BW_LOGIN_KEY       paste it on the login page. Find it: your service > Environment.
+#   BW_CALL_LINK_KEY   signs the short-lived call links, so only YOUR calls can use the call menu.
+#
+# Optional, NOT in the list below (add them yourself in Render > your service > Environment, only if you want them):
+#   BW_SMTP_HOST, BW_SMTP_PORT, BW_SMTP_USER, BW_SMTP_PASSWORD, BW_ALERT_EMAIL_FROM, BW_ALERT_EMAIL_TO
+#                      free email alerts and "Email me my proof", from YOUR own mail account (secret: the password)
+#   BW_PUBLIC_HOST     only for your own domain (Render sets RENDER_EXTERNAL_HOSTNAME for you)
+#   BW_CALL_DETECT_MACHINE  "on" = Twilio answering-machine check (Twilio may bill extra)
+#   BW_JUDGE_VIDEO_URL, BW_JUDGE_REPO_URL  links shown on the Judge Guide page (/judges)
+# PORT and RENDER_EXTERNAL_HOSTNAME are set by Render. Never put a real value for a secret in this file.
+#
+# FREE plan: no disk. Your history, audit log and settings live in BW_DATA_DIR on the service's own disk and are
+# LOST when the service spins down (after 15 minutes idle), restarts or redeploys. Your Twilio settings (above)
+# are kept. To keep history: a paid plan plus a disk (see the commented lines below).
+services:
+  - type: web
+    name: bridge-warden
+    runtime: python
+    plan: free
+    buildCommand: "python --version"   # standard library only, nothing to install
+    startCommand: "python -m bridge_warden hosted"
+    healthCheckPath: /healthz
+    autoDeployTrigger: "off"           # Render's advice for Deploy to Render repos: you choose when to update
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: BW_LOGIN_KEY
+        generateValue: true
+      - key: BW_CALL_LINK_KEY
+        generateValue: true
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM_NUMBER
+        sync: false
+      - key: BW_OWNER_PHONE
+        sync: false
+      - key: BW_PREFERRED_NAME
+        sync: false
+      - key: BW_CALL_VOICE
+        sync: false
+      - key: BW_DATA_DIR
+        value: bw-data
+      # Shows "Free Render copy: download your proof often" on every page. Set to off with a paid disk.
+      - key: BW_FREE_PLAN
+        value: "on"
+    # Keep history across restarts (PAID plan only; free web services can't have a disk):
+    # plan: starter
+    # disk:
+    #   name: bw-data
+    #   mountPath: /var/data
+    #   sizeGB: 1
+    # ...and change BW_DATA_DIR above to /var/data

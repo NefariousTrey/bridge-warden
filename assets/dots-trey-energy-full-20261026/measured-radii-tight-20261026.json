@@ -1,0 +1,29 @@
+{
+ "yellow": {
+  "cx": 573.0,
+  "cy": 840.8,
+  "ring_peak_r": 349.5,
+  "outer_edge_r": 379.0,
+  "cut_r": 379.0,
+  "crop_half": 381.0,
+  "cut_over_peak": 1.084
+ },
+ "red": {
+  "cx": 578.5,
+  "cy": 861.5,
+  "ring_peak_r": 348.5,
+  "outer_edge_r": 388.0,
+  "cut_r": 388.0,
+  "crop_half": 390.0,
+  "cut_over_peak": 1.113
+ },
+ "green": {
+  "cx": 578.3,
+  "cy": 840.4,
+  "ring_peak_r": 349.5,
+  "outer_edge_r": 372.5,
+  "cut_r": 372.5,
+  "crop_half": 374.5,
+  "cut_over_peak": 1.066
+ }
+}

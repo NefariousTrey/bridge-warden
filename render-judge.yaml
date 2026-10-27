@@ -1,0 +1,18 @@
+# Render blueprint for the Bridge Warden JUDGE DEMO (practice data only).
+# Moved here 2026-10-26 (copy of the old root render.yaml; backup render.yaml.bak-20261026-render). The root
+# render.yaml is now the self-host "Deploy to Render" Blueprint. To use THIS file, set Render's "Blueprint Path"
+# to render-judge.yaml (https://render.com/docs/infrastructure-as-code, Setup step 7).
+# Not deployed. Nobody has signed up. Trey decides if and when to use it.
+# Do NOT add PayPal, xAI, Twilio, Channel3 or webhook secrets here: judge mode refuses to start if any are set.
+services:
+  - type: web
+    name: bridge-warden-judge-demo
+    runtime: python
+    plan: free
+    buildCommand: "python --version"   # standard library only, nothing to install
+    startCommand: "python -m bridge_warden judge --public"
+    healthCheckPath: /healthz
+    autoDeploy: false
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
