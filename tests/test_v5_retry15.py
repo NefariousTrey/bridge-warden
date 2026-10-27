@@ -64,7 +64,7 @@ def test_third_miss_stops_calls_and_sends_one_final_message(gate):
     body = last_mail.get_content()
     assert A.FINAL_TEXT in body
     for money in ("250", "USD", "$", "support-desk", "personal.example.com"):   # no money details, no payee
-        shown = json.dumps({k: v for k, v in fin[0].items() if k not in ('hash', 'prev_hash', 'at', 'seq')})
+        shown = json.dumps({k: v for k, v in fin[0].items() if k not in ('hash', 'prev_hash', 'mac', 'for_action', 'at', 'seq')})   # random hex/ids can hold "250" by chance
         assert money not in body and money not in shown
     assert "http" not in body                                               # no links
 
