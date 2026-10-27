@@ -183,7 +183,7 @@ def test_chat_ai_sees_redacted_context_and_cannot_act(setup):
     assert "newshop" not in ctx and "555-0199" not in ctx and "newshop" not in q and "4111" not in q
     # the answer is only text: nothing was approved, sent or changed
     assert len(setup.gate.pending()) == 1 and not setup.gate.paypal.calls
-    assert json.loads(setup.pf.read_text()) == BASE
+    assert json.loads(setup.pf.read_text(encoding="utf-8")) == BASE
     _, page = setup.get(f"/ask?id={aid}")
     assert "AI advice" in page and "I approved it" in page   # shown as advice, clearly labelled
     ev = events(setup.gate, "ai_chat_asked")
@@ -275,7 +275,7 @@ def test_brand_variants_exist_match_and_are_plain_svg():
     files = brand_files()
     assert len(BRAND) == 3 and len(files) == 9
     for name, text in files.items():
-        disk = (ROOT / "assets" / "brand" / name).read_text()
+        disk = (ROOT / "assets" / "brand" / name).read_text(encoding="utf-8")
         assert disk == text
         assert "<script" not in text and "href" not in text and "http://www.w3.org/2000/svg" in text
         assert "https://" not in text and "@import" not in text

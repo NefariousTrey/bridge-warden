@@ -1,0 +1,13 @@
+# Same bytes on Windows, macOS and Linux: text files stay LF in every checkout.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.mp4 binary
+*.webm binary
+*.tgz binary

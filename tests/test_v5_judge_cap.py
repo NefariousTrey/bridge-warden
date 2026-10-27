@@ -51,7 +51,7 @@ def test_three_allowed_fourth_blocked(gate, monkeypatch):
     assert recs(gate, "judge_cap_reached")
     assert KEY not in str(gate.audit.records())
     f = gate.audit.path.parent / N.JUDGE_CAP_FILE
-    assert f.exists() and KEY not in f.read_text()
+    assert f.exists() and KEY not in f.read_text(encoding="utf-8")
 
 
 def test_count_is_persisted_across_restarts(gate, monkeypatch):
@@ -95,7 +95,7 @@ def test_dry_run_tests_do_not_count(gate):
 
 def test_unreadable_count_file_fails_safe(gate, monkeypatch):
     real(monkeypatch)
-    (gate.audit.path.parent / N.JUDGE_CAP_FILE).write_text("{oops")
+    (gate.audit.path.parent / N.JUDGE_CAP_FILE).write_text("{oops", encoding="utf-8")
     d, t, now = drill(gate, env={N.JUDGE_KEY_ENV: KEY})
     assert run(d, t, now, KEY, 1)[0].get("judge_cap") and not t.made
 

@@ -58,13 +58,13 @@ def test_lock_enforced_while_on(setup):
 
 def test_lock_survives_restart_and_is_shared(setup, tmp_path):
     dev_on(setup)
-    saved = json.loads((tmp_path / FILE).read_text())
+    saved = json.loads((tmp_path / FILE).read_text(encoding="utf-8"))
     assert saved == {"on": True, "sim": "green"}
     assert DevMode(tmp_path).on()                 # a new process using the same folder sees it
 
 
 def test_unreadable_switch_counts_as_on(tmp_path):
-    (tmp_path / FILE).write_text("{broken")
+    (tmp_path / FILE).write_text("{broken", encoding="utf-8")
     assert DevMode(tmp_path).on()
 
 

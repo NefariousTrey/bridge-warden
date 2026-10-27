@@ -135,14 +135,14 @@ def prepare_policy(data: Path, env) -> Path:
     path = data / "policy.json"
     if path.exists():
         return path
-    pol = json.loads((ROOT / "policy.example.json").read_text())
+    pol = json.loads((ROOT / "policy.example.json").read_text(encoding="utf-8"))
     name = N.clean_name(env.get("BW_PREFERRED_NAME", ""))
     if name:
         pol["preferred_name"] = name
     if N.TwilioCallAdapter(env=env).ready:
         pol.setdefault("notify", {})["call_on_fraud"] = {"enabled": True, "provider": "twilio", "experimental": True}
     tmp = path.with_suffix(".tmp")
-    tmp.write_text(json.dumps(pol, indent=2) + "\n")
+    tmp.write_text(json.dumps(pol, indent=2) + "\n", encoding="utf-8")
     os.replace(tmp, path)
     return path
 

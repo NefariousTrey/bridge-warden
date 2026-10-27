@@ -56,7 +56,7 @@ def test_verified_outside_payout_turns_red_and_calls_at_once(gate):
     assert 0 <= ms["t_verified"] <= ms["t_checked"] <= ms["t_call_request"] < 2000
     t = [r for r in gate.audit.records() if r["event"] == "acctwatch_timing"]
     assert t and t[-1]["ms"] == ms
-    assert (gate.audit.path.parent / "acctwatch_latency.jsonl").read_text().strip()
+    assert (gate.audit.path.parent / "acctwatch_latency.jsonl").read_text(encoding="utf-8").strip()
 
 
 @pytest.mark.parametrize("et", ["CUSTOMER.DISPUTE.CREATED", "PAYMENT.CAPTURE.REFUNDED", "PAYMENT.CAPTURE.REVERSED",
@@ -185,7 +185,7 @@ def test_latency_well_under_two_seconds(gate):
     for i in range(30):
         w.receive(hdr(tid=f"TX-{i:08d}"), ev(eid=f"WH-{i:016d}"))
     lat = [json.loads(x)["t_call_request"] for x in
-           (gate.audit.path.parent / "acctwatch_latency.jsonl").read_text().splitlines()]
+           (gate.audit.path.parent / "acctwatch_latency.jsonl").read_text(encoding="utf-8").splitlines()]
     assert len(lat) == 30 and tw.n == 30
     assert statistics.median(lat) < 200 and max(lat) < 2000
 

@@ -10,7 +10,7 @@ from bridge_warden import alerts as A
 from bridge_warden import hosted as H
 from bridge_warden import notify as N
 
-JS = (Path(__file__).resolve().parents[1] / "call-worker" / "src" / "index.js").read_text()
+JS = (Path(__file__).resolve().parents[1] / "call-worker" / "src" / "index.js").read_text(encoding="utf-8")
 
 
 def url_of(text):

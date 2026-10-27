@@ -16,7 +16,7 @@ from bridge_warden.policy import PolicyError, fingerprint, load as load_full, va
 from bridge_warden.rules import RiskEngine
 
 ROOT = Path(__file__).resolve().parent.parent
-BASE = json.loads((ROOT / "policy.example.json").read_text())
+BASE = json.loads((ROOT / "policy.example.json").read_text(encoding="utf-8"))
 STORE = "games@store.example.com"
 W = "writer@personal.example.com"
 PHRASE = "expose me to everything"
@@ -33,7 +33,7 @@ def gate_for(p, tmp_path, now=NOON_ET):
 @pytest.fixture
 def pfile(tmp_path):
     f = tmp_path / "policy.json"
-    f.write_text(json.dumps(BASE, indent=2))
+    f.write_text(json.dumps(BASE, indent=2), encoding="utf-8")
     return f
 
 
@@ -191,7 +191,7 @@ def test_master_off_needs_phrase_while_hard_blocks_are_on(pfile, log):
 
 def test_master_off_needs_only_yes_if_hard_blocks_already_off(tmp_path, log):
     f = tmp_path / "p.json"
-    f.write_text(json.dumps({**BASE, "checks": {n: False for n in C.CHECKS if C.tier(n) == "hard"}}))
+    f.write_text(json.dumps({**BASE, "checks": {n: False for n in C.CHECKS if C.tier(n) == "hard"}}), encoding="utf-8")
     assert C.set_mode(f, "off", log, ask=lambda p: "yes", out=lambda *a: None, is_tty=True)["status"] == "changed"
 
 
@@ -293,7 +293,7 @@ def test_loosening_on_disk_does_not_apply_until_restart(pfile, log, tmp_path):
 def _cli(tmp_path, *args):
     return subprocess.run([sys.executable, "-m", "bridge_warden", "--policy", str(tmp_path / "policy.json"),
                            "--audit", str(tmp_path / "cli.jsonl"), "controls", *args],
-                          cwd=ROOT, capture_output=True, text=True, input=PHRASE + "\n")
+                          cwd=ROOT, capture_output=True, text=True, input=PHRASE + "\n", encoding="utf-8")
 
 
 def test_cli_cannot_turn_checks_off_through_a_pipe(pfile, tmp_path):
@@ -313,5 +313,5 @@ def test_cli_pause_show_resume(pfile, tmp_path):
 def test_cli_never_edits_the_example_policy(tmp_path):
     before = fingerprint(ROOT / "policy.example.json")
     r = subprocess.run([sys.executable, "-m", "bridge_warden", "--policy", str(ROOT / "policy.example.json"),
-                        "--audit", str(tmp_path / "x.jsonl"), "controls", "pause"], cwd=ROOT, capture_output=True, text=True)
+                        "--audit", str(tmp_path / "x.jsonl"), "controls", "pause"], cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
     assert r.returncode != 0 and fingerprint(ROOT / "policy.example.json") == before

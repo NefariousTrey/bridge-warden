@@ -25,7 +25,7 @@ PRIVATE = Path(__file__).resolve().parents[2] / "private"
 
 def keyfile(tmp_path, lines, name="keys.txt"):
     f = tmp_path / name
-    f.write_text("\n".join(lines) + "\n")
+    f.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return f
 
 
@@ -73,7 +73,7 @@ def test_each_key_gets_its_own_three_calls(gate, monkeypatch, tmp_path):
     assert a.rang == 7
     jc = N.JudgeCalls(gate.audit.path.parent)
     assert [jc.used(k) for k in K] == [3, 3, 1]
-    blob = str(gate.audit.records()) + (gate.audit.path.parent / N.JUDGE_CAP_FILE).read_text()
+    blob = str(gate.audit.records()) + (gate.audit.path.parent / N.JUDGE_CAP_FILE).read_text(encoding="utf-8")
     assert not any(k in blob for k in K)                            # never logged, never stored
 
 
@@ -83,7 +83,7 @@ def test_private_key_file_is_well_formed_without_showing_it():
         pytest.skip("private judge keys are not on this computer (by design)")
     keys = N.judge_keys({N.JUDGE_KEY_FILE_ENV: str(f)})
     assert len(keys) == 10 and len(set(keys)) == 10 and all(len(k) >= 16 for k in keys)
-    assert oct(f.stat().st_mode)[-3:] == "600"
+    assert os.name == "nt" or oct(f.stat().st_mode)[-3:] == "600"   # Windows: no POSIX modes
     if old.exists():                                                # the first key file stays valid alongside
         both = N.judge_keys({N.JUDGE_KEY_FILE_ENV: os.pathsep.join([str(f), str(old)])})
         assert len(both) == 11

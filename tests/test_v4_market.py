@@ -57,7 +57,7 @@ def test_worst_ring_wins():
 
 # ---------------------------------------------------------------- EXAMPLE price file
 def test_example_file_is_labelled_example_and_generic():
-    data = json.loads(MP.EXAMPLE_FILE.read_text())
+    data = json.loads(MP.EXAMPLE_FILE.read_text(encoding="utf-8"))
     assert data["source"] == "example" and "EXAMPLE" in data["_about"] and "NOT real" in data["_about"]
     assert len(ITEMS) >= 10 and all(i["price"] > 0 for i in ITEMS)
     for brand in ("apple", "sony", "samsung", "nintendo", "nike", "playstation", "xbox", "iphone"):
@@ -66,11 +66,11 @@ def test_example_file_is_labelled_example_and_generic():
 
 def test_broken_or_missing_file_means_no_prices(tmp_path):
     assert MP.load_examples(tmp_path / "nope.json") == []
-    bad = tmp_path / "bad.json"; bad.write_text("{not json")
+    bad = tmp_path / "bad.json"; bad.write_text("{not json", encoding="utf-8")
     assert MP.load_examples(bad) == []
     odd = tmp_path / "odd.json"
     odd.write_text(json.dumps({"items": [{"name": "x"}, {"name": "y", "keywords": ["y"], "example_price": -1},
-                                         {"name": "Ok", "keywords": ["ok thing"], "example_price": 5}]}))
+                                         {"name": "Ok", "keywords": ["ok thing"], "example_price": 5}]}), encoding="utf-8")
     assert [i["name"] for i in MP.load_examples(odd)] == ["Ok"]
 
 
@@ -254,7 +254,7 @@ def test_logo_orb_variants_exist():
 
 def test_watermark_notice():
     from pathlib import Path
-    t = (Path(__file__).resolve().parents[1] / "ASSETS_NOTICE.md").read_text()
+    t = (Path(__file__).resolve().parents[1] / "ASSETS_NOTICE.md").read_text(encoding="utf-8")
     assert "bw-mark.png" in t and "All rights reserved. NOT covered by the Apache license." in t
 
 

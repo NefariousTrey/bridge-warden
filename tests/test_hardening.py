@@ -225,7 +225,7 @@ def test_audit_rewritten_chain_without_key_fails(tmp_path):
         body = {k: v for k, v in r.items() if k not in ("hash", "mac")}
         r["hash"] = hashlib.sha256(json.dumps(body, sort_keys=True, ensure_ascii=True).encode()).hexdigest()
         prev = r["hash"]
-    with open(log.path, "w") as fh:
+    with open(log.path, "w", encoding="utf-8") as fh:
         fh.write("".join(json.dumps(r, sort_keys=True) + "\n" for r in recs))
     ok, why = log.verify()
     assert not ok and "HMAC" in why
@@ -233,8 +233,8 @@ def test_audit_rewritten_chain_without_key_fails(tmp_path):
 
 def test_audit_truncation_is_detected(tmp_path):
     log = _log(tmp_path, 4)
-    lines = log.path.read_text().splitlines(keepends=True)
-    with open(log.path, "w") as fh:
+    lines = log.path.read_text(encoding="utf-8").splitlines(keepends=True)
+    with open(log.path, "w", encoding="utf-8") as fh:
         fh.write("".join(lines[:2]))
     ok, why = log.verify()
     assert not ok and "cut short" in why
@@ -242,7 +242,7 @@ def test_audit_truncation_is_detected(tmp_path):
 
 def test_audit_missing_head_or_unsigned_line_is_detected(tmp_path):
     log = _log(tmp_path)
-    with open(log.path, "a") as fh:
+    with open(log.path, "a", encoding="utf-8") as fh:
         fh.write(json.dumps({"event": "executed", "action_id": "x"}) + "\n")
     assert log.verify()[0] is False
     log2 = _log(tmp_path / "b")
@@ -256,16 +256,16 @@ def test_audit_rotation_keeps_one_chain(tmp_path):
     assert len(segs) >= 3 and log.verify() == (True, "ok") and len(log.records()) == 40
     assert [r["seq"] for r in log.records()] == list(range(1, 41))
     old = segs[0]
-    lines = old.read_text().splitlines(keepends=True)
+    lines = old.read_text(encoding="utf-8").splitlines(keepends=True)
     rec = json.loads(lines[0]); rec["proposal"]["amount"] = "5.00"; lines[0] = json.dumps(rec, sort_keys=True) + "\n"
-    with open(old, "w") as fh:
+    with open(old, "w", encoding="utf-8") as fh:
         fh.write("".join(lines))
     assert log.verify()[0] is False
 
 
 def test_gate_refuses_to_start_on_tampered_log(engine, tmp_path):
     log = _log(tmp_path)
-    with open(log.path, "a") as fh:
+    with open(log.path, "a", encoding="utf-8") as fh:
         fh.write("not json\n")
     with pytest.raises(AuditTampered):
         Gate(engine, AuditLog(log.path, key=b"k" * 32), FakePayPal())
@@ -276,8 +276,8 @@ def test_audit_key_file_is_private(tmp_path, monkeypatch):
     log = AuditLog(tmp_path / "x.jsonl")
     log.write("proposed", action_id="a1")
     kf = tmp_path / ".audit_hmac.key"
-    assert kf.exists() and (kf.stat().st_mode & 0o777) == 0o600
-    assert kf.read_text().strip() not in log.path.read_text()
+    assert kf.exists() and (os.name == "nt" or (kf.stat().st_mode & 0o777) == 0o600)   # Windows: no POSIX modes
+    assert kf.read_text(encoding="utf-8").strip() not in log.path.read_text(encoding="utf-8")
 
 
 def test_two_processes_writing_keep_the_chain(tmp_path):
@@ -299,7 +299,7 @@ def test_secrets_are_scrubbed_from_errors_and_audit(gate, monkeypatch):
         raise RuntimeError("auth failed for EFakeSandboxSecret-123456 with Bearer A21AAabcdefghijklmnop")
     gate.paypal.payout = leaky
     out = gate.propose(ProposedAction("payout", "20.00", "USD", W, "payout for completed blog post"))
-    text = gate.audit.path.read_text() + json.dumps(out)
+    text = gate.audit.path.read_text(encoding="utf-8") + json.dumps(out)
     assert "EFakeSandboxSecret-123456" not in text and "A21AAabcdefghijklmnop" not in text
     assert "xai-FAKEKEYFAKEKEYFAKEKEY123" not in scrub("key was xai-FAKEKEYFAKEKEYFAKEKEY123")
 
@@ -322,7 +322,7 @@ def test_paypal_error_body_is_trimmed_and_scrubbed(monkeypatch):
 # ---------------------------------------------------------------- policy integrity
 def _write(tmp_path, data, name="p.json"):
     p = tmp_path / name
-    p.write_text(data if isinstance(data, str) else json.dumps(data))
+    p.write_text(data if isinstance(data, str) else json.dumps(data), encoding="utf-8")
     return p
 
 
@@ -333,7 +333,7 @@ def _write(tmp_path, data, name="p.json"):
     {"ai_hold_at": 0.95, "ai_block_at": 0.5}, {"daily_cap": None},
 ])
 def test_malformed_policy_fails_closed(tmp_path, change):
-    base = json.loads((ROOT / "policy.example.json").read_text())
+    base = json.loads((ROOT / "policy.example.json").read_text(encoding="utf-8"))
     data = change if isinstance(change, str) else {**base, **change}
     with pytest.raises(PolicyError):
         load_policy_full(_write(tmp_path, data))
@@ -348,17 +348,17 @@ def test_cli_refuses_to_start_on_bad_policy(tmp_path):
     p = _write(tmp_path, {"allowed_currencies": ["USD"]})
     r = subprocess.run([sys.executable, "-m", "bridge_warden", "--policy", str(p), "--audit",
                         str(tmp_path / "a.jsonl"), "propose", "--action", "payout", "--amount", "1.00",
-                        "--payee", W, "--desc", "x"], cwd=ROOT, capture_output=True, text=True)
+                        "--payee", W, "--desc", "x"], cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
     assert r.returncode != 0 and "Refusing to start" in r.stderr and not (tmp_path / "a.jsonl").exists()
 
 
 def test_policy_hash_is_logged_and_changes_are_detected(engine, tmp_path):
-    p = _write(tmp_path, (ROOT / "policy.example.json").read_text())
+    p = _write(tmp_path, (ROOT / "policy.example.json").read_text(encoding="utf-8"))
     pol, sha, path = load_policy_full(p)
     log = tmp_path / "a.jsonl"
     g = Gate(RiskEngine(pol), AuditLog(log), FakePayPal(), policy_info={"sha256": sha, "path": path})
     assert g.audit.records()[-1]["event"] == "policy_loaded" and g.audit.records()[-1]["sha256"] == sha
-    p.write_text(p.read_text().replace('"500.00"', '"5000.00"'))      # edited while running
+    p.write_text(p.read_text(encoding="utf-8").replace('"500.00"', '"5000.00"'), encoding="utf-8")      # edited while running
     assert g.policy_drift() is not None and g.policy_drift() is not None
     assert [r["event"] for r in g.audit.records()].count("policy_changed_on_disk") == 1
     assert g.engine.p["hard_max"] == "500.00"                           # loaded policy stays in force
@@ -599,17 +599,17 @@ def test_ai_can_never_loosen(engine, tmp_path):
 # ---------------------------------------------------------------- CLI and self-check
 def test_review_needs_a_real_terminal(tmp_path):
     r = subprocess.run([sys.executable, "-m", "bridge_warden", "--audit", str(tmp_path / "a.jsonl"), "review"],
-                       cwd=ROOT, input="yes\n", capture_output=True, text=True)
+                       cwd=ROOT, input="yes\n", capture_output=True, text=True, encoding="utf-8")
     assert r.returncode != 0 and "real terminal" in r.stderr
 
 
 def test_agent_json_cannot_set_the_time(tmp_path):
     prop = tmp_path / "p.json"
     prop.write_text(json.dumps({"action": "payout", "amount": "20.00", "currency": "USD", "payee": W,
-                                "description": "payout for completed blog post", "proposed_at": "1999-01-01"}))
+                                "description": "payout for completed blog post", "proposed_at": "1999-01-01"}), encoding="utf-8")
     r = subprocess.run([sys.executable, "-m", "bridge_warden", "--policy", str(ROOT / "policy.example.json"),
                         "--no-xai", "--audit", str(tmp_path / "a.jsonl"), "propose", "--json", str(prop)],
-                       cwd=ROOT, capture_output=True, text=True)
+                       cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
     assert r.returncode == 0, r.stderr
     rec = next(x for x in AuditLog(tmp_path / "a.jsonl").records() if x["event"] == "proposed")
     assert rec["proposal"]["proposed_at"] != "1999-01-01"

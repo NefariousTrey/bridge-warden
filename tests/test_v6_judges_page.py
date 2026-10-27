@@ -118,18 +118,18 @@ def test_hosted_guide_is_public_and_login_links_it(hsrv):
 
 def test_judge_testing_docs_match_page():
     for f in (ROOT / "proof" / "JUDGE_TESTING.md", ROOT / "JUDGE_TESTING.md"):
-        t = f.read_text()
+        t = f.read_text(encoding="utf-8")
         assert "cross" + "roads" not in t.lower()
-    t = (ROOT / "proof" / "JUDGE_TESTING.md").read_text()
+    t = (ROOT / "proof" / "JUDGE_TESTING.md").read_text(encoding="utf-8")
     for must in ("Tested in sandbox with sample data to verify it works as intended.", "[YOUTUBE_LINK]",
                  "[REPO_LINK]", "Dec 15", "Judge login: in the Devpost testing notes.",
                  "Red never goes straight to green.", "AG Studio", "/judges"):
         assert must in t, must
-    assert "proof/JUDGE_TESTING.md" in (ROOT / "JUDGE_TESTING.md").read_text()
+    assert "proof/JUDGE_TESTING.md" in (ROOT / "JUDGE_TESTING.md").read_text(encoding="utf-8")
 
 
 def test_render_blueprint_free_and_secrets_not_synced():
-    y = (ROOT / "render.yaml").read_text()
+    y = (ROOT / "render.yaml").read_text(encoding="utf-8")
     assert re.search(r"^\s+plan: free$", y, re.M) and "disk:" not in re.sub(r"#.*", "", y)
     keys = dict(re.findall(r"- key: (\S+)\n\s+((?:sync: false|generateValue: true|value: \S+))", y))
     for k in ("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM_NUMBER", "BW_OWNER_PHONE"):
@@ -180,7 +180,7 @@ def test_no_phone_line_is_true_in_judge_mode(jsrv):
     assert isinstance(notify.call_adapter({}, env={}, force=True), notify.DryRunCallAdapter)
     for f in (ROOT / "proof" / "JUDGE_TESTING.md", ROOT / "JUDGE_TESTING.md"):
         assert ("Judge mode runs the whole flow without a phone. The voice call is optional "
-                "(your own Twilio, since it's open source).") in f.read_text()
+                "(your own Twilio, since it's open source).") in f.read_text(encoding="utf-8")
 
 
 def test_top_box_facts_match_the_code():
@@ -196,7 +196,7 @@ def test_top_box_facts_match_the_code():
     assert "TWILIO_ACCOUNT_SID" in judge.OWNER_SECRET_ENV                  # judge mode never has Twilio
     assert not re.search(r"\$\s?\d|per minute|/min\b|cents", _text(b), re.I)   # no prices
     for f in (ROOT / "proof" / "JUDGE_TESTING.md", ROOT / "JUDGE_TESTING.md"):
-        t = f.read_text()
+        t = f.read_text(encoding="utf-8")
         assert t.index("Good to know") < t.index("Try it in 5 steps") if "Try it in 5 steps" in t else True
         for x in web.JUDGE_TOP_FACTS:
             assert x in t, (f.name, x)
@@ -212,8 +212,8 @@ def test_top_box_ai_line_matches_the_judge_cap(monkeypatch):
     monkeypatch.setenv("BW_JUDGE_XAI_CAP", "250")
     assert "(up to 250 messages per judge)" in web.judges_body()
     for f in (ROOT / "proof" / "JUDGE_TESTING.md", ROOT / "JUDGE_TESTING.md"):
-        assert "2. " + line in f.read_text()
-    y = (ROOT / "render.yaml").read_text()
+        assert "2. " + line in f.read_text(encoding="utf-8")
+    y = (ROOT / "render.yaml").read_text(encoding="utf-8")
     assert re.search(r"- key: XAI_API_KEY\s+#[^\n]*\n\s+sync: false", y)                # env-only, never in the repo
-    assert 'autoDeployTrigger: "off"' in (ROOT / "render-judge.yaml").read_text()
-    assert "autoDeploy:" not in re.sub(r"#.*", "", (ROOT / "render-judge.yaml").read_text())
+    assert 'autoDeployTrigger: "off"' in (ROOT / "render-judge.yaml").read_text(encoding="utf-8")
+    assert "autoDeploy:" not in re.sub(r"#.*", "", (ROOT / "render-judge.yaml").read_text(encoding="utf-8"))

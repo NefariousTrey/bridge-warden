@@ -83,13 +83,13 @@ def test_local_serve_is_still_localhost_only():
 
 def test_prepare_policy_once_and_twilio_only_when_ready(tmp_path):
     p = Ho.prepare_policy(tmp_path / "a", env_for(tmp_path))
-    pol = json.loads(p.read_text())
+    pol = json.loads(p.read_text(encoding="utf-8"))
     assert pol["preferred_name"] == "Trey"
     assert pol["notify"]["call_on_fraud"] == {"enabled": True, "provider": "twilio", "experimental": True}
-    p.write_text('{"mine": 1}')
-    assert Ho.prepare_policy(tmp_path / "a", env_for(tmp_path)).read_text() == '{"mine": 1}'   # never overwritten
+    p.write_text('{"mine": 1}', encoding="utf-8")
+    assert Ho.prepare_policy(tmp_path / "a", env_for(tmp_path)).read_text(encoding="utf-8") == '{"mine": 1}'   # never overwritten
     p2 = Ho.prepare_policy(tmp_path / "b", env_for(tmp_path, TWILIO_AUTH_TOKEN=""))
-    c = json.loads(p2.read_text()).get("notify", {}).get("call_on_fraud", {})
+    c = json.loads(p2.read_text(encoding="utf-8")).get("notify", {}).get("call_on_fraud", {})
     assert c.get("provider") != "twilio"
 
 
@@ -224,7 +224,7 @@ def test_real_call_points_back_at_this_app_and_is_accepted(srv):
 
 # ---- the Blueprint files ------------------------------------------------------------------------------------------
 def test_render_yaml_self_host_blueprint():
-    y = (ROOT / "render.yaml").read_text()
+    y = (ROOT / "render.yaml").read_text(encoding="utf-8")
     assert "Made by @Nefarious_Trey, with Grok." in y and "Copyright 2026 Douglas Gibbons III" in y
     assert re.search(r"^\s+plan: free$", y, re.M)
     assert 'startCommand: "python -m bridge_warden hosted"' in y

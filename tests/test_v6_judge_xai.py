@@ -51,14 +51,14 @@ def test_counter_is_per_key_persisted_and_never_stores_the_key(tmp_path):
     assert c.take(J2) and c.used(J2) == 1
     again = _counter(tmp_path, 3)                                              # a new process (restart with a disk)
     assert again.used(J1) == 3 and again.used(J2) == 1 and again.take(J1) is False
-    raw = (tmp_path / "audit" / JA.FILE).read_text()
+    raw = (tmp_path / "audit" / JA.FILE).read_text(encoding="utf-8")
     assert J1 not in raw and J2 not in raw and "judge-" not in raw
 
 
 def test_unreadable_file_counts_as_used_up(tmp_path):
     c = _counter(tmp_path, 5)
     c.path.parent.mkdir(parents=True)
-    c.path.write_text("{broken")
+    c.path.write_text("{broken", encoding="utf-8")
     assert c.take(J1) is False and c.left(J1) == 0
 
 
@@ -80,9 +80,9 @@ def test_review_cap_then_sample_answer_and_nothing_sent(engine, tmp_path):
         out = g.propose(a())                        # message 4 = one past the cap
     assert len(mock.requests) == sent               # nothing left the machine
     assert out["verdict"] == "allow", out               # "hold" mode did not hold it: the cap is not an AI failure
-    last = [json.loads(l) for l in (tmp_path / "a.jsonl").read_text().splitlines() if '"ai_check"' in l][-1]
+    last = [json.loads(l) for l in (tmp_path / "a.jsonl").read_text(encoding="utf-8").splitlines() if '"ai_check"' in l][-1]
     assert last["result"]["skipped"] == JA.SKIP and last["sent"] is False
-    assert JA.LIMIT_NOTE in (tmp_path / "a.jsonl").read_text()
+    assert JA.LIMIT_NOTE in (tmp_path / "a.jsonl").read_text(encoding="utf-8")
 
 
 def test_help_chat_and_advise_fall_back_with_the_note(engine, tmp_path):
@@ -111,7 +111,7 @@ def test_owner_and_background_are_not_counted(engine, tmp_path):
 def hj(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(STUDIO, "ready", lambda: True)
     keys = tmp_path / "judges.txt"
-    keys.write_text(J1 + "\n" + J2 + "\n")
+    keys.write_text(J1 + "\n" + J2 + "\n", encoding="utf-8")
     mock = MockXai(reply())
     env = HT.env_for(tmp_path, XAI_API_KEY=FAKE_KEY, XAI_ZDR_CONFIRMED="1", BW_JUDGE_KEY_FILE=str(keys),
                      BW_JUDGE_XAI_CAP="2")
@@ -152,7 +152,7 @@ def test_hosted_judges_get_real_xai_until_their_cap(hj, capsys):
     assert st == 200
     # the xAI key and judge keys never reach a log, the counter file or the console
     out = capsys.readouterr()
-    blobs = [out.out, out.err] + [p.read_text(errors="replace") for p in Path(env["BW_DATA_DIR"]).rglob("*")
+    blobs = [out.out, out.err] + [p.read_text(errors="replace", encoding="utf-8") for p in Path(env["BW_DATA_DIR"]).rglob("*")
                                   if p.is_file()]
     for b in blobs:
         assert FAKE_KEY not in b and J1 not in b and J2 not in b
@@ -225,9 +225,9 @@ def test_render_build_fetches_ag_studio_only_with_the_key_and_never_echoes_it():
     import re
     root = Path(__file__).resolve().parent.parent
     for f in ("render.yaml", "render-judge.yaml"):
-        y = (root / f).read_text()
+        y = (root / f).read_text(encoding="utf-8")
         b = re.search(r"^\s+buildCommand: '(.*)'$", y, re.M).group(1)
         assert 'if [ -n "${BW_AG_STUDIO_LICENSE_KEY:-}" ]; then bash scripts/fetch_ag_studio.sh' in b
         assert "set -x" not in b and "echo $" not in b and 'echo "$' not in b and "printenv" not in b
-    sh = (root / "scripts" / "fetch_ag_studio.sh").read_text()
+    sh = (root / "scripts" / "fetch_ag_studio.sh").read_text(encoding="utf-8")
     assert "$BW_AG_STUDIO_LICENSE_KEY" not in sh and "set -x" not in sh

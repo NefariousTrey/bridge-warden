@@ -1940,7 +1940,7 @@ def build_sample(real_gate, clock, name_fn):
     keep = {k: rp[k] for k in ("owner_timezone", "ui") if k in rp}
     if keep:
         pf = Path(g.policy_info["path"])
-        pol = _json.loads(pf.read_text()); pol.update(keep); pf.write_text(_json.dumps(pol, indent=2))
+        pol = _json.loads(pf.read_text(encoding="utf-8")); pol.update(keep); pf.write_text(_json.dumps(pol, indent=2), encoding="utf-8")
         g.engine.p.update(keep)
     g.dev = DevMode(None)                     # seeding only; every sample id is a TEST id, so nothing can be paid
     g.audit.write("dev_mode_on", action_id="-", label="TEST", by="owner (web)")

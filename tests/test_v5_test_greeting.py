@@ -68,7 +68,7 @@ def test_drill_bad_name_gives_plain_hello(gate, bad):
 
 def test_typed_name_never_logged_or_stored(gate):
     b, d = run(gate, "Zebulon")
-    raw = gate.audit.path.read_text()
+    raw = gate.audit.path.read_text(encoding="utf-8")
     assert "Zebulon" not in raw and "Zebulon" not in json.dumps(vars(d), default=str)
     assert not any(s in raw for s in SECRETS)
 
@@ -87,7 +87,7 @@ def test_form_field_and_post(setup, monkeypatch):
     s.post("/act", token=token(page, "Test my alert"), call_name="Zebulon")
     t.made[-1][1]()
     assert got[-1][0].startswith("Hello Zebulon, this is Bridge Warden.") and got[-1][1] == "Zebulon"
-    raw = s.gate.audit.path.read_text()
+    raw = s.gate.audit.path.read_text(encoding="utf-8")
     assert "Zebulon" not in raw and "Zebulon" not in s.get("/")[1] and "Zebulon" not in s.get("/settings")[1]
 
 
@@ -101,7 +101,7 @@ def test_form_blank_and_hostile_post(setup, monkeypatch):
     s.post("/act", token=token(s.get("/settings")[1], "Test my alert"), call_name='"><script>x</script>')
     t.made[-1][1]()
     assert got[-1][0].startswith("Hello, this is Bridge Warden.") and got[-1][1] == "" and "Trey" not in got[-1][0]
-    assert "<script>x" not in s.gate.audit.path.read_text()
+    assert "<script>x" not in s.gate.audit.path.read_text(encoding="utf-8")
 
 
 # ---------------------------------------------------------------- Charon voice (Trey, Oct 26): allowed, free fallback kept
@@ -118,5 +118,5 @@ def test_charon_voice_allowed_and_free_fallback_kept():
         probe = ("import {voiceOf} from './src/index.js'; console.log(JSON.stringify([voiceOf({CALL_VOICE:%r}), "
                  "voiceOf({CALL_VOICE:'Google.x<y>'}), voiceOf({})]));" % v)
         r = subprocess.run([node, "--input-type=module", "-e", probe], capture_output=True, text=True, timeout=60,
-                           cwd=Path(__file__).resolve().parent.parent / "call-worker")
+                           cwd=Path(__file__).resolve().parent.parent / "call-worker", encoding="utf-8")
         assert json.loads(r.stdout) == [v, "man", "man"], r.stderr[-400:]

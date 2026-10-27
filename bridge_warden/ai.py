@@ -33,7 +33,7 @@ class ScamTextModel:
 
     def __init__(self, examples: list | None = None):
         if examples is None:
-            examples = [json.loads(l) for l in DATA.read_text().splitlines() if l.strip()]
+            examples = [json.loads(l) for l in DATA.read_text(encoding="utf-8").splitlines() if l.strip()]
         self.counts = {"scam": Counter(), "ok": Counter()}
         self.docs = Counter()
         for ex in examples:

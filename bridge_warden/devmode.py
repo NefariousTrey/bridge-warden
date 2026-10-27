@@ -38,7 +38,7 @@ class DevMode:
         if self.path is None or not self.path.exists():
             return {}
         try:
-            d = json.loads(self.path.read_text())
+            d = json.loads(self.path.read_text(encoding="utf-8"))
             return d if isinstance(d, dict) else {"on": True}
         except Exception:
             return {"on": True}                 # unreadable = locked (fail safe)
@@ -59,5 +59,5 @@ class DevMode:
             raise RuntimeError("Dev mode needs a folder to save its switch.")
         sim = sim if (on and sim in SIMS) else "green"
         tmp = self.path.with_name(self.path.name + ".tmp")
-        tmp.write_text(json.dumps({"on": bool(on), "sim": sim}))
+        tmp.write_text(json.dumps({"on": bool(on), "sim": sim}), encoding="utf-8")
         os.replace(tmp, self.path)              # all or nothing

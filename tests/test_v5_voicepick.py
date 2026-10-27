@@ -59,12 +59,12 @@ def test_policy_and_set_call_voice(setup):
     s = setup
     path = s.gate.policy_info["path"]
     assert controls.set_call_voice(path, "Polly.Joanna", s.gate.audit, by="t")["status"] == "changed"
-    assert json.loads(open(path).read())["call_voice"] == "Polly.Joanna"
+    assert json.loads(open(path, encoding="utf-8").read())["call_voice"] == "Polly.Joanna"
     assert controls.set_call_voice(path, "Polly.Joanna", s.gate.audit, by="t")["status"] == "no_change"
     for bad in BAD:
         with pytest.raises(PolicyError):
             controls.set_call_voice(path, bad, s.gate.audit, by="t")
-    assert json.loads(open(path).read())["call_voice"] == "Polly.Joanna"
+    assert json.loads(open(path, encoding="utf-8").read())["call_voice"] == "Polly.Joanna"
     assert N.saved_voice(s.gate) == "Polly.Joanna"                                     # read fresh from disk
     controls.set_call_voice(path, "", s.gate.audit, by="t")
     assert N.saved_voice(s.gate) is None                                               # no pick = server default
@@ -124,11 +124,11 @@ def test_settings_picker_save_and_bad_input(setup, monkeypatch):
     assert "Charon (Google, male)" in page and "~$0.039 per call + ~$0.014/min" in page and "Basic man" in page
     assert 'id="test-voice"' in page and "My saved voice" in page
     s.post("/act", token=token(page, 'id="call-voice"'), call_voice=CHARON)
-    assert json.loads(open(s.gate.policy_info["path"]).read())["call_voice"] == CHARON
+    assert json.loads(open(s.gate.policy_info["path"], encoding="utf-8").read())["call_voice"] == CHARON
     _, page = s.get("/settings")
     assert f'<option value="{CHARON}" selected>' in page
     s.post("/act", token=token(page, 'id="call-voice"'), call_voice='"><script>x</script>')
-    assert json.loads(open(s.gate.policy_info["path"]).read())["call_voice"] == CHARON
+    assert json.loads(open(s.gate.policy_info["path"], encoding="utf-8").read())["call_voice"] == CHARON
     _, page = s.get("/settings")
     assert "not on the list" in page and "<script>x" not in page
     got = []
@@ -137,7 +137,7 @@ def test_settings_picker_save_and_bad_input(setup, monkeypatch):
     s.app.alert_test.timer = t = Timers()
     s.post("/act", token=token(page, "Test my alert"), call_voice="Polly.Joanna")
     t.made[-1][1]()
-    assert got[-1] == "Polly.Joanna" and json.loads(open(s.gate.policy_info["path"]).read())["call_voice"] == CHARON
+    assert got[-1] == "Polly.Joanna" and json.loads(open(s.gate.policy_info["path"], encoding="utf-8").read())["call_voice"] == CHARON
 
 
 def test_dev_mode_pick_is_test_calls_only(setup):
@@ -147,7 +147,7 @@ def test_dev_mode_pick_is_test_calls_only(setup):
     _, page = s.get("/settings")
     assert "Dev mode is on: this pick only changes test calls." in page
     s.post("/act", token=token(page, 'id="call-voice"'), call_voice="Polly.Joanna")
-    assert "call_voice" not in json.loads(open(real).read())                          # real policy untouched
+    assert "call_voice" not in json.loads(open(real, encoding="utf-8").read())                          # real policy untouched
     assert N.saved_voice(s.gate) is None                                               # real alerts: unchanged
     assert s.app.call_voice() == "Polly.Joanna"                                        # sample (test) calls: the pick
     assert N.saved_voice(s.app.sample_gate()) == "Polly.Joanna"
@@ -177,4 +177,4 @@ def test_judge_pick_is_own_test_call_only(setup):
     assert "Judge demo: pick a voice on the Test my alert form" in page and 'id="call-voice"' not in page
     assert 'id="test-voice"' in page
     s.post("/act", token=s.app.issue_nonce("-", "-", "voice:set"), call_voice="Polly.Joanna")
-    assert "call_voice" not in json.loads(open(s.gate.policy_info["path"]).read())
+    assert "call_voice" not in json.loads(open(s.gate.policy_info["path"], encoding="utf-8").read())

@@ -36,7 +36,7 @@ def test_hear_page_is_public_and_locked_down(setup):
     assert "<script>" not in body                                # no inline script; JSON data block only
     assert not re.search(r'(src|href)="https?://', body)
     js_r, js = setup.req("GET", "/hear.js")
-    assert js_r.status == 200 and js == JS.read_text() and "javascript" in js_r.getheader("Content-Type")
+    assert js_r.status == 200 and js == JS.read_text(encoding="utf-8") and "javascript" in js_r.getheader("Content-Type")
 
 
 def test_microphone_stays_off_everywhere_else(setup):
@@ -53,7 +53,7 @@ def test_demo_data_is_the_call_data():
 
 
 def test_demo_script_sends_nothing_and_mic_is_opt_in():
-    js = JS.read_text()
+    js = JS.read_text(encoding="utf-8")
     for bad in ("fetch(", "XMLHttpRequest", "WebSocket", "sendBeacon", "EventSource", "localStorage", "http://",
                 "https://", "eval(", "innerHTML", "new Function"):
         assert bad not in js, bad
@@ -137,7 +137,7 @@ for (const [test, kind, inputs] of D.runs) {
 console.log(JSON.stringify(out));"""
     feed = json.dumps({"data": N.call_demo_data(), "runs": RUNS})
     r = subprocess.run([NODE, "-e", probe % json.dumps(str(JS))], input=feed, capture_output=True, text=True,
-                       timeout=60)
+                       timeout=60, encoding="utf-8")
     assert r.returncode == 0, r.stderr[-800:]
     js = json.loads(r.stdout)
     for (test, kind, inputs), got in zip(RUNS, js):
@@ -147,14 +147,14 @@ console.log(JSON.stringify(out));"""
 
 @pytest.mark.skipif(not NODE, reason="node not installed")
 def test_browser_match_choice_uses_the_shared_vectors():
-    v = json.loads((ROOT / "call-worker" / "test" / "vectors.json").read_text())
+    v = json.loads((ROOT / "call-worker" / "test" / "vectors.json").read_text(encoding="utf-8"))
     probe = """const {engine} = require(%s); const D = JSON.parse(require('fs').readFileSync(0, 'utf8'));
 const E = engine(D.data);
 console.log(JSON.stringify([D.cases.map(c => E.matchChoice(c.digits, c.speech)),
   D.walk.map(c => E.walkChoice(c.digits, c.speech))]));"""
     feed = json.dumps({"data": N.call_demo_data(), "cases": v["cases"], "walk": v["walk_cases"]})
     r = subprocess.run([NODE, "-e", probe % json.dumps(str(JS))], input=feed, capture_output=True, text=True,
-                       timeout=60)
+                       timeout=60, encoding="utf-8")
     assert r.returncode == 0, r.stderr[-800:]
     a, b = json.loads(r.stdout)
     assert a == [c["want"] for c in v["cases"]] and b == [c["want"] for c in v["walk_cases"]]

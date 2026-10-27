@@ -74,7 +74,7 @@ def test_dedupe_survives_restart(gate):
     w2, tw2 = mkwatch(gate)                                     # a new watcher = a restart
     outs = send_all(w2, ev[1:], start=10)
     assert tw1.n == 1 and tw2.n == 0 and all(o.get("deduped") for o in outs)
-    st = json.loads((gate.audit.path.parent / "acctwatch_state.json").read_text())
+    st = json.loads((gate.audit.path.parent / "acctwatch_state.json").read_text(encoding="utf-8"))
     assert "batch:" + BATCH in st["alerted"]
 
 
@@ -212,7 +212,7 @@ def test_email_proof_failure_hides_password(gate):
     app = mail_app(gate, fail=True)
     r = app.email_proof()
     assert not r["sent"] and "app-pass-1234" not in json.dumps(r)
-    assert "app-pass-1234" not in gate.audit.path.read_text()
+    assert "app-pass-1234" not in gate.audit.path.read_text(encoding="utf-8")
 
 
 def test_email_proof_events_have_plain_words():
@@ -238,7 +238,7 @@ def test_free_plan_detection(tmp_path):
 
 
 def test_render_yaml_turns_banner_on():
-    y = (ROOT / "render.yaml").read_text()
+    y = (ROOT / "render.yaml").read_text(encoding="utf-8")
     assert re.search(r'key: BW_FREE_PLAN\s+value: "on"', y)
 
 
@@ -262,7 +262,7 @@ def test_hosted_pages_show_banner(tmp_path, plan, shown):
 
 # ---- 6. bw-data/ never committed --------------------------------------------------------------------------------
 def test_gitignore_has_bw_data():
-    assert "bw-data/" in (ROOT / ".gitignore").read_text().split()
+    assert "bw-data/" in (ROOT / ".gitignore").read_text(encoding="utf-8").split()
 
 
 # ---- 7. owner-only files ----------------------------------------------------------------------------------------
@@ -270,6 +270,7 @@ def mode(p):
     return stat.S_IMODE(os.stat(p).st_mode)
 
 
+@pytest.mark.skipif(os.name == "nt", reason="Windows has no owner-only file modes (0600); NTFS uses ACLs")
 def test_history_files_are_owner_only(gate):
     w, tw = mkwatch(gate)
     send_all(w, payout_events()[:1])
@@ -280,6 +281,7 @@ def test_history_files_are_owner_only(gate):
         assert mode(d / n) == 0o600, n
 
 
+@pytest.mark.skipif(os.name == "nt", reason="Windows has no owner-only file modes (0600); NTFS uses ACLs")
 def test_old_open_files_are_fixed_and_others_left_alone(tmp_path):
     a = AuditLog(tmp_path / "audit.jsonl")
     a.write("hello", action_id="-")
@@ -288,7 +290,7 @@ def test_old_open_files_are_fixed_and_others_left_alone(tmp_path):
         p.touch()
         os.chmod(p, 0o644)
     other = tmp_path / "notes.txt"
-    other.write_text("mine")
+    other.write_text("mine", encoding="utf-8")
     os.chmod(other, 0o644)
     AuditLog(tmp_path / "audit.jsonl")                         # next start fixes them
     assert mode(tmp_path / "audit.jsonl") == 0o600 and mode(tmp_path / "audit.jsonl.head") == 0o600
@@ -296,6 +298,7 @@ def test_old_open_files_are_fixed_and_others_left_alone(tmp_path):
     assert mode(other) == 0o644                                 # not ours: untouched
 
 
+@pytest.mark.skipif(os.name == "nt", reason="Windows has no owner-only file modes (0600); NTFS uses ACLs")
 def test_retry_queue_is_owner_only(tmp_path):
     q = A.RetryQueue(tmp_path)
     q.update(lambda d: d.setdefault("x", 1))
@@ -304,7 +307,7 @@ def test_retry_queue_is_owner_only(tmp_path):
 
 # ---- 8. docs ----------------------------------------------------------------------------------------------------
 def test_setup_doc_says_data_stays_with_you():
-    t = (ROOT / "SETUP_YOUR_OWN.md").read_text()
+    t = (ROOT / "SETUP_YOUR_OWN.md").read_text(encoding="utf-8")
     assert "Your data stays on your computer." in t and "email yourself a copy" in t
     assert "The developer never gets it." in t
 
@@ -313,6 +316,6 @@ def test_runbook_exists():
     p = ROOT / "proof/scripts/RUN_ON_TREYS_PC.md"   # private PC run notes: kept local, not shipped (.gitignore)
     if not p.exists():
         pytest.skip("private PC runbook is not in the ship set")
-    t = p.read_text()
+    t = p.read_text(encoding="utf-8")
     for must in ("cloudflared", "register_sandbox_webhook.py", "stranger_sandbox_payout.py", "Clean up", "never"):
         assert must in t

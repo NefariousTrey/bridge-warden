@@ -135,13 +135,13 @@ def test_policy_accepts_good_names_and_rejects_hostile_ones():
 def test_set_preferred_name_writes_backs_up_and_logs_without_the_name(setup):
     s = setup
     r = C.set_preferred_name(s.pf, "  Trey ", s.gate.audit)
-    assert r["status"] == "changed" and json.loads(s.pf.read_text())["preferred_name"] == "Trey"
+    assert r["status"] == "changed" and json.loads(s.pf.read_text(encoding="utf-8"))["preferred_name"] == "Trey"
     assert C.set_preferred_name(s.pf, "Trey", s.gate.audit)["status"] == "no_change"
     ev = [x for x in s.gate.audit.records() if x["event"] == "preferred_name_changed"]
     assert ev and "Trey" not in json.dumps(ev)
     with pytest.raises(PolicyError):
         C.set_preferred_name(s.pf, "</Say>", s.gate.audit)
-    assert json.loads(s.pf.read_text())["preferred_name"] == "Trey"
+    assert json.loads(s.pf.read_text(encoding="utf-8"))["preferred_name"] == "Trey"
 
 
 def test_settings_page_saves_name_and_test_call_uses_it(setup):
@@ -151,7 +151,7 @@ def test_settings_page_saves_name_and_test_call_uses_it(setup):
     s.post("/act", token=token(page, "preferred-name"), preferred_name="Trey")
     _, page = s.get("/settings")
     assert "Saved. Calls will say: Hi Trey, this is Bridge Warden." in page and 'value="Trey"' in page
-    assert json.loads(s.pf.read_text())["preferred_name"] == "Trey" and s.app.preferred_name() == "Trey"
+    assert json.loads(s.pf.read_text(encoding="utf-8"))["preferred_name"] == "Trey" and s.app.preferred_name() == "Trey"
     assert "Test calls never use it" in page                              # TESTGREET: test calls ignore it
 
 
@@ -164,7 +164,7 @@ def test_settings_refuses_hostile_name_and_keeps_old_one(setup):
     assert "Use letters, spaces, hyphens or apostrophes (up to 40). Nothing changed." in page
     assert s.pf.read_bytes() == before and "<script>x" not in page
     s.post("/act", token=token(page, "preferred-name"), preferred_name="")
-    assert json.loads(s.pf.read_text())["preferred_name"] == "" and s.app.preferred_name() == ""
+    assert json.loads(s.pf.read_text(encoding="utf-8"))["preferred_name"] == "" and s.app.preferred_name() == ""
 
 
 def test_view_only_run_keeps_name_for_the_session(ro):
@@ -186,7 +186,7 @@ def test_worker_greeting_matches_python():
              "console.log(JSON.stringify(N.map(n=>[cleanName(n), voiceTwiml(%r,true,false,'unauthorized',n), voiceTwiml(%r,false,false,'unauthorized',n)])));")
     r = subprocess.run([NODE, "--input-type=module", "-e", probe % (json.dumps(names), B, B)],
                        cwd=Path(__file__).resolve().parent.parent / "call-worker", capture_output=True, text=True,
-                       timeout=60)
+                       timeout=60, encoding="utf-8")
     assert r.returncode == 0, r.stderr[-800:]
     assert json.loads(r.stdout) == [[N.clean_name(n), N.voice_twiml(B, True, name=n), N.voice_twiml(B, False, name=n)]
                                        for n in names]

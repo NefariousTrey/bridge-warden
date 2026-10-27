@@ -111,7 +111,7 @@ def test_private_terms_from_policy_are_redacted():
 def test_key_is_never_logged(engine, tmp_path):
     g = make_gate(engine, tmp_path, MockXai(raise_exc=RuntimeError("boom " + FAKE_KEY)))
     g.propose(ProposedAction("payout", "20.00", "USD", "writer@personal.example.com", "blog post"))
-    text = (tmp_path / "a.jsonl").read_text()
+    text = (tmp_path / "a.jsonl").read_text(encoding="utf-8")
     assert FAKE_KEY not in text and "TESTKEY" not in text
     assert FAKE_KEY not in repr(g.ai)
 

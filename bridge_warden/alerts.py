@@ -20,7 +20,6 @@ The email is fixed text: no payee, amount, link or account detail ever leaves th
 from __future__ import annotations
 
 import base64
-import fcntl
 import hashlib
 import hmac
 import json
@@ -33,6 +32,8 @@ import time
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from pathlib import Path
+
+from .filelock import lock as _flock, unlock as _funlock
 
 DEFAULT_RETRY_MINUTES = [15, 15]   # 3 calls in all: now, +15 min, +30 min (Trey, 2026-10-27)
 RETRY_MIN, RETRY_MAX, RETRY_COUNT_MAX = 1, 120, 3
@@ -193,10 +194,10 @@ class RetryQueue:
     def update(self, fn):
         """fn(entries: dict) -> result. Entries are saved atomically after fn returns."""
         with self._lock() as lf:
-            fcntl.flock(lf, fcntl.LOCK_EX)
+            _flock(lf)
             try:
                 try:
-                    data = json.loads(self.path.read_text())
+                    data = json.loads(self.path.read_text(encoding="utf-8"))
                     data = data if isinstance(data, dict) else {}
                 except (OSError, ValueError):
                     data = {}
@@ -209,11 +210,11 @@ class RetryQueue:
                 private(self.path)
                 return out
             finally:
-                fcntl.flock(lf, fcntl.LOCK_UN)
+                _funlock(lf)
 
     def read(self) -> dict:
         try:
-            d = json.loads(self.path.read_text())
+            d = json.loads(self.path.read_text(encoding="utf-8"))
             return d if isinstance(d, dict) else {}
         except (OSError, ValueError):
             return {}

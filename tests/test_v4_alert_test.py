@@ -302,7 +302,7 @@ def test_web_real_choices_only_tighten(setup):
     assert "can&rsquo;t lock PayPal for you" in lock and "two-step" in lock
     _, home = s.get("/")
     s.post("/act", token=token(home, "Keep everything blocked"))
-    assert json.loads(s.pf.read_text()).get("mode") == "paused"
+    assert json.loads(s.pf.read_text(encoding="utf-8")).get("mode") == "paused"
     assert json.loads(s.get("/status.json")[1])["state"] == "gray"
 
 

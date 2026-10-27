@@ -79,9 +79,9 @@ def test_broken_chain_is_red(gate):
 def test_tampered_file_is_found(gate):
     gate.propose(ProposedAction("payout", "5.00", "USD", "friend@personal.example.com", "lunch"))
     p = gate.audit.path
-    lines = p.read_text().splitlines()
+    lines = p.read_text(encoding="utf-8").splitlines()
     lines[0] = lines[0].replace("5.00", "9.00")
-    p.write_text("\n".join(lines) + "\n")
+    p.write_text("\n".join(lines) + "\n", encoding="utf-8")
     assert any(f["kind"] == "chain_broken" for f in AG.scan(gate.audit.records(), gate.audit.verify(), None, NOON_ET))
 
 
@@ -188,7 +188,7 @@ def test_info_never_raises(gate):
 
 
 def test_agent_module_has_no_way_to_approve_or_pay():
-    src = (AG.__file__ and open(AG.__file__).read())
+    src = (AG.__file__ and open(AG.__file__, encoding="utf-8").read())
     for bad in ('write("owner_decision"', "decide(", "execute(", "payout(", "refund(", 'write("executed"',
                 "paypal", 'to="green"', 'write("light_changed"', "LIGHT_EVENT"):
         assert bad not in src, bad

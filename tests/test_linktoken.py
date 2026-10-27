@@ -34,7 +34,7 @@ def test_worker_accepts_python_link_and_rejects_changes():
              "const b=await go(%s,{...P,To:'+1555'}); console.log(JSON.stringify([a.status,t.includes(\"Hello Mary-Jo O'Neil\"),b.status]));"
              ) % (json.dumps(KEY), json.dumps(u), json.dumps(u))
     out = subprocess.run(["node", "--input-type=module", "-e", probe], cwd=WORKER, capture_output=True, text=True,
-                         timeout=60)
+                         timeout=60, encoding="utf-8")
     assert json.loads(out.stdout.strip().splitlines()[-1]) == [200, True, 403], out.stderr[-400:]
 
 

@@ -45,7 +45,7 @@ def source_from_env(env=None) -> str:
 def load_examples(path: Path | None = None) -> list:
     """The example list. A broken or missing file just means "no market price" (never a crash)."""
     try:
-        data = json.loads(Path(path or EXAMPLE_FILE).read_text())
+        data = json.loads(Path(path or EXAMPLE_FILE).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return []
     out = []

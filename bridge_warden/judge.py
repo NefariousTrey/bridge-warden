@@ -101,11 +101,11 @@ def practice_reader():
 
 
 def build_practice_gate(workdir: Path) -> Gate:
-    pol = json.loads((ROOT / "policy.example.json").read_text())
+    pol = json.loads((ROOT / "policy.example.json").read_text(encoding="utf-8"))
     pol.setdefault("money_check", {})["subscription_ids"] = SUBS
     pol.setdefault("notify", {})["call_on_fraud"] = {"enabled": True, "provider": "dry_run"}
     pf = workdir / "policy.json"
-    pf.write_text(json.dumps(pol, indent=2))
+    pf.write_text(json.dumps(pol, indent=2), encoding="utf-8")
     p, sha, path = load(pf)
     gate = Gate(RiskEngine(p), AuditLog(workdir / "audit.jsonl"), None, policy_info={"sha256": sha, "path": path})
     gate.ai = None

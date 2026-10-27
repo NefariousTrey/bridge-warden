@@ -175,7 +175,7 @@ def _save_history(policy_path: Path) -> Path:
     while True:
         dest = d / f"{n:05d}-{fingerprint(policy_path)[:12]}.json"
         try:
-            fd = os.open(dest, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            fd = os.open(dest, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0), 0o600)
             break
         except FileExistsError:
             n += 1
@@ -186,7 +186,7 @@ def _save_history(policy_path: Path) -> Path:
 
 def _atomic_write(path: Path, text: str):
     tmp = path.with_name(f".{path.name}.tmp-{os.getpid()}")
-    with open(tmp, "x") as fh:
+    with open(tmp, "x", encoding="utf-8") as fh:
         fh.write(text)
         fh.flush()
         os.fsync(fh.fileno())
@@ -386,7 +386,7 @@ def undo(policy_path, audit, **kw):
     if not vs:
         return {"status": "nothing_to_undo"}
     target = load_file(vs[-1])
-    return apply(policy_path, target, audit, note=f"undo to {vs[-1].name}", raw_text=vs[-1].read_text(), **kw)
+    return apply(policy_path, target, audit, note=f"undo to {vs[-1].name}", raw_text=vs[-1].read_text(encoding="utf-8"), **kw)
 
 
 def status_lines(policy: dict) -> list:

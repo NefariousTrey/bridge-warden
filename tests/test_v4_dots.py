@@ -21,7 +21,7 @@ from bridge_warden.web import (DOT_FILES, HEADERS, SCRIPT, STYLE_HASH, SCRIPT_HA
                                     light_files, make_handler)
 
 ROOT = Path(__file__).resolve().parent.parent
-BASE = json.loads((ROOT / "policy.example.json").read_text())
+BASE = json.loads((ROOT / "policy.example.json").read_text(encoding="utf-8"))
 ENERGY = ROOT / "assets" / "dots-trey-energy-20261026"
 CVD = ROOT / "assets" / "dots-trey-cvd-20261026"
 FULL = ROOT / "assets" / "dots-trey-energy-full-20261026"
@@ -30,7 +30,7 @@ D_ = "designer@personal.example.com"
 
 def _server(tmp_path, writable=True):
     pf = tmp_path / ("policy.json" if writable else "policy.example.json")
-    pf.write_text(json.dumps(BASE, indent=2))
+    pf.write_text(json.dumps(BASE, indent=2), encoding="utf-8")
     pol, sha, path = load_full(pf)
     gate = Gate(RiskEngine(pol), AuditLog(tmp_path / "audit.jsonl"), FakePayPal(), clock=lambda: NOON_ET,
                 policy_info={"sha256": sha, "path": path})
@@ -122,24 +122,24 @@ def test_cvd_orb_files_exist_square_and_transparent(n):
 def test_notices_say_apache_and_logo_music_reserved():
     # 2026-10-26 (night): code stays Apache 2.0; the dot art is MIT on its own (old test in .bak-20261026-dotsmit)
     for d in (ENERGY, CVD, FULL):
-        t = (d / "NOTICE.md").read_text()
+        t = (d / "NOTICE.md").read_text(encoding="utf-8")
         assert "Art by @Nefarious_Trey." in t and "MIT License" in t and "all rights reserved" in t.lower()
         assert "Copyright 2026 Douglas Gibbons III\nMade by @Nefarious_Trey,\nwith Grok.\n" in t
-        lic = (d / "LICENSE").read_text()
+        lic = (d / "LICENSE").read_text(encoding="utf-8")
         assert lic.startswith("MIT License\n\nCopyright 2026 Douglas Gibbons III\nMade by @Nefarious_Trey,\nwith Grok.\n")
         assert "Permission is hereby granted, free of charge" in lic and "WITHOUT WARRANTY OF ANY KIND" in lic
         if (d / "NOTICE.md.bak-20261026-dotsmit").exists():   # backups stay on the build box only (not shipped)
-            assert "Apache License, Version 2.0" in (d / "NOTICE.md.bak-20261026-dotsmit").read_text()   # old text kept
+            assert "Apache License, Version 2.0" in (d / "NOTICE.md.bak-20261026-dotsmit").read_text(encoding="utf-8")   # old text kept
         if (d / "NOTICE.md.bak-20261026-apache").exists():
-            assert "MIT" in (d / "NOTICE.md.bak-20261026-apache").read_text()      # the oldest MIT text is kept too
+            assert "MIT" in (d / "NOTICE.md.bak-20261026-apache").read_text(encoding="utf-8")      # the oldest MIT text is kept too
     if (ENERGY / "NOTICE.md.bak").exists():
-        assert "All rights reserved" in (ENERGY / "NOTICE.md.bak").read_text()   # the oldest text is kept
-    a = (ROOT / "ASSETS_NOTICE.md").read_text()
+        assert "All rights reserved" in (ENERGY / "NOTICE.md.bak").read_text(encoding="utf-8")   # the oldest text is kept
+    a = (ROOT / "ASSETS_NOTICE.md").read_text(encoding="utf-8")
     assert "Apache" in a and "logo" in a.lower() and "music" in a.lower() and "all rights reserved" in a.lower()
     assert "status dots are MIT licensed" in a
-    lic = (ROOT / "LICENSE").read_text()
+    lic = (ROOT / "LICENSE").read_text(encoding="utf-8")
     assert "Apache License" in lic and "Version 2.0, January 2004" in lic and "END OF TERMS AND CONDITIONS" in lic
-    n = (ROOT / "NOTICE").read_text()
+    n = (ROOT / "NOTICE").read_text(encoding="utf-8")
     # 2026-10-26: legal name only on copyright lines (Trey), then the two-line credit (old check in .bak-20261026-judge)
     assert n.startswith("Bridge Warden\nCopyright 2026 Douglas Gibbons III\nMade by @Nefarious_Trey,\nwith Grok.\n")
     assert "logo" in n.lower() and "music" in n.lower() and "all rights reserved" in n.lower()

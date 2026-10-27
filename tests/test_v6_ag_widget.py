@@ -191,7 +191,7 @@ def test_panel_serves_hashed_widget_with_bw_header(st):
 
 
 def test_widget_js_has_no_money_or_approve_path():
-    s = JS.read_text()
+    s = JS.read_text(encoding="utf-8")
     for bad in ("/act", "/decide", ".click(", "submit(", "nonce", "approve", "release", "api.x.ai", "Authorization",
                 "defineAiTool", "innerHTML"):
         assert bad not in s, bad
@@ -202,7 +202,7 @@ def test_widget_js_has_no_money_or_approve_path():
 @pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
 def test_bw_light_widget_node_tests():
     p = Path(__file__).parent / "node" / "test_bw_light_widget.mjs"
-    r = subprocess.run(["node", str(p)], capture_output=True, text=True, timeout=60)
+    r = subprocess.run(["node", str(p)], capture_output=True, text=True, timeout=60, encoding="utf-8")
     assert r.returncode == 0, r.stdout + r.stderr
     assert "passed" in r.stdout and " 0 passed" not in r.stdout
 

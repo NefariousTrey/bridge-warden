@@ -20,7 +20,6 @@ Secrets are scrubbed from every record before it is written.
 from __future__ import annotations
 
 import contextlib
-import fcntl
 import hashlib
 import hmac
 import json
@@ -31,6 +30,7 @@ import threading
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .filelock import O_BINARY, lock as _flock, unlock as _funlock
 from .guard import scrub_obj
 
 GENESIS = "0" * 64
@@ -51,8 +51,9 @@ def private(path) -> None:
 
 def private_open(path, mode="a"):
     """Open for writing; a new file is created owner-only (0600) from the first byte."""
-    flags = os.O_WRONLY | os.O_CREAT | (os.O_APPEND if "a" in mode else os.O_TRUNC)
-    fh = os.fdopen(os.open(path, flags, PRIVATE_MODE), mode)
+    flags = os.O_WRONLY | os.O_CREAT | O_BINARY | (os.O_APPEND if "a" in mode else os.O_TRUNC)
+    # utf-8 + "\n" on every OS (Windows would otherwise use its local code page and "\r\n")
+    fh = os.fdopen(os.open(path, flags, PRIVATE_MODE), mode, encoding="utf-8", newline="\n")
     private(path)
     return fh
 DEFAULT_MAX_BYTES = 5_000_000
@@ -95,12 +96,12 @@ class AuditLog:
             return env.encode()
         kf = self.path.parent / ".audit_hmac.key"
         try:
-            fd = os.open(kf, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-            with os.fdopen(fd, "w") as fh:
+            fd = os.open(kf, os.O_WRONLY | os.O_CREAT | os.O_EXCL | O_BINARY, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
                 fh.write(secrets.token_hex(32))
         except FileExistsError:
             pass
-        return kf.read_text().strip().encode()
+        return kf.read_text(encoding="utf-8").strip().encode()
 
     def __repr__(self):
         return f"AuditLog({str(self.path)!r})"
@@ -123,16 +124,16 @@ class AuditLog:
     def _file_lock(self):
         """Cross-process lock, so an agent's `propose` and the owner's `serve` can't interleave lines."""
         with _lock, private_open(self.path.with_name(self.path.name + ".lock"), "a") as lf:
-            fcntl.flock(lf, fcntl.LOCK_EX)
+            _flock(lf)
             try:
                 yield
             finally:
-                fcntl.flock(lf, fcntl.LOCK_UN)
+                _funlock(lf)
 
     def _tail(self) -> tuple:
         for seg in reversed(self.segments()):
             last = None
-            with seg.open() as fh:
+            with seg.open(encoding="utf-8") as fh:
                 for line in fh:
                     if line.strip():
                         last = line
@@ -176,7 +177,7 @@ class AuditLog:
     def records(self) -> list:
         out = []
         for seg in self.segments():
-            out.extend(json.loads(l) for l in seg.read_text().splitlines() if l.strip())
+            out.extend(json.loads(l) for l in seg.read_text(encoding="utf-8").splitlines() if l.strip())
         return out
 
     def verify(self) -> tuple:
@@ -196,7 +197,7 @@ class AuditLog:
             prev, seq = rec["hash"], rec["seq"]
         if self.head_path.exists():
             try:
-                h = json.loads(self.head_path.read_text())
+                h = json.loads(self.head_path.read_text(encoding="utf-8"))
             except json.JSONDecodeError:
                 return False, "head file is damaged"
             if not hmac.compare_digest(str(h.get("mac")), self._mac(f"head:{h.get('seq')}:{h.get('hash')}")):

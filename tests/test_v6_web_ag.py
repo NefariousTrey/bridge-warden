@@ -232,7 +232,7 @@ def test_studio_answer_has_real_usage_and_key_never_logged(st, tmp_path):
     assert sent["instructions"].startswith(STUDIO.STUDIO_RULES)
     rec = ev(st.gate, STUDIO.EVENT)[-1]
     assert rec["tools_called"] == ["bw_subscriptions"] and rec["usage"]["prompt_tokens"] == 12
-    log = (st.gate.audit.path.read_text() if hasattr(st.gate.audit, "path") else json.dumps(st.gate.audit.records()))
+    log = (st.gate.audit.path.read_text(encoding="utf-8") if hasattr(st.gate.audit, "path") else json.dumps(st.gate.audit.records()))
     assert SECRET not in log and "Where does my money go" not in log
     assert SECRET not in body
 

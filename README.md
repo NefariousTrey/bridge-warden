@@ -673,3 +673,31 @@ The repo was slimmed to the app, tests, licenses and how-to docs. Some lines abo
 - Code: [REPO_LINK]
 
 Made by @Nefarious_Trey, with Grok.
+
+## Setup on Windows / macOS / Linux (Oct 27, 2026)
+
+Bridge Warden runs the same on all three. It needs **Python 3.10+** and nothing else (standard library only).
+Node is only needed to run the call Worker tests. Paths, file locks and text files are handled for each OS.
+
+One step, any OS (makes `.venv`, installs pytest, copies `policy.example.json` to `policy.json`; never overwrites):
+
+```text
+python scripts/bw_setup.py              # add --ag-studio to also fetch the optional AG Studio bundle
+```
+
+| | Windows (PowerShell) | macOS / Linux |
+|---|---|---|
+| Setup | `powershell -ExecutionPolicy Bypass -File scripts\setup.ps1` | `python3 scripts/bw_setup.py` |
+| Turn on the venv | `.venv\Scripts\Activate.ps1` | `. .venv/bin/activate` |
+| Set a key for this window | `$env:PAYPAL_CLIENT_ID = "..."` | `export PAYPAL_CLIENT_ID=...` |
+| Run | `python -m bridge_warden serve` | `python -m bridge_warden serve` |
+| Tests | `python -m pytest -q` | `python -m pytest -q` |
+| AG Studio (optional) | `python scripts\fetch_ag_studio.py` | `python3 scripts/fetch_ag_studio.py` (or the `.sh`) |
+
+Notes:
+- On Windows, use `py -3` if `python` is not found. In cmd.exe use `set NAME=value` and `.venv\Scripts\activate.bat`.
+- `scripts/fetch_ag_studio.py` does the same job as `scripts/fetch_ag_studio.sh` (same pinned hash) without npm, tar or bash.
+- Windows has no owner-only file modes (`0600`). Bridge Warden still works there, but its history and key files are
+  protected only by your Windows user account folder rights. Keep the data folder inside your own user folder.
+- The Render blueprint (`render.yaml`) runs on Render's Linux servers, so it keeps the bash build line.
+- Tests run on Ubuntu, Windows and macOS with `.github/workflows/ci.yml`.

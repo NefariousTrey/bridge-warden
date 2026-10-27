@@ -84,13 +84,13 @@ def test_owner_toggle_sets_cookie_and_saves_pref(s):
     assert r.status == 303 and r.getheader("Location") == "/settings"
     ck = r.getheader("Set-Cookie")
     assert ck.startswith("bw_theme=dark;") and "HttpOnly" in ck and "SameSite=Strict" in ck and "Path=/" in ck
-    assert json.loads(s.pf.read_text())["ui"]["theme"] == "dark"               # saved for the owner
+    assert json.loads(s.pf.read_text(encoding="utf-8"))["ui"]["theme"] == "dark"               # saved for the owner
     assert any(x["event"] == "ui_pref_changed" for x in s.gate.audit.records())
     for p in ("/", "/money", "/history", "/settings"):                          # no cookie sent: saved pref wins
         assert is_dark(s.get(p)[1]), p
     r, _ = s.post("/act", token=token(s.get("/settings")[1], "Use the Light theme"))
     assert r.getheader("Set-Cookie").startswith("bw_theme=light;")
-    assert json.loads(s.pf.read_text())["ui"]["theme"] == "light" and is_light(s.get("/")[1])
+    assert json.loads(s.pf.read_text(encoding="utf-8"))["ui"]["theme"] == "light" and is_light(s.get("/")[1])
 
 
 def test_browser_cookie_wins_over_saved_pref(s):
@@ -104,11 +104,11 @@ def test_browser_cookie_wins_over_saved_pref(s):
 def test_view_only_toggle_is_session_only(ro):
     r, _ = ro.post("/act", token=token(ro.get("/settings")[1], "Use the Dark theme"))
     assert r.status == 303 and r.getheader("Set-Cookie").startswith("bw_theme=dark;")
-    assert "ui" not in json.loads(ro.pf.read_text()) and ro.app.ui_session["theme"] == "dark"
+    assert "ui" not in json.loads(ro.pf.read_text(encoding="utf-8")) and ro.app.ui_session["theme"] == "dark"
 
 
 def test_grid_v3_has_dark_params_and_v2_kept():
-    v3 = (web.STATIC_DIR / "bw-grid-v3.js").read_text()
+    v3 = (web.STATIC_DIR / "bw-grid-v3.js").read_text(encoding="utf-8")
     assert "document.documentElement.getAttribute('data-theme') === 'dark'" in v3
     assert "browserColorScheme: 'dark'" in v3 and "browserColorScheme: 'light'" in v3
     assert "bw-grid-v3.js" in web.GRID_FILES and (web.STATIC_DIR / "bw-grid-v2.js").exists()

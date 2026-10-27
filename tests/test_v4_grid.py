@@ -20,13 +20,13 @@ def h256(b):
 
 
 def test_files_are_local_mit_and_make_no_network_calls():
-    lic = (STATIC / "AG-GRID-LICENSE.txt").read_text()
+    lic = (STATIC / "AG-GRID-LICENSE.txt").read_text(encoding="utf-8")
     assert lic.startswith("The MIT License")
-    bundle = (STATIC / "ag-grid-community.min.js").read_text()
+    bundle = (STATIC / "ag-grid-community.min.js").read_text(encoding="utf-8")
     for bad in ("XMLHttpRequest", "sendBeacon", "fetch(", "new WebSocket", "importScripts"):
         assert bad not in bundle
     for name in ("bw-grid.js", "bw-grid-v2.js", "bw-grid-v3.js"):   # v1, v2 kept on disk; v3 is the one served
-        ours = (STATIC / name).read_text()
+        ours = (STATIC / name).read_text(encoding="utf-8")
         assert not re.search(r"https?://", ours) and "innerHTML" not in ours and "eval(" not in ours
         assert "fetch('/moves.json'" in ours
 

@@ -275,13 +275,13 @@ def test_settings_retry_form_saves(setup):
     assert 'id="call-retries"' in page and "Each retry is a paid call" in page and "15 min then 15 min" in page
     assert "Email alerts (free): off" in page and "Recent alerts" in page
     s.post("/act", token=token(page, 'id="call-retries"'), call_retries="10, 20, 30")
-    assert json.loads(open(s.gate.policy_info["path"]).read())["call_retry_minutes"] == [10, 20, 30]
+    assert json.loads(open(s.gate.policy_info["path"], encoding="utf-8").read())["call_retry_minutes"] == [10, 20, 30]
     _, page = s.get("/settings")
     s.post("/act", token=token(page, 'id="call-retries"'), call_retries="999")
-    assert json.loads(open(s.gate.policy_info["path"]).read())["call_retry_minutes"] == [10, 20, 30]
+    assert json.loads(open(s.gate.policy_info["path"], encoding="utf-8").read())["call_retry_minutes"] == [10, 20, 30]
     _, page = s.get("/settings")
     s.post("/act", token=token(page, 'id="call-retries"'), call_retries="off")
-    assert json.loads(open(s.gate.policy_info["path"]).read())["call_retry_minutes"] == []
+    assert json.loads(open(s.gate.policy_info["path"], encoding="utf-8").read())["call_retry_minutes"] == []
 
 
 def test_judges_get_no_retries():

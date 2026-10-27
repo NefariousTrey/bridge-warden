@@ -106,17 +106,17 @@ def test_every_message_list_in_the_app_goes_through_the_rule():
     """Judge, hosted, local and Dev mode all build AI requests in these files only; each list is wrapped."""
     builders = []
     for f in sorted(PKG.glob("*.py")):
-        s = f.read_text()
+        s = f.read_text(encoding="utf-8")
         for m in re.finditer(r'"messages"\s*:', s):
             builders.append(f.name)
             assert s[m.end():m.end() + 8].lstrip().startswith("ruled("), f"{f.name}: messages without the rule"
     assert sorted(set(builders)) == ["ai.py", "xai_check.py"]
-    hits = [f.name for f in PKG.glob("*.py") if "/chat/completions" in f.read_text()]
+    hits = [f.name for f in PKG.glob("*.py") if "/chat/completions" in f.read_text(encoding="utf-8")]
     assert hits == ["xai_check.py"] or sorted(hits) == ["selfcheck.py", "xai_check.py"]
 
 
 def test_worker_rule_is_the_same_text():
-    js = WORKER.read_text()
+    js = WORKER.read_text(encoding="utf-8")
     m = re.search(r'export const STANDING_RULE = ("(?:[^"\\]|\\.)*");', js)
     assert m and json.loads(m.group(1)) == LAW.RULE
     assert 'content: STANDING_RULE + "\\n\\n" + ask' in js
@@ -133,13 +133,13 @@ def test_lawful_note_shown(setup):
 
 @pytest.mark.parametrize("doc", ["README.md", "SETUP_YOUR_OWN.md", "proof/JUDGE_TESTING.md"])
 def test_docs_have_lawful_use(doc):
-    t = (PKG.parent / doc).read_text()
+    t = (PKG.parent / doc).read_text(encoding="utf-8")
     assert "## Lawful use" in t and LAW.NOTE in t
 
 
 def test_no_house_terms_in_new_text():
     for f in (PKG / "lawful.py", PKG.parent / "README.md", PKG.parent / "SETUP_YOUR_OWN.md", WORKER):
-        assert not re.search(r"\bTN\b", f.read_text()), f
+        assert not re.search(r"\bTN\b", f.read_text(encoding="utf-8")), f
 
 
 from test_v4_ui import setup  # noqa: E402,F401  (fixture)

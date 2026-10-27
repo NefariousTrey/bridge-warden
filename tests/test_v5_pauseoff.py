@@ -32,7 +32,7 @@ def test_pause_shows_yellow_and_logs_paused_by_you(setup):
     _, page = setup.get("/")
     assert D.status(setup.gate)["state"] == "green"
     setup.post("/act", token=token(page, "Pause"))
-    assert json.loads(setup.pf.read_text())["mode"] == "paused"
+    assert json.loads(setup.pf.read_text(encoding="utf-8"))["mode"] == "paused"
     st = D.status(setup.gate)
     assert (st["state"], st["why"], st["paused"]) == ("gray", "paused", True)
     last = events(setup.gate, D.LIGHT_EVENT)[-1]
@@ -86,7 +86,7 @@ def test_off_to_paused_goes_red_to_yellow(tmp_path):
 def test_unanswered_alert_stays_red_while_paused_until_you_respond(setup):
     block(setup.gate)
     assert D.status(setup.gate)["state"] == "red"
-    setup.pf.write_text(json.dumps({**json.loads(setup.pf.read_text()), "mode": "paused"}))   # paused another way
+    setup.pf.write_text(json.dumps({**json.loads(setup.pf.read_text(encoding="utf-8")), "mode": "paused"}), encoding="utf-8")   # paused another way
     assert setup.gate.live_pause()
     st = D.status(setup.gate)
     assert (st["state"], st["why"]) == ("red", "needs_you")       # pause alone is not an answer
@@ -102,7 +102,7 @@ def test_keep_everything_blocked_is_an_answer_red_to_yellow(setup):
     _, home = setup.get("/")
     assert "st-red" in home
     setup.post("/act", token=token(home, "Keep everything blocked"))
-    assert json.loads(setup.pf.read_text())["mode"] == "paused"
+    assert json.loads(setup.pf.read_text(encoding="utf-8"))["mode"] == "paused"
     assert D.status(setup.gate)["state"] == "gray"
     assert lights(setup.gate)[-1] == ("red", "gray")
     assert any(r.get("by") == "owner (web)" for r in events(setup.gate, "owner_saw_blocks"))

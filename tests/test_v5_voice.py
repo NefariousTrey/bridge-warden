@@ -54,5 +54,5 @@ def test_adapter_inline_twiml_uses_setting():
 @pytest.mark.skipif(not shutil.which("node"), reason="node not installed")
 def test_worker_voice_tests_pass():
     here = os.path.join(os.path.dirname(__file__), "..", "call-worker")
-    r = subprocess.run(["node", "test/test_worker.mjs"], cwd=here, capture_output=True, text=True, timeout=60)
+    r = subprocess.run(["node", "test/test_worker.mjs"], cwd=here, capture_output=True, text=True, timeout=60, encoding="utf-8")
     assert r.returncode == 0 and "voice tests ok" in r.stdout

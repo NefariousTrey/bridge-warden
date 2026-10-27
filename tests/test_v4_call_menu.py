@@ -14,7 +14,7 @@ from bridge_warden.web import AI_BOTS, HEADERS, ROBOTS_TXT
 
 ROOT = Path(__file__).resolve().parent.parent
 WORKER = ROOT / "call-worker"
-_V = json.loads((WORKER / "test" / "vectors.json").read_text())
+_V = json.loads((WORKER / "test" / "vectors.json").read_text(encoding="utf-8"))
 VECTORS, WALK_VECTORS = _V["cases"], _V["walk_cases"]
 B = "https://bridge-warden-call.example.workers.dev"
 
@@ -146,7 +146,7 @@ NODE = shutil.which("node")
 
 @pytest.mark.skipif(not NODE, reason="node not installed")
 def test_worker_matches_python_twiml_and_passes_its_own_tests():
-    r = subprocess.run([NODE, "test/test_worker.mjs"], cwd=WORKER, capture_output=True, text=True, timeout=60)
+    r = subprocess.run([NODE, "test/test_worker.mjs"], cwd=WORKER, capture_output=True, text=True, timeout=60, encoding="utf-8")
     assert r.returncode == 0, r.stderr[-800:]
     probe = """import {voiceTwiml, gatherTwiml, otherTwiml, walkTwiml} from './src/index.js';
 const B=%r; const out=[voiceTwiml(B,true), voiceTwiml(B,false), voiceTwiml(B,false,true),
@@ -168,7 +168,7 @@ console.log(JSON.stringify(out));"""
          ["risky_sell", "99", "dd", "0", "1", ""], ["scam_buy", " 2 ", "d", "+1", "", "skip"]]
     r = subprocess.run([NODE, "--input-type=module", "-e",
                         probe % (B, json.dumps(g), json.dumps(o), json.dumps(w))],
-                       cwd=WORKER, capture_output=True, text=True, timeout=60)
+                       cwd=WORKER, capture_output=True, text=True, timeout=60, encoding="utf-8")
     assert r.returncode == 0, r.stderr[-800:]
     js = json.loads(r.stdout)
     py = [N.voice_twiml(B, True), N.voice_twiml(B, False), N.voice_twiml(B, False, True),
@@ -181,16 +181,16 @@ console.log(JSON.stringify(out));"""
 
 
 def test_worker_steps_js_is_the_same_data():
-    js = (WORKER / "src" / "steps.js").read_text()
+    js = (WORKER / "src" / "steps.js").read_text(encoding="utf-8")
     raw = js.split("export const PAYPAL_STEPS = ", 1)[1].rsplit(";", 1)[0]
     assert json.loads(raw) == N.PAYPAL_STEPS
 
 
 def test_worker_config_is_workers_dev_only_with_no_secrets():
-    t = (WORKER / "wrangler.toml").read_text()
+    t = (WORKER / "wrangler.toml").read_text(encoding="utf-8")
     assert 'name = "bridge-warden-call"' in t and "workers_dev = true" in t
     assert "routes" not in t.replace("no routes", "") and "route =" not in t
-    src = (WORKER / "src" / "index.js").read_text()
+    src = (WORKER / "src" / "index.js").read_text(encoding="utf-8")
     # CALLFIX 2026-10-26: one private log line, only on a refused request, key names only (see refusedNote).
     assert src.count("console.") == 1 and "console.log(JSON.stringify(refusedNote(" in src
     assert "env.XAI_API_KEY" in src and "env.TWILIO_AUTH_TOKEN" in src
@@ -223,7 +223,7 @@ def test_robots_blocks_ai_bots_and_call_paths():
 
 
 def test_worker_robots_is_the_same_text():
-    js = (WORKER / "src" / "robots.js").read_text()
+    js = (WORKER / "src" / "robots.js").read_text(encoding="utf-8")
     assert "export const ROBOTS_TXT = " + json.dumps(ROBOTS_TXT) + ";" in js
 
 

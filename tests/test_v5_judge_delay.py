@@ -57,7 +57,7 @@ def test_clock_rule_unchanged_for_everyone_else(hhmm):
 
 def test_key_from_private_file(tmp_path):
     f = tmp_path / "judge_key.txt"
-    f.write_text(KEY + "\n")
+    f.write_text(KEY + "\n", encoding="utf-8")
     env = {N.JUDGE_KEY_FILE_ENV: str(f)}
     assert N.is_judge(KEY, env) and not N.is_judge("nope", env)
     assert N.judge_key({N.JUDGE_KEY_FILE_ENV: str(tmp_path / "missing")}) == ""

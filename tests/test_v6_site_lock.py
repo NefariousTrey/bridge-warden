@@ -108,7 +108,7 @@ def test_password_never_logged(lk, capsys):
     HT.req(s, "GET", "/judges", headers=basic(pw="wrong-guess-123456789"))
     from pathlib import Path
     out = capsys.readouterr()
-    blobs = [out.out, out.err] + [p.read_text(errors="replace") for p in Path(env["BW_DATA_DIR"]).rglob("*")
+    blobs = [out.out, out.err] + [p.read_text(errors="replace", encoding="utf-8") for p in Path(env["BW_DATA_DIR"]).rglob("*")
                                   if p.is_file()]
     assert all(PW not in b and "wrong-guess" not in b for b in blobs)
 
@@ -118,5 +118,5 @@ def test_render_blueprints_list_the_lock_as_a_secret():
     import re
     root = Path(__file__).resolve().parent.parent
     for f in ("render.yaml",):
-        y = (root / f).read_text()
+        y = (root / f).read_text(encoding="utf-8")
         assert re.search(r"- key: BW_SITE_LOCK_PASSWORD\s+(#[^\n]*)?\n\s+sync: false", y)

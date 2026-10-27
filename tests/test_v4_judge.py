@@ -117,7 +117,7 @@ def test_owner_serve_still_localhost_only():
 
 
 def test_render_yaml_is_judge_only_and_manual():
-    y = (ROOT / "render-judge.yaml").read_text()   # moved 2026-10-26: root render.yaml is now the self-host button
+    y = (ROOT / "render-judge.yaml").read_text(encoding="utf-8")   # moved 2026-10-26: root render.yaml is now the self-host button
     assert "judge --public" in y and "autoDeploy: false" in y and "healthCheckPath: /healthz" in y
     keys = re.findall(r"- key: (\S+)", y)
     assert keys == ["PYTHON_VERSION"]

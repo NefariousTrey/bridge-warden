@@ -73,9 +73,9 @@ def test_audit_chain_detects_tampering(tmp_path):
     for i in range(3):
         log.write("proposed", action_id=f"a{i}", proposal={"amount": "1.00"})
     assert log.verify() == (True, "ok")
-    lines = log.path.read_text().splitlines()
+    lines = log.path.read_text(encoding="utf-8").splitlines()
     rec = json.loads(lines[1]); rec["proposal"]["amount"] = "999.00"; lines[1] = json.dumps(rec, sort_keys=True)
-    with open(log.path, "w") as fh:  # simulate an attacker editing the file in place
+    with open(log.path, "w", encoding="utf-8") as fh:  # simulate an attacker editing the file in place
         fh.write("\n".join(lines) + "\n")
     assert log.verify()[0] is False
 
@@ -83,4 +83,4 @@ def test_audit_chain_detects_tampering(tmp_path):
 def test_audit_never_holds_secret(gate, monkeypatch):
     monkeypatch.setenv("PAYPAL_SANDBOX_SECRET", "SHOULD-NEVER-APPEAR-123")
     gate.propose(ProposedAction("payout", "20.00", "USD", W, "payout for completed blog post"))
-    assert "SHOULD-NEVER-APPEAR-123" not in gate.audit.path.read_text()
+    assert "SHOULD-NEVER-APPEAR-123" not in gate.audit.path.read_text(encoding="utf-8")

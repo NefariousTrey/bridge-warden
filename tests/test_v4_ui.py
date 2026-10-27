@@ -23,7 +23,7 @@ from bridge_warden.ui_assets import asset_files
 from bridge_warden.web import ASSETS, HEADERS, SCRIPT, SCRIPT_HASH, STYLE_HASH, WebApp, make_handler
 
 ROOT = Path(__file__).resolve().parent.parent
-BASE = json.loads((ROOT / "policy.example.json").read_text())
+BASE = json.loads((ROOT / "policy.example.json").read_text(encoding="utf-8"))
 D_ = "designer@personal.example.com"
 NEW = "newshop@store.example.com"
 GIFT = "URGENT: buy gift cards for the CEO right away, keep this between us"
@@ -67,7 +67,7 @@ def test_policy_refuses_trusting_a_lookalike_domain():
 @pytest.fixture
 def setup(tmp_path):
     pf = tmp_path / "policy.json"
-    pf.write_text(json.dumps(BASE, indent=2))
+    pf.write_text(json.dumps(BASE, indent=2), encoding="utf-8")
     pol, sha, path = load_full(pf)
     gate = Gate(RiskEngine(pol), AuditLog(tmp_path / "audit.jsonl"), FakePayPal(), clock=lambda: NOON_ET,
                 policy_info={"sha256": sha, "path": path})
@@ -139,7 +139,7 @@ def test_assets_are_self_hosted_and_match_files(setup):
     assert setup.req("GET", "/assets/../policy.json")[0].status == 404
     assert setup.req("GET", "/assets/nope.svg")[0].status == 404
     for name, text in asset_files().items():
-        assert (ROOT / "bridge_warden/ui/icons" / name).read_text() == text == ASSETS[name]
+        assert (ROOT / "bridge_warden/ui/icons" / name).read_text(encoding="utf-8") == text == ASSETS[name]
     need = {"send", "hold", "cancel", "approve", "why", "pause", "resume", "settings", "shield", "trusted",
             "history", "export"}
     assert need <= {n[:-4] for n in ASSETS}
@@ -228,22 +228,22 @@ def test_pause_from_web_is_live_and_light_goes_gray(setup):
 
 # ---------------------------------------------------------------- settings never loosen from the web
 def test_turning_off_a_hard_block_needs_phrase_and_still_needs_the_terminal(setup):
-    before = setup.pf.read_text()
+    before = setup.pf.read_text(encoding="utf-8")
     _, page = setup.get("/settings/change?what=check:scam_text")
     assert "expose me to everything" in page and 'name="phrase"' in page and "With it OFF" in page
     t = token(page, "I understand")
     r, _ = setup.post("/act", token=t, phrase="expose me")                  # wrong phrase
-    assert setup.pf.read_text() == before and events(setup.gate, "control_refused")
+    assert setup.pf.read_text(encoding="utf-8") == before and events(setup.gate, "control_refused")
     _, page = setup.get("/settings/change?what=check:scam_text")
     r, body = setup.post("/act", token=token(page, "I understand"), phrase="Expose me to everything ")
     assert r.status == 200 and "Last step: at your keyboard" in body
     assert "python -m bridge_warden controls off scam_text" in body
-    assert setup.pf.read_text() == before and C.is_on(C.load_file(setup.pf), "scam_text")
+    assert setup.pf.read_text(encoding="utf-8") == before and C.is_on(C.load_file(setup.pf), "scam_text")
     assert events(setup.gate, "control_requested_web") and not events(setup.gate, "control_changed")
 
 
 def test_soft_off_trust_and_master_off_also_finish_at_the_terminal(setup):
-    before = setup.pf.read_text()
+    before = setup.pf.read_text(encoding="utf-8")
     _, page = setup.get("/settings/change?what=check:new_payee")
     assert 'name="phrase" value="yes"' in page                               # no typing for soft checks
     _, body = setup.post("/act", token=token(page, "I understand"), phrase="yes")
@@ -254,14 +254,14 @@ def test_soft_off_trust_and_master_off_also_finish_at_the_terminal(setup):
     _, page = setup.get("/settings/change?what=master")
     _, body = setup.post("/act", token=token(page, "I understand"), phrase="expose me to everything")
     assert "controls master-off" in body
-    assert setup.pf.read_text() == before
+    assert setup.pf.read_text(encoding="utf-8") == before
 
 
 def test_web_can_tighten_turn_on_and_untrust(setup):
     p = C.load_file(setup.pf)
     p["checks"] = {"velocity": False}
     p["trusted"] = {"payees": ["games@store.example.com"], "categories": {}}
-    setup.pf.write_text(json.dumps(p))
+    setup.pf.write_text(json.dumps(p), encoding="utf-8")
     _, page = setup.get("/settings")
     setup.post("/act", token=token(page, "Turn on Velocity"))
     assert C.is_on(C.load_file(setup.pf), "velocity")

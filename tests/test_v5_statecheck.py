@@ -111,11 +111,11 @@ def test_ai_disclaimer_everywhere():
                            "to catch most problems, but it doesn't replace your own eyes. Check your PayPal activity "
                            "yourself from time to time.")
     for f in ("README.md", "SETUP_YOUR_OWN.md", "proof/JUDGE_TESTING.md"):
-        t = (root / f).read_text()
+        t = (root / f).read_text(encoding="utf-8")
         assert LAW.AI_NOTE in t and "re-reads your PayPal state" in t, f
-    web = (root / "bridge_warden/web.py").read_text()
+    web = (root / "bridge_warden/web.py").read_text(encoding="utf-8")
     assert "LAW.AI_NOTE" in web
-    assert "AI_NOTE_SHORT" in (root / "bridge_warden/cli.py").read_text()
+    assert "AI_NOTE_SHORT" in (root / "bridge_warden/cli.py").read_text(encoding="utf-8")
 
 
 def test_facts_rule_in_rule_and_worker():
@@ -123,7 +123,7 @@ def test_facts_rule_in_rule_and_worker():
     line = ("Use only facts from the user's PayPal data. Never invent names, amounts, dates, or events that PayPal "
             "does not show. If you are unsure, say so and check first; do not guess.")
     assert LAW.RULE.endswith(line)
-    js = (pathlib.Path(__file__).resolve().parent.parent / "call-worker/src/index.js").read_text()
+    js = (pathlib.Path(__file__).resolve().parent.parent / "call-worker/src/index.js").read_text(encoding="utf-8")
     assert line.replace("'", "\\'") in js or line in js
 
 
