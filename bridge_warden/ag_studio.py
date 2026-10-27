@@ -97,7 +97,17 @@ PANEL_TITLE = "BW AG Grid agent, AG Studio dashboard and chat"
 # v6: BW theming for the Studio panel: a white header with Trey's BW logo (served by /assets/brand/, allowlisted).
 HEAD_CSS = ('.bw-head{display:flex;align-items:center;gap:10px;padding:8px 14px;background:#FFFFFF;color:#0B1220;'
             'border-bottom:1px solid #E5E7EB}.bw-head img{width:32px;height:32px}.bw-head b{font-size:15px}'
-            '.bw-head small{color:#4B5563;margin-left:auto}')
+            '.bw-head small{color:#4B5563;margin-left:auto}'
+            # BW theming: no teal select outline or corner resize handles on the widgets (they looked like a resizer
+            # stuck on the card). Widgets keep a plain thin card border (page layout widgetBorder in bw-studio.js).
+            '.bw-studio .ag-studio-layout-widget,.bw-studio .ag-studio-layout-widget:hover,'
+            '.bw-studio .ag-studio-layout-widget.ag-studio-layout-widget-selected,'
+            '.bw-studio .ag-studio-layout-widget.ag-studio-layout-widget-sibling-drag-interactive'
+            '{--ag-studio-layout-widget-resize-border-color:transparent!important;'
+            '--ag-studio-layout-widget-resize-handle-color:transparent!important}'
+            '.bw-studio .ag-studio-layout-widget-focus,.bw-studio .ag-studio-layout-widget-focus .ag-studio-layout-widget-overlay'
+            '{-webkit-box-shadow:none!important;box-shadow:none!important}'
+            '.bw-studio .ag-studio-layout-widget:has(.bw-light)>.ag-studio-layout-widget-toolbar{display:none!important}')   # no edit icons on BW Light
 HEAD_HTML = ('<header class="bw-head"><img src="/assets/brand/bw-mark-navy-v7b.png" '
              'srcset="/assets/brand/bw-mark-navy-v7b@2x.png 2x" alt="Bridge Warden"><b>Bridge Warden</b>'
              '<span>AG Studio: BW Light + spending</span><small>Only you can turn the light green.</small></header>')

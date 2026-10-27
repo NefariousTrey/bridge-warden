@@ -14,6 +14,8 @@ Made by @Nefarious_Trey, with Grok. Copyright 2026 Douglas Gibbons III. Apache-2
 """
 from __future__ import annotations
 
+import html
+
 from . import ag_agent as AG
 from . import dashboard as D
 
@@ -138,3 +140,60 @@ def step(app, purpose: str) -> dict:
     if not r.get("ok"):
         return {"ok": False, "why": r.get("why") or "nothing changed", "light": COLOR[st["state"]]}
     return {"ok": True, "light": COLOR[st["state"]], "text": st.get("text", "")}
+
+
+# ---- the compact BW Light on every BW page (server-rendered; no script, so it works without AG Studio) -------------
+# Same owner rules: its two buttons are plain owner forms to /act with the same one-time tokens (studio:light:...)
+# and run step() above. It sits in the page flow under the status bar (never floats over content).
+BACKS = {"home": "/", "money": "/money", "history": "/history", "settings": "/settings", "judges": "/judges"}
+LABEL = {"seen": "I've seen this", "fixed": "It's fixed"}
+CSS = (".bwl{background:var(--card);border:1px solid var(--line);border-radius:10px;margin:10px 0 14px;overflow:hidden}"
+       ".bwl-h{display:flex;align-items:center;gap:8px;padding:6px 12px;background:#FFFFFF;color:#0B1220;"
+       "border-bottom:1px solid #E5E7EB;font-size:14px}.bwl-h svg{width:22px;height:22px}"
+       ".bwl-h small{margin-left:auto;color:#4B5563;font-size:12px}"
+       ".bwl-b{display:flex;align-items:center;gap:12px;padding:8px 12px;flex-wrap:wrap}"
+       ".bwl-dot{width:36px;height:36px;flex:0 0 36px}.bwl-t{flex:1 1 280px;min-width:0;font-size:14px}"
+       ".bwl-a{color:var(--soft)}.bwl-acts{display:flex;gap:8px;flex-wrap:wrap}.bwl-acts form{margin:0}"
+       ".bwl-acts .btn{min-height:36px;padding:6px 12px;font-size:14px}")
+
+
+def compact_html(d: dict | None, active: str = "") -> str:
+    """The compact BW Light card. `d` is state(app). Plain HTML: dot, word, last alert, the two owner buttons."""
+    if not d:
+        return ""
+    e = html.escape
+    back = BACKS.get(active, "/")
+    la = d.get("last_alert")
+    if la:
+        t = la.get("text") or ""
+        t = t if len(t) <= 140 else t[:139].rstrip() + "\u2026"
+        alert = f'Last alert{" (" + e(la["at"]) + ")" if la.get("at") else ""}: {e(t)}'
+    else:
+        alert = "No alerts yet."
+    note = d.get("hint") or ""
+    note_html = f'<br><span class="bwl-a">{e(note)}</span>' if note else ""
+    acts = []
+    for s in STEPS:
+        if d["can"].get(s) and d["tokens"].get(s):
+            acts.append(f'<form method="post" action="/act"><input type="hidden" name="token" value="{e(d["tokens"][s])}">'
+                        f'<input type="hidden" name="back" value="{e(back)}">'
+                        f'<button class="btn bwl-{s}" type="submit">{e(LABEL[s])}</button></form>')
+        else:
+            acts.append(f'<button class="btn bwl-{s}" type="button" disabled>{e(LABEL[s])}</button>')
+    img = (f'<img class="bwl-dot" src="{e(d["dot"]["src"])}" srcset="{e(d["dot"]["src2x"])} 2x" '
+           f'alt="{e(d["alt"])}" width="36" height="36">')
+    return (f'<aside class="bwl bwl-{e(d["light"])}" aria-label="BW Light" data-light="{e(d["light"])}">'
+            '<div class="bwl-h"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#logo"/></svg>'
+            '<b>BW Light</b><small>Only you can turn it green.</small></div>'
+            f'<div class="bwl-b">{img}<span class="bwl-t"><b>{e(d["word"])}.</b> <span class="bwl-a">{alert}</span>'
+            f'{note_html}</span>'
+            f'<span class="bwl-acts">{"".join(acts)}</span></div></aside>')
+
+
+def act(app, purpose: str) -> tuple[str, str]:
+    """/act for a compact-card button (token already taken by the caller): (message, kind)."""
+    r = step(app, purpose)
+    if r["ok"]:
+        return {"yellow": "Marked as seen. The light is yellow.", "green": "Confirmed fixed. The light is green."}.get(
+            r["light"], "Done.") + " Logged in History.", "ok"
+    return "Nothing changed: " + r["why"] + ".", "warn"

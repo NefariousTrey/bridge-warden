@@ -293,6 +293,7 @@ html[data-theme=dark] .jg-tag{border-color:#4ADE80}
 """
 STYLE += (".jg-top{border-width:3px} .jg-top h2{margin-top:0} "
           ".jg-facts{font-size:1.15em;line-height:1.6;padding-left:1.6em;margin:.4em 0} .jg-facts li{margin:.5em 0}")
+STYLE += LIGHTW.CSS   # v6: the compact BW Light card on every page
 STYLE_HASH = "sha256-" + base64.b64encode(hashlib.sha256(STYLE.encode()).digest()).decode()
 
 # Progressive enhancement only: the page works fully without it. It asks /status.json (same origin) every
@@ -584,7 +585,7 @@ def page(title: str, body: str, active: str, st: dict | None, flash: str = "", m
 <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#logo"/></svg>
 <span><b>Bridge Warden</b><small>{TAGLINE}</small></span></a>
 <nav aria-label="Main"><ul>{nav}</ul></nav>{themed_mark_img(mark_state(st)) if mark else ""}</div></header>
-<main id="main" class="wrap" tabindex="-1">{status}
+<main id="main" class="wrap" tabindex="-1">{status}{LIGHTW.compact_html((st or {}).get("light_card"), active)}
 <div role="status" aria-live="polite">{flash}<p id="live" class="msg warn" hidden>Something new happened.
 <a href="/">Refresh the page</a> to see it.</p></div>
 {body}
@@ -1090,6 +1091,10 @@ def dev_on(app) -> bool:
 def status_with_button(app) -> dict:
     st = with_dev(app, with_test(app, D.status(app.gate)))
     st["cvd"] = app.colorblind()
+    try:                                     # v6: the compact BW Light card (same owner rules as the AG Studio widget)
+        st["light_card"] = LIGHTW.state(app)
+    except Exception:                        # never break a page over the card
+        st["light_card"] = None
     if app.policy_path() and not st.get("dev_sim"):
         if st["paused"]:
             st["button"] = _act_form(app, "mode:on", "Resume", "resume", "btn", aria="Resume guarding")
@@ -2659,6 +2664,11 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
                 else:
                     app.say("Nothing changed: " + r["why"] + ".", "warn")
                 return self._redirect("/")
+            if purpose.startswith(LIGHTW.PURPOSE):         # v6: compact BW Light card (same rules as the widget)
+                msg, kind = LIGHTW.act(app, purpose)
+                app.say(msg, kind)
+                back = form.get("back", [""])[0]
+                return self._redirect(back if back in LIGHTW.BACKS.values() else "/")
             if purpose.startswith(("ag:seen:", "ag:fixed:", "ag:ignore:")):   # only the owner's own clicks
                 msg, kind = WA.owner_step(app, gate, purpose, form)
                 app.say(msg, kind)

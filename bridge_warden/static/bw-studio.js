@@ -172,7 +172,9 @@
         pages: [{
           id: 'main', name: 'Where my money goes',
           widgets: widgets,
-          widgetLayout: layout
+          widgetLayout: layout,
+          // a plain thin card border on every widget (the teal select outline is hidden by the panel's CSS)
+          layout: {widgetBorderEnabled: true, widgetBorderWidth: 1, widgetBorderColor: dark ? '#2B3648' : '#E5E7EB'}
         }],
         selectedPageId: 'main',
         // the agent chat stays open; the edit side panels start folded so the BW Light and grid views have room

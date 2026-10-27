@@ -205,3 +205,62 @@ def test_bw_light_widget_node_tests():
     r = subprocess.run(["node", str(p)], capture_output=True, text=True, timeout=60)
     assert r.returncode == 0, r.stdout + r.stderr
     assert "passed" in r.stdout and " 0 passed" not in r.stdout
+
+
+# ---- the compact BW Light card on every BW page (server-rendered, same owner rules) ------------------------------
+import re  # noqa: E402
+
+PAGES = ("/", "/money", "/history", "/settings")
+
+
+def card(page):
+    m = re.search(r'<aside class="bwl bwl-(\w+)".*?</aside>', page, re.S)
+    assert m, "no BW Light card"
+    return m.group(1), m.group(0)
+
+
+def card_token(html_card, step):
+    m = re.search(r'name="token" value="([^"]+)"><input type="hidden" name="back" value="([^"]*)">'
+                  rf'<button class="btn bwl-{step}" type="submit">', html_card)
+    return m and m.group(1)
+
+
+def test_compact_card_on_every_page_under_the_status_bar(setup):
+    for p in PAGES:
+        r, page = setup.get(p)
+        assert r.status == 200, p
+        light, c = card(page)
+        assert light == "green" and page.count('class="bwl ') == 1, p
+        assert page.index('id="status"') < page.index('class="bwl ') < page.index('role="status"'), p
+        assert "style=" not in c and "<script" not in c and "BW Light" in c and "#logo" in c, p
+        assert 'disabled>I&#x27;ve seen this' in c and 'disabled>It&#x27;s fixed' in c, p       # nothing to do on green
+    assert L.CSS in W.STYLE and ".bwl-h{" in L.CSS and "#FFFFFF" in L.CSS                          # white header, hashed CSS
+    assert "position:fixed" not in L.CSS and "position:absolute" not in L.CSS                      # never covers content
+
+
+def test_compact_card_red_seen_yellow_fixed_green_single_use(setup):
+    g = setup.gate
+    block(g)
+    _, c = card(setup.get("/money")[1])
+    assert "bwl-red" in c and card_token(c, "fixed") is None and 'disabled>It&#x27;s fixed' in c    # red: no green step
+    t = card_token(c, "seen")
+    assert t and 'name="back" value="/money"' in c
+    r, _ = setup.post("/act", token=t, back="/money")
+    assert r.status == 303 and r.getheader("Location") == "/money"
+    assert L.state(setup.app)["light"] == "yellow" and events(g, "owner_saw_blocks")[-1]["by"] == L.BY
+    assert setup.post("/act", token=t, back="/money")[0].status != 303                              # replay refused
+    light, c = card(setup.get("/settings")[1])
+    assert light == "yellow"
+    r, _ = setup.post("/act", token=card_token(c, "fixed"), back="https://evil.example/")
+    assert r.status == 303 and r.getheader("Location") == "/"                                       # back is allowlisted
+    assert card(setup.get("/")[1])[0] == "green"
+    never_red_to_green(g)
+    assert g.paypal.calls == []
+
+
+def test_compact_card_cannot_decide_a_held_payment(setup):
+    g = setup.gate
+    hold(g)
+    _, c = card(setup.get("/")[1])
+    assert "/decide" not in c and "Send" not in c and "approve" not in c.lower()
+    assert g.paypal.calls == [] and len(g.pending()) == 1

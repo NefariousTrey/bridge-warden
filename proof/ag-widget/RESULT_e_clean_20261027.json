@@ -1,0 +1,228 @@
+{
+  "licensed_no_watermark": true,
+  "steps": [
+    [
+      "red shown",
+      true
+    ],
+    [
+      "not selected on load, no outline",
+      true
+    ],
+    [
+      "scripted click dropped, still red",
+      true
+    ],
+    [
+      "It's fixed is off while red",
+      true
+    ],
+    [
+      "seen -> yellow",
+      true
+    ],
+    [
+      "fixed -> green",
+      true
+    ],
+    [
+      "no outline or handles even while selected",
+      true
+    ],
+    [
+      "after a click away: no outline, handles or edit icons",
+      true
+    ],
+    [
+      "after reload: green, no outline",
+      true
+    ],
+    [
+      "compact card on Home, green",
+      true
+    ],
+    [
+      "video: red shown",
+      true
+    ],
+    [
+      "video: seen -> yellow",
+      true
+    ],
+    [
+      "video: yellow, no outline",
+      true
+    ],
+    [
+      "video: fixed -> green",
+      true
+    ],
+    [
+      "video: green, no outline",
+      true
+    ]
+  ],
+  "all_steps_ok": true,
+  "paypal_calls": 0,
+  "red_to_green_jumps": [],
+  "lights": [
+    [
+      "green",
+      "red",
+      "ag_agent"
+    ],
+    [
+      "red",
+      "gray",
+      "ag_agent"
+    ],
+    [
+      "gray",
+      "green",
+      "ok"
+    ],
+    [
+      "green",
+      "red",
+      "ag_agent"
+    ],
+    [
+      "red",
+      "gray",
+      "ag_agent"
+    ],
+    [
+      "gray",
+      "green",
+      "ok"
+    ]
+  ],
+  "who_acted": [
+    "BW AG Grid agent (Dev mode TEST)",
+    "owner (AG Studio widget)"
+  ],
+  "data": "Dev mode SAMPLE data only (temp log)",
+  "watermark_dom_hits": {
+    "red": [
+      {
+        "cls": "",
+        "text": ".ag-watermark{position:absolute;bottom:20px;right:25px;font-weight:700;font-fami",
+        "w": 0,
+        "h": 0
+      },
+      {
+        "cls": "",
+        "text": ".ag-studio-watermark{bottom:20px;color:#9b9b9b;opacity:.7;position:absolute;-web",
+        "w": 0,
+        "h": 0
+      },
+      {
+        "cls": "",
+        "text": ".ag-watermark{bottom:20px;color:#9b9b9b;opacity:.7;position:absolute;transition:",
+        "w": 0,
+        "h": 0
+      },
+      {
+        "cls": "ag-studio-watermark ag-hidden",
+        "text": "",
+        "w": 0,
+        "h": 0
+      },
+      {
+        "cls": "ag-studio-watermark-text",
+        "text": "",
+        "w": 0,
+        "h": 0
+      },
+      {
+        "cls": "ag-watermark ag-hidden",
+        "text": "",
+        "w": 0,
+        "h": 0
+      },
+      {
+        "cls": "ag-watermark-text",
+        "text": "",
+        "w": 0,
+        "h": 0
+      }
+    ],
+    "green": [
+      {
+        "cls": "",
+        "text": ".ag-watermark{position:absolute;bottom:20px;right:25px;font-weight:700;font-fami",
+        "w": 0,
+        "h": 0
+      },
+      {
+        "cls": "",
+        "text": ".ag-studio-watermark{bottom:20px;color:#9b9b9b;opacity:.7;position:absolute;-web",
+        "w": 0,
+        "h": 0
+      },
+      {
+        "cls": "",
+        "text": ".ag-watermark{bottom:20px;color:#9b9b9b;opacity:.7;position:absolute;transition:",
+        "w": 0,
+        "h": 0
+      },
+      {
+        "cls": "ag-studio-watermark ag-hidden",
+        "text": "",
+        "w": 0,
+        "h": 0
+      },
+      {
+        "cls": "ag-studio-watermark-text",
+        "text": "",
+        "w": 0,
+        "h": 0
+      },
+      {
+        "cls": "ag-watermark ag-hidden",
+        "text": "",
+        "w": 0,
+        "h": 0
+      },
+      {
+        "cls": "ag-watermark-text",
+        "text": "",
+        "w": 0,
+        "h": 0
+      }
+    ]
+  },
+  "console_license_lines": [],
+  "deselect_tries": [
+    [
+      "frame header",
+      null,
+      null,
+      true
+    ],
+    [
+      "Escape key",
+      null,
+      null,
+      true
+    ],
+    [
+      "deselect_worked",
+      false
+    ]
+  ],
+  "files": [
+    "01e-studio-red.png",
+    "02e-widget-red.png",
+    "03e-widget-yellow.png",
+    "04e-widget-green.png",
+    "05e-studio-green.png",
+    "06e-history-page.png",
+    "07e-home-card.png"
+  ],
+  "video_frames": [
+    "proof/video/ag-widget-frame-1-red.png",
+    "proof/video/ag-widget-frame-2-yellow.png",
+    "proof/video/ag-widget-frame-3-green.png"
+  ]
+}
