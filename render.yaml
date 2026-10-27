@@ -66,6 +66,8 @@ services:
         sync: false
       - key: XAI_API_KEY             # optional: your own xAI key for the AI checks and chats (blank = no AI)
         sync: false
+      - key: BW_SITE_LOCK_PASSWORD   # optional: private test copy, whole site behind a password (user "bw")
+        sync: false
       - key: BW_DATA_DIR
         value: bw-data
       # Shows "Free Render copy: download your proof often" on every page. Set to off with a paid disk.

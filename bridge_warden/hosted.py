@@ -58,6 +58,41 @@ class HostedRefused(SystemExit):
     pass
 
 
+LOCK_ENV = "BW_SITE_LOCK_PASSWORD"   # private test copy: the WHOLE site needs this password (HTTP Basic, user "bw")
+LOCK_USER = "bw"
+MIN_LOCK_PASSWORD = 20
+LOCK_OPEN = ("/healthz", "/robots.txt")   # health check ("ok") and robots.txt ("Disallow: /") need no password
+LOCK_REALM = 'Basic realm="Bridge Warden (private)", charset="UTF-8"'
+LOCK_ROBOTS = "noindex, nofollow, noarchive"
+LOCK_ROBOTS_TXT = "User-agent: *\nDisallow: /\n"      # locked copy: no crawler may read anything
+LOCK_META = '<meta name="robots" content="noindex, nofollow">'
+
+
+def site_lock(env) -> str:
+    """The site lock password, or "" when the lock is off. Too short = refused (never echoed)."""
+    pw = str(env.get(LOCK_ENV, "") or "").strip()
+    if pw and len(pw) < MIN_LOCK_PASSWORD:
+        raise HostedRefused(f"Hosted mode refused: {LOCK_ENV} is set but shorter than {MIN_LOCK_PASSWORD} characters.")
+    return pw
+
+
+def lock_ok(header: str, password: str) -> bool:
+    """HTTP Basic check for the site lock. Constant-time on both the user and the password. Never logs either."""
+    import base64
+    import binascii
+    scheme, _, b64 = str(header or "").strip().partition(" ")
+    if scheme.lower() != "basic" or not b64:
+        return False
+    try:
+        raw = base64.b64decode(b64.strip(), validate=True).decode("utf-8")
+    except (binascii.Error, ValueError, UnicodeDecodeError):
+        return False
+    user, sep, given = raw.partition(":")
+    ok_user = hmac.compare_digest(user.encode(), LOCK_USER.encode())
+    ok_pw = hmac.compare_digest(given.encode(), password.encode())
+    return bool(sep) and ok_user and ok_pw
+
+
 def hosted_settings(env) -> dict:
     """Read and check the hosted settings. Never returns or prints secret values in an error."""
     host = str(env.get("BW_PUBLIC_HOST") or env.get("RENDER_EXTERNAL_HOSTNAME") or "").strip().lower()
@@ -309,6 +344,7 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_tr
     app.hosted = cfg
     free = free_plan(env, cfg["data"])
     guard = LoginGuard(cfg["login_key"])
+    lock = site_lock(env)                                # "" = no site lock
     H = web.make_handler(gate, app=app)
     origin = "https://" + cfg["host"]
 
@@ -327,6 +363,9 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_tr
         THEME_SECURE = True     # hosted is always https: the bw_theme cookie gets Secure
 
         def _send(self, body, code=200, extra=None, ctype="text/html; charset=utf-8"):
+            if lock and isinstance(body, str) and ctype.startswith("text/html") and "<head>" in body \
+                    and LOCK_META not in body:
+                body = body.replace("<head>", "<head>" + LOCK_META, 1)     # locked copy: meta noindex too
             return super()._send(body, code, {"Strict-Transport-Security": HSTS, **(extra or {})}, ctype)
 
         def _redirect(self, where, extra=None):
@@ -374,11 +413,54 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_tr
                                                 self.headers.get("X-Twilio-Signature", ""), ai=gate.ai)
             return self._send(body, code, {"Content-Security-Policy": "default-src 'none'"}, ctype)
 
+        # ---- site lock (BW_SITE_LOCK_PASSWORD): every route needs the password, except Twilio's signed call
+        # webhooks (they keep their own signature / signed-link checks) and the bare health check.
+        def send_response(self, code, message=None):
+            self._robots_sent = False
+            return super().send_response(code, message)
+
+        def send_header(self, keyword, value):
+            if lock and keyword.lower() == "x-robots-tag":
+                value, self._robots_sent = LOCK_ROBOTS + ", " + str(value), True
+            return super().send_header(keyword, value)
+
+        def end_headers(self):
+            if lock and not getattr(self, "_robots_sent", False) and getattr(self, "_headers_buffer", None) is not None:
+                self._robots_sent = True
+                super().send_header("X-Robots-Tag", LOCK_ROBOTS)
+            return super().end_headers()
+
+        def _lock_blocks(self) -> bool:
+            if not lock:
+                return False
+            path = urllib.parse.urlparse(self.path).path
+            if path in LOCK_OPEN or path in CALL_STEPS or path == "/call-status":
+                return False
+            if lock_ok(self.headers.get("Authorization", ""), lock):
+                return False
+            body = b"This Bridge Warden copy is private. Password needed."
+            self.send_response(401)
+            self.send_header("WWW-Authenticate", LOCK_REALM)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Strict-Transport-Security", HSTS)
+            self.end_headers()
+            if self.command != "HEAD":
+                self.wfile.write(body)
+            return True
+
         def do_GET(self):
+            if self._lock_blocks():
+                return None
+            if lock and urllib.parse.urlparse(self.path).path == "/robots.txt":
+                return self._send(LOCK_ROBOTS_TXT, ctype="text/plain; charset=utf-8")
             with JA.acting_as(self._session_judge_key(), judge_xai):     # a judge's AI use counts against their key
                 return self._do_get()
 
         def do_POST(self):
+            if self._lock_blocks():
+                return None
             with JA.acting_as(self._session_judge_key(), judge_xai):
                 return self._do_post()
 
