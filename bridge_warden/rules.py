@@ -171,8 +171,8 @@ class RiskEngine:
         # 7. Odd hours (owner's local time)
         lo, hi = self.p.get("quiet_hours", [0, 6])
         local = now.astimezone(ZoneInfo(self.p.get("owner_timezone", "UTC")))
-        if lo <= local.hour < hi:
-            add("odd_hours", HOLD, f"It's {local.strftime('%-I:%M %p')} for you, inside your quiet hours.", 15)
+        if lo <= local.hour < hi:   # (12-hour clock built by hand: Windows has no %-I)
+            add("odd_hours", HOLD, f"It's {local.hour % 12 or 12}:{local:%M %p} for you, inside your quiet hours.", 15)
 
         # 8. The agent's own words: injection, secrets, scam patterns, AI score
         raw = a.description or ""

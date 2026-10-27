@@ -431,7 +431,8 @@ def local_time(iso: str, tz: str) -> str:
         t = datetime.fromisoformat(iso)
         if t.tzinfo is None:
             t = t.replace(tzinfo=timezone.utc)
-        return t.astimezone(ZoneInfo(tz)).strftime("%b %-d, %-I:%M %p %Z")
+        t = t.astimezone(ZoneInfo(tz))   # no %-d / %-I: Windows strftime rejects them
+        return f"{t:%b} {t.day}, {t.hour % 12 or 12}:{t:%M %p %Z}"
     except (TypeError, ValueError, KeyError):
         return "-"
 

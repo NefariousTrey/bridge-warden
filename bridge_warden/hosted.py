@@ -120,7 +120,8 @@ def free_plan(env, data) -> bool:
         return True
     if v in ("off", "0", "no", "false"):
         return False
-    return not Path(str(data)).is_absolute()
+    p = Path(str(data))
+    return not (p.is_absolute() or p.root)   # '/var/data' has a root but no drive on Windows
 
 
 def with_free_banner(html_text: str) -> str:
