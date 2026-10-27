@@ -3,9 +3,10 @@
 ## Good to know
 
 1. Your judge key gives you 3 real test calls, free to you.
-2. PayPal is sandbox only. No real money moves.
-3. Judge mode runs the whole flow without a phone.
-4. To run it yourself: it is open source. Bring your own Twilio and xAI keys.
+2. The AI check is real xAI, free to you on our key (up to 1,000 messages per judge).
+3. PayPal is sandbox only. No real money moves.
+4. Judge mode runs the whole flow without a phone.
+5. To run it yourself: it is open source. Bring your own Twilio and xAI keys.
 
 The same guide is a page in the app: open **/judges** (top menu: **Judges**). No sign-in needed to read it.
 
@@ -161,3 +162,14 @@ the log. If something needs attention, the light turns yellow (paused), automati
 approvals still work), you see a plain note in the app, and you get an email if email is set up. It clears
 when you clear it in Settings or a later check comes back clean. A red light is never turned yellow.
 Dev mode has a button to simulate this (marked TEST; PayPal is not called).
+
+## The AI on the hosted judge demo
+
+- Log in with your own judge key (same box as the login key). Your AI use is counted for your key only.
+- The AI check, the help chats, the AG chat panel, summaries and call replies use real xAI on our key.
+  It is free to you, up to 1,000 xAI messages per judge.
+- After that, you see the sample answer with the note "Judge AI limit reached, showing sample answer".
+  Nothing more is sent to xAI, so it never costs more.
+- Your judge key is never stored. Only a salted fingerprint of it is counted.
+- Judge mode (no login, on your own computer) has no xAI key. It always shows the sample answers.
+- Every real alert or test call hangs up by itself after 30 minutes at most.

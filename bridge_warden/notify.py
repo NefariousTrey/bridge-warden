@@ -265,6 +265,21 @@ def apply_voice(xml: str, voice) -> str:
     return xml if v == FREE_VOICE else xml.replace('<Say voice="man">', f'<Say voice="{v}" language="en-US">')
 
 
+CALL_MAX_ENV = "BW_CALL_MAX_SECONDS"
+CALL_MAX_DEFAULT = 1800       # hard stop: Twilio hangs up any real alert/test call after 30 minutes (TimeLimit)
+CALL_MAX_CEILING = 14400      # Twilio's own maximum (4 hours)
+
+
+def call_max_seconds(env=None) -> int:
+    """Twilio TimeLimit for every real call. Env BW_CALL_MAX_SECONDS, default 1800. Bad value = default."""
+    raw = str((os.environ if env is None else env).get(CALL_MAX_ENV, "") or "").strip()
+    try:
+        n = int(raw) if raw else CALL_MAX_DEFAULT
+    except ValueError:
+        n = CALL_MAX_DEFAULT
+    return n if 1 <= n <= CALL_MAX_CEILING else CALL_MAX_DEFAULT
+
+
 class TwilioCallAdapter(CallAdapter):
     """EXPERIMENTAL. Places one voice call through the OWNER'S OWN Twilio account (they pay Twilio directly;
     Bridge Warden pays nothing). Secrets and numbers come from this computer's environment only and are never
@@ -284,6 +299,7 @@ class TwilioCallAdapter(CallAdapter):
         self._status_url = su if (pu and pu.scheme == "https" and pu.hostname and not pu.query and not pu.username
                                   and re.fullmatch(r"[A-Za-z0-9/_.-]{0,200}", pu.path or "")) else ""
         self._detect_machine = str(env.get("BW_CALL_DETECT_MACHINE", "")).strip().lower() in ("1", "on", "true", "yes")
+        self._time_limit = call_max_seconds(env)   # hard max call length (Twilio TimeLimit), default 30 minutes
 
     def __repr__(self):
         return f"TwilioCallAdapter(ready={self.ready})"
@@ -315,6 +331,7 @@ class TwilioCallAdapter(CallAdapter):
             data = {"To": self._to, "From": self._from, "Url": u}
         else:      # no public address: the call only speaks; the owner chooses in the app
             data = {"To": self._to, "From": self._from, "Twiml": apply_voice(twiml(lines), v)}
+        data["TimeLimit"] = str(self._time_limit)   # Twilio hangs up after this many seconds, whatever happens
         if self._status_url:   # MISSEDCALL: Twilio tells us how the call ended (signed; checked by alerts.py)
             data.update(StatusCallback=self._status_url, StatusCallbackMethod="POST")
         if self._detect_machine:   # optional, small extra Twilio fee: a voicemail pick-up counts as missed
@@ -1007,6 +1024,7 @@ class FraudDrill:
         if dev_locked(self.gate):
             adapter = DryRunCallAdapter()   # Dev mode: the drill runs, but no phone rings
         judge = is_judge(judge_key, self.env)
+        self.ai_judge_key = judge_key.strip() if judge else ""   # call replies count against this judge's xAI allowance
         if judge and getattr(adapter, "real", False) and getattr(adapter, "ready", False):
             # judges get at most JUDGE_CALL_CAP REAL calls per key; dry-run tests never count. The key is not logged.
             if not JudgeCalls(self.gate.audit.path.parent).take(judge_key):

@@ -3,9 +3,10 @@
 ## Good to know
 
 1. Your judge key gives you 3 real test calls, free to you.
-2. PayPal is sandbox only. No real money moves.
-3. Judge mode runs the whole flow without a phone.
-4. To run it yourself: it is open source. Bring your own Twilio and xAI keys.
+2. The AI check is real xAI, free to you on our key (up to 1,000 messages per judge).
+3. PayPal is sandbox only. No real money moves.
+4. Judge mode runs the whole flow without a phone.
+5. To run it yourself: it is open source. Bring your own Twilio and xAI keys.
 
 Start here: **proof/JUDGE_TESTING.md**.
 

@@ -28,6 +28,7 @@ import os
 import re
 import time
 
+from . import judge_ai as JA
 from . import net
 from .guard import scrub
 from .lawful import ruled
@@ -253,6 +254,9 @@ class XaiChecker:
         return scrub(s, extra=[self._key] if self._key else [])
 
     def _budget_reason(self) -> str | None:
+        jl = JA.limit_reason()          # a judge with no xAI messages left (hosted judge demo)
+        if jl:
+            return jl
         now = self._clock()
         if now < self._open_until:
             return "circuit_open"
@@ -262,6 +266,7 @@ class XaiChecker:
         return None
 
     def _send_counted(self, *args):
+        JA.take_or_raise()              # judge allowance FIRST: no message left = nothing is sent (no cost)
         self._calls.append(self._clock())
         return self._send(*args)
 
@@ -341,6 +346,8 @@ class XaiChecker:
             out["usage"] = {k: data.get("usage", {}).get(k) for k in ("prompt_tokens", "completion_tokens")}
             out["parsed"] = parse_ai_reply(data["choices"][0]["message"]["content"])
             self._record(True)
+        except JA.JudgeAiLimit:            # nothing was sent: the sample answer is shown instead
+            out["called"], out["skipped"] = False, JA.SKIP
         except Exception as e:  # timeout, network, HTTP error, junk JSON: fall back
             out["error"] = self._scrub(f"{type(e).__name__}: {e}")[:200]
             self._record(False)
@@ -413,6 +420,8 @@ def _advise(self, context: dict, question: str = "", scope: str = "") -> dict:
                                                                    "cost_in_usd_ticks")}   # v6: real cost from xAI
         out["text"] = clean_advice(data["choices"][0]["message"]["content"])
         self._record(True)
+    except JA.JudgeAiLimit:
+        out["called"], out["skipped"] = False, JA.SKIP
     except Exception as e:
         out["error"] = self._scrub(f"{type(e).__name__}: {e}")[:200]
         self._record(False)

@@ -146,6 +146,8 @@ class Gate:
         else:
             mode = self.ai.cfg.get("on_ai_failure", "use_local")
             why = res.get("skipped") or res.get("error") or "no answer"
+            if why == "judge_ai_limit":   # judge_ai.SKIP: the judge's xAI allowance is used up (not an AI failure)
+                why, mode = "Judge AI limit reached, showing sample answer", "use_local"
             if mode == "hold" and v.verdict == ALLOW:
                 v.findings.append(Finding("xai_unavailable", HOLD, f"The xAI check did not answer ({why}), so this waits for you.", 10))
                 v.verdict = worst(v.verdict, HOLD)

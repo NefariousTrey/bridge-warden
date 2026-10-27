@@ -639,10 +639,18 @@ JUDGE_FREE_UNTIL = "Free for judges through Dec 15, 2026."
 SANDBOX_LINE = "Tested in sandbox with sample data to verify it works as intended."
 JUDGE_TOP_FACTS = (   # Trey, Oct 27: plain box at the top. Each line checked against the code (see tests).
     "Your judge key gives you 3 real test calls, free to you.",
+    "The AI check is real xAI, free to you on our key (up to 1,000 messages per judge).",
     "PayPal is sandbox only. No real money moves.",
     "Judge mode runs the whole flow without a phone.",
     "To run it yourself: it is open source. Bring your own Twilio and xAI keys.",
 )
+
+
+def judge_top_facts() -> tuple:
+    """JUDGE_TOP_FACTS with the judge xAI cap from env BW_JUDGE_XAI_CAP (default 1,000)."""
+    from . import judge_ai as JA
+    n = JA.cap()
+    return tuple(x.replace("1,000", f"{n:,}") if "real xAI" in x else x for x in JUDGE_TOP_FACTS)
 NO_PHONE_LINE = ("Judge mode runs the whole flow without a phone. "
                  "The voice call is optional (your own Twilio, since it's open source).")
 
@@ -677,7 +685,7 @@ def judges_body(video: str | None = None, repo: str | None = None) -> str:
         '<div class="jg">'
         '<h1 id="jg-h">Judge Guide</h1>'
         '<section class="jg-box jg-top" aria-labelledby="jg-top-h"><h2 id="jg-top-h">Good to know</h2>'
-        f'<ol class="jg-facts">{''.join(f'<li>{e(x)}</li>' for x in JUDGE_TOP_FACTS)}</ol></section>'
+        f'<ol class="jg-facts">{''.join(f'<li>{e(x)}</li>' for x in judge_top_facts())}</ol></section>'
         '<p class="lead">Bridge Warden watches the payments your AI agent makes with PayPal.</p>'
         '<p class="lead">It lets safe ones through, stops risky ones, and tells you right away.</p>'
         f'<p class="jg-tag">{e(SANDBOX_LINE)}</p>'

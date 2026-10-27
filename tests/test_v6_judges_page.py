@@ -200,3 +200,20 @@ def test_top_box_facts_match_the_code():
         assert t.index("Good to know") < t.index("Try it in 5 steps") if "Try it in 5 steps" in t else True
         for x in web.JUDGE_TOP_FACTS:
             assert x in t, (f.name, x)
+
+
+def test_top_box_ai_line_matches_the_judge_cap(monkeypatch):
+    """Line 2: real xAI on our key, up to 1,000 messages per judge (BW_JUDGE_XAI_CAP, default 1000)."""
+    from bridge_warden import judge_ai as JA
+    line = "The AI check is real xAI, free to you on our key (up to 1,000 messages per judge)."
+    assert web.JUDGE_TOP_FACTS[1] == line and JA.DEFAULT_CAP == 1000
+    monkeypatch.delenv("BW_JUDGE_XAI_CAP", raising=False)
+    assert web.html.escape(line) in web.judges_body()
+    monkeypatch.setenv("BW_JUDGE_XAI_CAP", "250")
+    assert "(up to 250 messages per judge)" in web.judges_body()
+    for f in (ROOT / "proof" / "JUDGE_TESTING.md", ROOT / "JUDGE_TESTING.md"):
+        assert "2. " + line in f.read_text()
+    y = (ROOT / "render.yaml").read_text()
+    assert re.search(r"- key: XAI_API_KEY\s+#[^\n]*\n\s+sync: false", y)                # env-only, never in the repo
+    assert 'autoDeployTrigger: "off"' in (ROOT / "render-judge.yaml").read_text()
+    assert "autoDeploy:" not in re.sub(r"#.*", "", (ROOT / "render-judge.yaml").read_text())

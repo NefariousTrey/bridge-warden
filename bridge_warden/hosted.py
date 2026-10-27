@@ -15,7 +15,11 @@ Safety (same rules as the local app, plus what a public address needs):
   * Call paths answer ONLY a request signed by Twilio (X-Twilio-Signature with TWILIO_AUTH_TOKEN) or carrying
     a good short-lived link token (e= expiry + s= HMAC-SHA256 with BW_CALL_LINK_KEY, bound to the path, our
     query keys, the called number and your Account SID). Same checks and same words as call-worker/.
-  * No AI on calls here. Loosening a setting still needs a real terminal, which a hosted copy does not have,
+  * xAI (optional): only if XAI_API_KEY is set (Render dashboard, sync: false). Then transaction checks, help chats,
+    the AG chat panel, summaries and call replies use it. Judges log in with their own judge key and get at most
+    BW_JUDGE_XAI_CAP xAI messages each (default 1000, see judge_ai.py); after that they see sample answers.
+    The key is never printed, logged or written to History. No XAI_API_KEY = no AI, as before.
+  * Loosening a setting still needs a real terminal, which a hosted copy does not have,
     so on Render the page can only make things SAFER.
 """
 from __future__ import annotations
@@ -34,6 +38,7 @@ from http.server import ThreadingHTTPServer
 from pathlib import Path
 from types import SimpleNamespace
 
+from . import judge_ai as JA
 from . import notify as N
 
 HOST_RE = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$")
@@ -173,8 +178,9 @@ def carry_voice(body: str, base: str, v: str) -> str:
     return pat.sub(lambda m: m.group(0) if re.search(r"[?&](amp;)?v=", m.group(0)) else m.group(0) + "&amp;v=" + v, body)
 
 
-def call_twiml(step: str, base: str, query: str, params: dict) -> str:
-    """The TwiML for one call step. Same routing as the Worker; no AI here."""
+def call_twiml(step: str, base: str, query: str, params: dict, ai=None) -> str:
+    """The TwiML for one call step. Same routing as the Worker. ai: optional xAI helper for unclear speech
+    (only when XAI_API_KEY is set; it can only pick menu choice 1-4)."""
     q = dict(urllib.parse.parse_qsl(query, keep_blank_values=True))
     test = q.get("t") != "0"
     n = 2 if q.get("n") == "2" else 1
@@ -187,11 +193,12 @@ def call_twiml(step: str, base: str, query: str, params: dict) -> str:
         return N.walk_twiml(base, test, kind, q.get("i"), q.get("a"), q.get("x"),
                             params.get("Digits"), params.get("SpeechResult"))
     if step == "gather":
-        return N.gather_twiml(base, test, n, params.get("Digits"), params.get("SpeechResult"), None, kind)
-    return N.other_twiml(base, test, n, params.get("SpeechResult"), None, kind)
+        return N.gather_twiml(base, test, n, params.get("Digits"), params.get("SpeechResult"), ai, kind)
+    return N.other_twiml(base, test, n, params.get("SpeechResult"), ai, kind)
 
 
-def answer_call(cfg: dict, env, path: str, query: str, params: dict, signature: str, now: float | None = None):
+def answer_call(cfg: dict, env, path: str, query: str, params: dict, signature: str, now: float | None = None,
+                ai=None):
     """(status, body, ctype). Refuses (403) anything not signed by Twilio and without a good link token."""
     step = CALL_STEPS.get(path)
     if step is None:
@@ -208,7 +215,7 @@ def answer_call(cfg: dict, env, path: str, query: str, params: dict, signature: 
     qv = dict(urllib.parse.parse_qsl(query, keep_blank_values=True)).get("v", "")
     voice = N.voice_of(qv) if qv else env.get("BW_CALL_VOICE", "")   # VOICEPICK: signed &v= wins; unknown = free
     try:
-        body = call_twiml(step, base, query, params)
+        body = call_twiml(step, base, query, params, ai)
         if qv:
             body = carry_voice(body, base, N.voice_of(qv))
         if cfg["link_key"]:
@@ -240,7 +247,8 @@ class LoginGuard:
     def __init__(self, key: str, clock=time.monotonic):
         self.key, self.clock, self.fails, self.lock = key, clock, [], threading.Lock()
 
-    def check(self, given: str) -> str:
+    def check(self, given: str, is_judge=None) -> str:
+        """'ok' (owner key), 'judge' (one of the judge keys, if is_judge is given), 'bad' or 'slow'."""
         with self.lock:
             now = self.clock()
             self.fails = [t for t in self.fails if t > now - 60]
@@ -248,19 +256,39 @@ class LoginGuard:
                 return "slow"
             if given and hmac.compare_digest(given.encode(), self.key.encode()):
                 return "ok"
+            if given and is_judge is not None and is_judge(given):
+                return "judge"
             self.fails.append(now)
             return "bad"
 
 
 LOGIN_BODY = ("<h1>Log in</h1><p>Paste your login key. Find it in your Render dashboard: your Bridge Warden service, "
               "then <b>Environment</b>, then <b>BW_LOGIN_KEY</b>. Keep it secret.</p>"
+              "<p>Judges: paste your judge key here.</p>"
               '<form method="post" action="/login"><p><label for="k">Login key</label></p>'
               '<p><input id="k" name="k" type="password" autocomplete="current-password" required></p>'
               '<p><button type="submit">Log in</button></p></form>'
               '<p>Judging? Read the <a href="/judges">Judge Guide</a> first.</p>')
 
 
-def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None):
+ZDR_ENV = "XAI_ZDR_CONFIRMED"     # "1" = the owner confirmed Zero Data Retention on their xAI team (checked per call too)
+JUDGE_SESSIONS_MAX = 500
+
+
+def hosted_ai(gate, env, transport=None):
+    """The xAI checker for a hosted copy, or None when XAI_API_KEY is not set. The key is read from env only and is
+    never printed or logged (XaiChecker scrubs it from every error)."""
+    key = str(env.get("XAI_API_KEY", "") or "").strip()
+    cfg = dict(gate.engine.p.get("xai") or {})
+    if not key or not cfg.get("enabled", True):
+        return None
+    from .xai_check import XaiChecker
+    if str(env.get(ZDR_ENV, "")).strip().lower() in ("1", "on", "yes", "true"):
+        cfg["owner_confirmed_zdr"] = True
+    return XaiChecker(cfg, api_key=key, transport=transport, env=env)
+
+
+def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_transport=None):
     """Returns (server, app). Your own Bridge Warden on your own public host (Render)."""
     from . import web
     from .cli import build_gate
@@ -271,7 +299,11 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None):
     pol = prepare_policy(cfg["data"], env)
     gate = build_gate(SimpleNamespace(policy=str(pol), audit=str(cfg["data"] / "audit" / "audit.jsonl"),
                                       live=False, no_xai=True))
+    gate.ai = hosted_ai(gate, env, xai_transport)       # None unless XAI_API_KEY is set
+    judge_xai = JA.JudgeXaiCounter(cfg["data"] / "audit", env=env)
+    judge_sessions: dict = {}                            # session token -> judge key (memory only, never logged)
     app = web.WebApp(gate)
+    app.judge_xai = judge_xai
     app.alert_test.env, app.alert_test.sender = env, sender
     app.email_env = env            # "Email me my proof" goes to the owner's own address from these settings
     app.hosted = cfg
@@ -314,12 +346,43 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None):
                 return None
             return self.rfile.read(n)
 
+        def _cookie_token(self) -> str:
+            from http.cookies import SimpleCookie
+            c = SimpleCookie()
+            try:
+                c.load(self.headers.get("Cookie", ""))
+            except Exception:
+                return ""
+            m = c.get(web.COOKIE)
+            return m.value if m else ""
+
+        def _session_judge_key(self) -> str:
+            tok = self._cookie_token()
+            if not tok:
+                return ""
+            for t, k in list(judge_sessions.items()):
+                if hmac.compare_digest(t.encode(), tok.encode()):
+                    return k if N.is_judge(k, env) else ""     # a removed judge key logs that judge out
+            return ""
+
+        def _logged_in(self):
+            return super()._logged_in() or bool(self._session_judge_key())
+
         def _call(self, url, params):
-            code, body, ctype = answer_call(cfg, env, url.path, url.query, params,
-                                            self.headers.get("X-Twilio-Signature", ""))
+            with JA.acting_as(getattr(app.alert_test, "ai_judge_key", ""), judge_xai):   # call replies: that judge
+                code, body, ctype = answer_call(cfg, env, url.path, url.query, params,
+                                                self.headers.get("X-Twilio-Signature", ""), ai=gate.ai)
             return self._send(body, code, {"Content-Security-Policy": "default-src 'none'"}, ctype)
 
         def do_GET(self):
+            with JA.acting_as(self._session_judge_key(), judge_xai):     # a judge's AI use counts against their key
+                return self._do_get()
+
+        def do_POST(self):
+            with JA.acting_as(self._session_judge_key(), judge_xai):
+                return self._do_post()
+
+        def _do_get(self):
             url = urllib.parse.urlparse(self.path)
             if url.path == "/healthz":
                 return self._send("ok", ctype="text/plain; charset=utf-8")
@@ -334,7 +397,7 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None):
                 return self._redirect("/login")      # every private page sends you to the login form
             return super().do_GET()
 
-        def do_POST(self):
+        def _do_post(self):
             url = urllib.parse.urlparse(self.path)
             if not self._host_ok():
                 return self._deny("wrong host", 421)
@@ -373,9 +436,17 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None):
                     k = urllib.parse.parse_qs(raw.decode("utf-8"), max_num_fields=5).get("k", [""])[0].strip()
                 except (UnicodeDecodeError, ValueError):
                     k = ""
-                r = guard.check(k)
+                r = guard.check(k, is_judge=lambda g: N.is_judge(g, env))
                 if r == "slow":
                     return self._deny("Too many wrong tries. Wait a minute, then try again.", 429)
+                if r == "judge":         # a judge: own session, own xAI allowance. The key is never logged.
+                    tok = secrets.token_urlsafe(32)
+                    if len(judge_sessions) >= JUDGE_SESSIONS_MAX:
+                        judge_sessions.pop(next(iter(judge_sessions)))
+                    judge_sessions[tok] = k
+                    gate.audit.write("hosted_login", action_id="-", by="judge (web)")
+                    return self._redirect("/", {"Set-Cookie": f"{web.COOKIE}={tok}; HttpOnly; SameSite=Strict; "
+                                                              "Path=/; Secure"})
                 if r != "ok":
                     gate.audit.write("hosted_login_refused", action_id="-", by="web")
                     return self._deny("That login key is wrong.", 401)

@@ -220,6 +220,8 @@ def ask(gate, lane: str, question: str, state: dict, report: dict | None = None,
             out["warn"] = ("The BW AG Grid agent checked this answer: " + flags[0]["text"])
     else:
         why = res.get("skipped") or res.get("error") or "no answer"
+        if why == "judge_ai_limit":       # judge_ai.SKIP: friendly words, not a code
+            why = "Judge AI limit reached, showing sample answer"
         out["answer"] = (f"Step {n + 1} of {len(g['steps'])}: {step}" if step else g["steps"][0]) + \
             f" (AI not used: {str(why)[:60]}.)"
     out["usage"] = usage_line(res)

@@ -9,10 +9,11 @@ services:
     name: bridge-warden-judge-demo
     runtime: python
     plan: free
-    buildCommand: "python --version"   # standard library only, nothing to install
+    # Standard library only. AG Studio is fetched ONLY if BW_AG_STUDIO_LICENSE_KEY is set (the key is never echoed).
+    buildCommand: 'python --version && if [ -n "${BW_AG_STUDIO_LICENSE_KEY:-}" ]; then bash scripts/fetch_ag_studio.sh || echo "AG Studio not fetched (optional)"; fi'
     startCommand: "python -m bridge_warden judge --public"
     healthCheckPath: /healthz
-    autoDeploy: false
+    autoDeployTrigger: "off"           # current syntax (was autoDeploy: false, now deprecated)
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.7"

@@ -23,6 +23,13 @@
 #   BW_PUBLIC_HOST     only for your own domain (Render sets RENDER_EXTERNAL_HOSTNAME for you)
 #   BW_CALL_DETECT_MACHINE  "on" = Twilio answering-machine check (Twilio may bill extra)
 #   BW_JUDGE_VIDEO_URL, BW_JUDGE_REPO_URL  links shown on the Judge Guide page (/judges)
+#   XAI_ZDR_CONFIRMED  "1" = you turned on Zero Data Retention for your xAI team (needed before any xAI call;
+#                      every reply is still checked for the ZDR header). XAI_API_KEY itself is in the list below.
+#   BW_AG_STUDIO_LICENSE_KEY  your AG Studio key (secret). If set, the build also runs scripts/fetch_ag_studio.sh
+#                      (needs npm; the key itself is never printed). Not set = no AG Studio, everything else works.
+#   BW_JUDGE_KEY or BW_JUDGE_KEY_FILE  judge keys (secret), only if you run a judge demo. Each judge logs in with one.
+#   BW_JUDGE_XAI_CAP   xAI messages per judge key on YOUR xAI key (default 1000). After that: sample answers.
+#   BW_CALL_MAX_SECONDS  hard max length of a real call (Twilio TimeLimit, default 1800 = 30 minutes)
 # PORT and RENDER_EXTERNAL_HOSTNAME are set by Render. Never put a real value for a secret in this file.
 #
 # FREE plan: no disk. Your history, audit log and settings live in BW_DATA_DIR on the service's own disk and are
@@ -33,7 +40,8 @@ services:
     name: bridge-warden
     runtime: python
     plan: free
-    buildCommand: "python --version"   # standard library only, nothing to install
+    # Standard library only. AG Studio is fetched ONLY if you set BW_AG_STUDIO_LICENSE_KEY (the key is never echoed).
+    buildCommand: 'python --version && if [ -n "${BW_AG_STUDIO_LICENSE_KEY:-}" ]; then bash scripts/fetch_ag_studio.sh || echo "AG Studio not fetched (optional)"; fi'
     startCommand: "python -m bridge_warden hosted"
     healthCheckPath: /healthz
     autoDeployTrigger: "off"           # Render's advice for Deploy to Render repos: you choose when to update
@@ -55,6 +63,8 @@ services:
       - key: BW_PREFERRED_NAME
         sync: false
       - key: BW_CALL_VOICE
+        sync: false
+      - key: XAI_API_KEY             # optional: your own xAI key for the AI checks and chats (blank = no AI)
         sync: false
       - key: BW_DATA_DIR
         value: bw-data

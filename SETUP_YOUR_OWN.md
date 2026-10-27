@@ -334,3 +334,22 @@ Each answer shows the real tokens and cost xAI reports. xAI does not report cred
 
 Read AG Grid's terms first: https://www.ag-grid.com/eula/AG-Grid-Enterprise-License-Latest.html.
 Every outside service and library we use is listed in `NOTICE` and in README "Built with / third-party".
+
+## Optional: real xAI on a hosted judge demo (Oct 27, 2026)
+
+Set these in the Render dashboard (Environment). They are never in the repo, and never printed or logged.
+
+- `XAI_API_KEY` (secret): your xAI key. Blank = no AI, sample answers only.
+- `XAI_ZDR_CONFIRMED=1`: only after you turned on Zero Data Retention for your xAI team. Every reply is
+  still checked for the ZDR header.
+- `BW_JUDGE_KEY` or `BW_JUDGE_KEY_FILE` (secret): judge keys. Each judge logs in with their own key.
+- `BW_JUDGE_XAI_CAP` (default 1000): xAI messages per judge key. At the cap: the sample answer and
+  "Judge AI limit reached, showing sample answer". Nothing more is sent.
+- `BW_CALL_MAX_SECONDS` (default 1800): every real call hangs up after this many seconds (Twilio TimeLimit).
+- `BW_AG_STUDIO_LICENSE_KEY` (secret, optional): the build then fetches AG Studio with
+  scripts/fetch_ag_studio.sh. The key is never echoed. Not set = no AG Studio panel.
+
+The count is saved in the data folder (`audit/judge_xai.json`). Render's free plan has no disk, so the
+count starts again from 0 when the service restarts, sleeps (after 15 minutes idle) or redeploys. A paid
+Render disk keeps it. Either way, also set a spending limit (or prepaid credits only) on your xAI team.
+That is the hard backstop. Requests by the owner (login key) and background checks are not judge-counted.
