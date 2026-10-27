@@ -619,7 +619,7 @@ Everything below is not ours. Full text with licence links: [NOTICE](NOTICE).
 |---|---|---|
 | PayPal REST APIs (sandbox) | the money moves Bridge Warden guards; webhooks | https://www.paypal.com/us/legalhub/paypal/useragreement-full |
 | xAI API (Grok) | optional second opinion, help chats, AG Studio chat | https://x.ai/legal/terms-of-service-enterprise |
-| Twilio Voice / SMS | optional alert call and text | https://www.twilio.com/en-us/legal/tos |
+| Twilio Voice | optional alert call (calls only, no texts) | https://www.twilio.com/en-us/legal/tos |
 | Google Chirp3-HD voice (via Twilio `<Say>`) | the call's voice (Polly optional) | https://cloud.google.com/terms/service-terms |
 | Cloudflare Workers + Wrangler | optional phone menu Worker (`call-worker/`) | https://www.cloudflare.com/terms/ ; Wrangler MIT OR Apache-2.0 |
 | Render | optional hosting blueprints | https://render.com/terms |

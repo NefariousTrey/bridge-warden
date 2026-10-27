@@ -31,8 +31,8 @@ Outside services (you sign up yourself; their terms apply to you):
   - xAI API (Grok models; /v1/chat/completions and /v1/responses): optional second
     opinion, the two help chats, and the AG Studio chat panel. Off without XAI_API_KEY.
     Terms: https://x.ai/legal/terms-of-service-enterprise
-  - Twilio Programmable Voice and SMS: the optional "a payment needs you" phone call /
-    text. Terms: https://www.twilio.com/en-us/legal/tos
+  - Twilio Programmable Voice: the optional "a payment needs you" phone call (calls only;
+    Bridge Warden sends no texts). Terms: https://www.twilio.com/en-us/legal/tos
     Acceptable use: https://www.twilio.com/en-us/legal/aup
   - Google Cloud Text-to-Speech "Chirp3-HD" voice (default Google.en-US-Chirp3-HD-Charon),
     used ONLY through Twilio's <Say> (we never call Google directly; Twilio bills it).
