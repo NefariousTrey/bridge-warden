@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One setup step for Bridge Warden on Windows, macOS or Linux (Python 3.10+, standard library only).
+"""One setup step for Bridge Warden on Windows, macOS or Linux (Python 3.10+, standard library only; tzdata on Windows).
 
     python scripts/bw_setup.py              # make .venv, install test tools, copy policy.example.json -> policy.json
     python scripts/bw_setup.py --no-venv    # just the policy copy
@@ -21,6 +21,16 @@ HERE = Path(__file__).resolve().parent
 
 def venv_python(venv: Path) -> Path:
     return venv / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+
+
+def tz_ok() -> bool:
+    """True if Python can load a named time zone (Windows needs the tzdata package for that)."""
+    try:
+        from zoneinfo import ZoneInfo
+        ZoneInfo("America/New_York")
+        return True
+    except Exception:
+        return False
 
 
 def main(argv=None) -> int:
@@ -47,10 +57,15 @@ def main(argv=None) -> int:
             subprocess.run([sys.executable, "-m", "venv", str(venv)], check=True)
             print(f"Made {venv}")
         py = venv_python(venv)
+        req = root / "requirements.txt"                # tzdata on Windows only (no time-zone database there)
+        if req.exists():
+            subprocess.run([str(py), "-m", "pip", "install", "-q", "-r", str(req)], check=True)
         req = root / "requirements-dev.txt"
         if req.exists():
             subprocess.run([str(py), "-m", "pip", "install", "-q", "-r", str(req)], check=True)
             print("Installed test tools (pytest).")
+    elif not tz_ok():
+        print("Time zones are missing (usual on Windows). Run:  python -m pip install tzdata", file=sys.stderr)
 
     if a.ag_studio:
         sys.path.insert(0, str(HERE))

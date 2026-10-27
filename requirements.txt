@@ -1,0 +1,3 @@
+# Bridge Warden runs on the Python standard library. The one exception:
+# Windows has no built-in time-zone database, so zoneinfo needs the tzdata package there.
+tzdata; sys_platform == "win32"

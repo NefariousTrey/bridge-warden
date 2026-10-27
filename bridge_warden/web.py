@@ -564,10 +564,13 @@ def dev_strip() -> str:
             f'</strong><span class="dev-note">{e(DEV.BANNER)}</span></p></div>')
 
 
+CURRENT = ' aria-current="page"'   # no backslash inside the f-string below (Python 3.10/3.11 cannot parse that)
+
+
 def page(title: str, body: str, active: str, st: dict | None, flash: str = "", mark: bool = True,
          dev: bool | None = None, mark_back: str = "navy") -> str:
     nav = "".join(
-        f'<li><a href="{href}"{" aria-current=\"page\"" if key == active else ""}>{icon(ic)}{label}</a></li>'
+        f'<li><a href="{href}"{CURRENT if key == active else ""}>{icon(ic)}{label}</a></li>'
         for key, href, ic, label in (("home", "/", "home", "Home"), ("money", "/money", "money", "Money"),
                                      ("history", "/history", "history", "History"),
                                      ("settings", "/settings", "settings", "Settings"),
@@ -686,7 +689,7 @@ def judges_body(video: str | None = None, repo: str | None = None) -> str:
         '<div class="jg">'
         '<h1 id="jg-h">Judge Guide</h1>'
         '<section class="jg-box jg-top" aria-labelledby="jg-top-h"><h2 id="jg-top-h">Good to know</h2>'
-        f'<ol class="jg-facts">{''.join(f'<li>{e(x)}</li>' for x in judge_top_facts())}</ol></section>'
+        f'<ol class="jg-facts">{"".join(f"<li>{e(x)}</li>" for x in judge_top_facts())}</ol></section>'
         '<p class="lead">Bridge Warden watches the payments your AI agent makes with PayPal.</p>'
         '<p class="lead">It lets safe ones through, stops risky ones, and tells you right away.</p>'
         f'<p class="jg-tag">{e(SANDBOX_LINE)}</p>'

@@ -676,7 +676,9 @@ Made by @Nefarious_Trey, with Grok.
 
 ## Setup on Windows / macOS / Linux (Oct 27, 2026)
 
-Bridge Warden runs the same on all three. It needs **Python 3.10+** and nothing else (standard library only).
+Bridge Warden runs the same on all three. It needs **Python 3.10+** and nothing else (standard library only),
+except on Windows, which has no built-in time-zone database: there it needs the `tzdata` package
+(`requirements.txt`; the setup step installs it).
 Node is only needed to run the call Worker tests. Paths, file locks and text files are handled for each OS.
 
 One step, any OS (makes `.venv`, installs pytest, copies `policy.example.json` to `policy.json`; never overwrites):
