@@ -643,7 +643,8 @@ JUDGE_FREE_UNTIL = "Free for judges through Dec 15, 2026."
 SANDBOX_LINE = "Tested in sandbox with sample data to verify it works as intended."
 JUDGE_TOP_FACTS = (   # Trey, Oct 27: plain box at the top. Each line checked against the code (see tests).
     "Your judge key gives you 3 real test calls, free to you.",
-    "The AI check is real xAI, free to you on our key (up to 1,000 messages per judge).",
+    ("All AI is real xAI: the AI check, help chats, the AG chat panel, summaries and call replies. "
+     "Free to you on our key (up to 1,000 messages per judge in all)."),      # judge_ai.py: one cap covers every use
     "PayPal is sandbox only. No real money moves.",
     "Judge mode runs the whole flow without a phone.",
     "To run it yourself: it is open source. Bring your own Twilio and xAI keys.",

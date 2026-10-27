@@ -73,6 +73,9 @@ Software NOT shipped (optional, fetched by the owner, commercial):
 Runtime dependencies: none. The app is Python 3.10+ standard library only
 (Python Software Foundation License: https://docs.python.org/3/license.html).
 The call Worker has no npm dependencies (package.json lists none).
+Windows only: tzdata (Apache-2.0), the IANA time-zone database for Python's zoneinfo,
+because Windows has none built in (requirements.txt). Not needed on macOS or Linux.
+Project page: https://pypi.org/project/tzdata/
 
 Developer / proof tools only (not shipped, not needed to run Bridge Warden):
   - pytest 9.1.1 (MIT) with pluggy 1.7.0 (MIT), iniconfig 2.3.1 (MIT),

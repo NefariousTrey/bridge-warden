@@ -116,7 +116,7 @@ def test_login_form_post_only_secure_cookie(srv):
     st, h, _ = req(s, "POST", "/login", "k=" + LOGIN, {**form, "Origin": "https://" + HOST})
     assert st == 303 and "Secure" in h["set-cookie"] and "HttpOnly" in h["set-cookie"]
     st, _, body = req(s, "GET", "/", headers={"Cookie": h["set-cookie"].split(";")[0]})
-    assert st == 200 and "Runs on your own Render service." in body and "bw-mark-white-v7b" in body
+    assert st == 200 and "Runs on its own Render service." in body and "bw-mark-white-v7b" in body
     assert 'th-light" src="/assets/brand/bw-mark-navy' not in body and 'th-dark" src="/assets/brand/bw-mark-navy-v7b' in body and '<header class="top top-light">' in body     # Oct 26 10:11 PM ET: all white
     ck = {"Cookie": h["set-cookie"].split(";")[0]}
     st, _, body = req(s, "GET", "/history", headers=ck)                # used to crash: _page had no mark_back

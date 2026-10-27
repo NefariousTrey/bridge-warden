@@ -131,7 +131,7 @@ def test_lawful_note_shown(setup):
     assert "Made by @Nefarious_Trey,<br>with Grok." in home                    # credit line unchanged
 
 
-@pytest.mark.parametrize("doc", ["README.md", "SETUP_YOUR_OWN.md", "proof/JUDGE_TESTING.md"])
+@pytest.mark.parametrize("doc", ["README.md", "SETUP_YOUR_OWN.md", "JUDGE_TESTING.md"])
 def test_docs_have_lawful_use(doc):
     t = (PKG.parent / doc).read_text(encoding="utf-8")
     assert "## Lawful use" in t and LAW.NOTE in t

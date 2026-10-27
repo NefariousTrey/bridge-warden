@@ -298,6 +298,10 @@ class LoginGuard:
             return "bad"
 
 
+LOCAL_FOOTER = "Runs only on this computer."          # web.page() footer, true only for a local copy
+HOSTED_FOOTER = "Runs on its own Render service."       # same words as web.py's Judge Guide footer
+
+
 LOGIN_BODY = ("<h1>Log in</h1><p>Paste your login key. Find it in your Render dashboard: your Bridge Warden service, "
               "then <b>Environment</b>, then <b>BW_LOGIN_KEY</b>. Keep it secret.</p>"
               "<p>Judges: paste your judge key here.</p>"
@@ -364,6 +368,8 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_tr
         THEME_SECURE = True     # hosted is always https: the bw_theme cookie gets Secure
 
         def _send(self, body, code=200, extra=None, ctype="text/html; charset=utf-8"):
+            if isinstance(body, str) and ctype.startswith("text/html"):
+                body = body.replace(LOCAL_FOOTER, HOSTED_FOOTER)     # every hosted page, /login too
             if lock and isinstance(body, str) and ctype.startswith("text/html") and "<head>" in body \
                     and LOCK_META not in body:
                 body = body.replace("<head>", "<head>" + LOCK_META, 1)     # locked copy: meta noindex too
@@ -374,7 +380,7 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_tr
 
         def _page(self, title, body, active, extra=None, mark=True, mark_back="navy"):
             out = web.page(title, body, active, web.status_with_button(app), app.take_flash(), mark=mark,
-                           mark_back=mark_back).replace("Runs only on this computer.", "Runs on your own Render service.")
+                           mark_back=mark_back).replace(LOCAL_FOOTER, HOSTED_FOOTER)
             self._send(with_free_banner(out) if free else out, extra=extra)
 
         def _body(self, cap):

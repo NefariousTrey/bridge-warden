@@ -110,7 +110,7 @@ def test_ai_disclaimer_everywhere():
     assert LAW.AI_NOTE == ("Bridge Warden is an AI and can make mistakes. It works from your PayPal data and is built "
                            "to catch most problems, but it doesn't replace your own eyes. Check your PayPal activity "
                            "yourself from time to time.")
-    for f in ("README.md", "SETUP_YOUR_OWN.md", "proof/JUDGE_TESTING.md"):
+    for f in ("README.md", "SETUP_YOUR_OWN.md", "JUDGE_TESTING.md"):
         t = (root / f).read_text(encoding="utf-8")
         assert LAW.AI_NOTE in t and "re-reads your PayPal state" in t, f
     web = (root / "bridge_warden/web.py").read_text(encoding="utf-8")

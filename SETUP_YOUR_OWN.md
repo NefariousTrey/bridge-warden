@@ -353,3 +353,14 @@ The count is saved in the data folder (`audit/judge_xai.json`). Render's free pl
 count starts again from 0 when the service restarts, sleeps (after 15 minutes idle) or redeploys. A paid
 Render disk keeps it. Either way, also set a spending limit (or prepaid credits only) on your xAI team.
 That is the hard backstop. Requests by the owner (login key) and background checks are not judge-counted.
+
+## Note: AG Studio fetch without npm (Oct 27, 2026)
+
+`scripts/fetch_ag_studio.py` does the same job as `scripts/fetch_ag_studio.sh` (same pinned hash), with only Python:
+no npm, tar or bash. It works on Windows, macOS and Linux:
+
+- Windows: `python scripts\fetch_ag_studio.py`
+- macOS / Linux: `python3 scripts/fetch_ag_studio.py`
+
+It saves AG Studio to `bridge_warden/vendor/ag-studio/` (git-ignored). It never reads or prints your
+`BW_AG_STUDIO_LICENSE_KEY`. AG Studio is commercial software by AG Grid; read their terms first.
