@@ -391,7 +391,7 @@ def run_scan(gate, report: dict | None = None, *, by: str = "owner (web)", now=N
     """One scan: find, log, raise. Never steps anything down."""
     recs = gate.audit.records()
     pol = (getattr(getattr(gate, "engine", None), "p", {}) or {}).get("ag_agent") or {}
-    found = scan(recs, gate.audit.verify(), report, now, {**pol, **(cfg or {})})
+    found = scan(recs, gate.audit.verify(), report, now or gate.clock(), {**pol, **(cfg or {})})
     raised = []
     if raise_lights:
         for f in found:
@@ -411,7 +411,7 @@ def request_raise(gate, key: str, level: str, report: dict | None = None, *, by:
     never above the level the local rules gave it. It can only raise; it has no way to step down."""
     if level not in ("yellow", "red"):
         return {"ok": False, "why": "An AI can only raise the light to yellow or red."}
-    found = {f["key"]: f for f in scan(gate.audit.records(), gate.audit.verify(), report)}
+    found = {f["key"]: f for f in scan(gate.audit.records(), gate.audit.verify(), report, gate.clock())}
     f = found.get(str(key or ""))
     if f is None:
         return {"ok": False, "why": "No such finding from the local rules."}

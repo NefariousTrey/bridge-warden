@@ -50,6 +50,20 @@ Judge mode runs the whole flow without a phone. The voice call is optional (your
 **Red never goes straight to green.**
 Red goes to yellow first. Only you can turn it green.
 
+## BW Light
+
+BW Light is Bridge Warden's status light. It is one dot: red, yellow or green.
+It shows BW's verdict on the account, and why.
+You see it as a small card on every page, and as a widget in AG Studio.
+
+It has two buttons:
+- **"I've seen this"** steps red down to yellow.
+- **"It's fixed"** turns yellow green.
+
+**Red can never jump straight to green.** If the light is red, "It's fixed" is refused.
+Only a real person's click works. The AI chat can't press them.
+BW Light can't pay or move money.
+
 ## Where AG Studio shows up
 
 Open **History**. The big table of money moves is AG Grid.

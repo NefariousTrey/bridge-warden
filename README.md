@@ -576,6 +576,15 @@ to yellow, never to green. Only you turn yellow green: "It's fixed", or Ignore w
 your money, your call." Sending a held payment also needs an "I'm sure" tick. Every step is in History.
 Tested end to end in Dev mode (`proof/ag-agent/`, `tests/test_v6_ag_agent.py`).
 
+**BW Light.** BW Light is Bridge Warden's status light: one red, yellow or green dot that shows BW's verdict on
+the account, plus the reason and the last time it went red. It is a small card on every BW page (works with no
+script) and an AG Studio custom widget (`bridge_warden/ag_light.py`, `bridge_warden/static/bw-light-widget.js`).
+It has two owner buttons. "I've seen this" steps red down to yellow. "It's fixed" turns yellow green. **Red can
+never jump straight to green**: if the light is red, "It's fixed" is refused and logged
+(`owner_light_ok_refused`). The buttons run BW's existing owner rules only. They need your login, the same
+origin and a one-time token tied to the light you saw. The AI chat gets no tool for them, and the widget drops
+any click that is not a real person's click. BW Light has no way to pay, release a hold or move money.
+
 **Two chats, two lanes (both read-only).** History has the BW AG Grid agent chat (past patterns); the home page
 has the "now" chat (what is happening right now). Both use xAI with your own `XAI_API_KEY`, give short
 step-by-step fix walk-throughs, and can't approve, ignore, turn green or move money.
