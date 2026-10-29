@@ -713,3 +713,17 @@ Notes:
   protected only by your Windows user account folder rights. Keep the data folder inside your own user folder.
 - The Render blueprint (`render.yaml`) runs on Render's Linux servers, so it keeps the bash build line.
 - Tests run on Ubuntu, Windows and macOS with `.github/workflows/ci.yml`.
+
+## Update 2026-10-28: PayPal account events on your Render copy, with an xAI second look
+
+- Your Render copy now has `POST /paypal-webhook` for PayPal **sandbox** webhooks. It is off ("not set up")
+  until you fill in `PAYPAL_CLIENT_ID`, `PAYPAL_SANDBOX_SECRET` and `BW_PAYPAL_WEBHOOK_ID` in Render.
+  How to register `https://bridge-warden.onrender.com/paypal-webhook` with PayPal: see
+  [SETUP_YOUR_OWN.md](SETUP_YOUR_OWN.md), "On your Render copy (no tunnel needed)".
+- No login on that one address, but every event still gets the acctwatch checks: 64 KB cap, PayPal headers,
+  sandbox cert host, 5 minute window, replay guard, and PayPal's own signature check on the raw body.
+- After the fixed rules, if `XAI_API_KEY` is set (and `XAI_ZDR_CONFIRMED=1`), events the rules did not flag get an
+  xAI second look on a scrubbed summary (no emails, names or private words; a leak check runs before sending).
+  Stricter only: xAI can turn an event red, never clear one. xAI errors keep the rules result. Same rate limit,
+  breaker and ZDR checks as the payment checks. Each look is saved in History.
+- Tests: `tests/test_v6_hosted_paypal_events.py` (all faked: no PayPal, Twilio or xAI calls).

@@ -12,6 +12,8 @@
 #                                                             stay in YOUR Twilio account only)
 #   BW_OWNER_PHONE     your phone, like +15551234567
 #   BW_PREFERRED_NAME  what the call calls you ("Hi Trey"). Blank = plain greeting.
+#   PAYPAL_CLIENT_ID, PAYPAL_SANDBOX_SECRET, BW_PAYPAL_WEBHOOK_ID  optional: your PayPal SANDBOX app and its webhook,
+#                      so PayPal's own events (outside Bridge Warden) reach POST /paypal-webhook. Blank = route off.
 #   BW_CALL_VOICE      blank or "man" = Twilio's free voice. "Google.en-US-Chirp3-HD-Charon" = our pick (Twilio bills about $0.039/call + minutes).
 # Made for you (generateValue: true = random 256-bit value, never in this file):
 #   BW_LOGIN_KEY       paste it on the login page. Find it: your service > Environment.
@@ -66,6 +68,14 @@ services:
         sync: false
       - key: XAI_API_KEY             # optional: your own xAI key for the AI checks and chats (blank = no AI)
         sync: false
+      # Optional: watch your PayPal SANDBOX account (POST /paypal-webhook). All three blank = that route is off.
+      # Your sandbox app at developer.paypal.com > Apps & Credentials (Sandbox): Client ID and Secret.
+      - key: PAYPAL_CLIENT_ID        # optional: sandbox app Client ID
+        sync: false
+      - key: PAYPAL_SANDBOX_SECRET   # optional: sandbox app Secret (secret, never printed)
+        sync: false
+      - key: BW_PAYPAL_WEBHOOK_ID    # optional: the Webhook ID PayPal shows after you add
+        sync: false                  # https://<your service>.onrender.com/paypal-webhook to the sandbox app
       - key: BW_SITE_LOCK_PASSWORD   # optional: private test copy, whole site behind a password (user "bw")
         sync: false
       - key: BW_DATA_DIR

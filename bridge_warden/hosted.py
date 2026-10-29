@@ -21,6 +21,12 @@ Safety (same rules as the local app, plus what a public address needs):
     The key is never printed, logged or written to History. No XAI_API_KEY = no AI, as before.
   * Loosening a setting still needs a real terminal, which a hosted copy does not have,
     so on Render the page can only make things SAFER.
+  * PayPal account events (2026-10-28, optional): POST /paypal-webhook takes PayPal SANDBOX webhooks. It is OFF
+    (503 "not set up") until PAYPAL_CLIENT_ID, PAYPAL_SANDBOX_SECRET and BW_PAYPAL_WEBHOOK_ID are all set. No login
+    (PayPal cannot log in), but every event gets acctwatch.py's own checks: 64 KB cap, all PAYPAL-* headers, a
+    sandbox cert host, a 5 minute time window, a replay guard, and PayPal's verify-webhook-signature on the RAW
+    body. Then the fixed rules, then (only if XAI_API_KEY is set) a stricter-only xAI second look on a scrubbed
+    summary, then the same red light and alert (call / email) as everything else.
 """
 from __future__ import annotations
 
@@ -46,6 +52,8 @@ CALL_STEPS = {"/voice": "voice", "/gather": "gather", "/other": "other", "/walk"
 OUR_KEYS = {"t", "n", "k", "i", "a", "x", "nm", "e", "s", "bodySHA256"}   # same as the Worker
 MIN_LOGIN_KEY = 32
 MAX_CALL_BODY = 8192
+PAYPAL_HOOK = "/paypal-webhook"
+PAYPAL_ENV = ("PAYPAL_CLIENT_ID", "PAYPAL_SANDBOX_SECRET", "BW_PAYPAL_WEBHOOK_ID")
 LOGIN_FAILS_PER_MINUTE = 10
 HSTS = "max-age=31536000"
 OPEN_PATHS = ("/assets/", "/robots.txt", "/hear", "/judges")   # /judges = Judge Guide (public)   # public anyway (also public in local mode)
@@ -328,7 +336,34 @@ def hosted_ai(gate, env, transport=None):
     return XaiChecker(cfg, api_key=key, transport=transport, env=env)
 
 
-def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_transport=None):
+def paypal_ready(env) -> bool:
+    """All three PayPal sandbox settings are filled in (values are never read out loud or logged)."""
+    return all(str(env.get(k, "") or "").strip() for k in PAYPAL_ENV)
+
+
+def hosted_watch(gate, env, sender=None, verifier=None, paypal_sender=None):
+    """The PayPal account watcher for /paypal-webhook, or None (route off) unless all of PAYPAL_ENV are set.
+    sender: Twilio transport for the alert call (tests pass a fake). verifier / paypal_sender: tests only.
+    Sandbox only (PayPalSandbox refuses any other host)."""
+    if not paypal_ready(env):
+        return None
+    from . import acctwatch as W
+    from . import alerts as AL
+    from .paypal_client import PayPalSandbox
+    client = PayPalSandbox(str(env["PAYPAL_CLIENT_ID"]).strip(), str(env["PAYPAL_SANDBOX_SECRET"]).strip())
+    if verifier is None:
+        verifier = W.PayPalVerifier(client, str(env["BW_PAYPAL_WEBHOOK_ID"]).strip(), sender=paypal_sender)
+    watch = W.AccountWatch(gate, verifier=verifier, env=env)
+
+    def alerts():   # built per alert, so call settings changed on the Settings page apply at once
+        caller = N.call_adapter(gate.engine.p.get("notify", {}) or {}, env=env, sender=sender)
+        return AL.Alerts(gate, caller=caller, env=env)
+    watch.alerts_factory = alerts
+    return watch
+
+
+def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_transport=None,
+                 paypal_verifier=None, paypal_sender=None):
     """Returns (server, app). Your own Bridge Warden on your own public host (Render)."""
     from . import web
     from .cli import build_gate
@@ -347,6 +382,8 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_tr
     app.alert_test.env, app.alert_test.sender = env, sender
     app.email_env = env            # "Email me my proof" goes to the owner's own address from these settings
     app.hosted = cfg
+    watch = hosted_watch(gate, env, sender=sender, verifier=paypal_verifier, paypal_sender=paypal_sender)
+    app.paypal_watch = watch                             # None = /paypal-webhook is off ("not set up")
     free = free_plan(env, cfg["data"])
     guard = LoginGuard(cfg["login_key"])
     lock = site_lock(env)                                # "" = no site lock
@@ -441,7 +478,7 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_tr
             if not lock:
                 return False
             path = urllib.parse.urlparse(self.path).path
-            if path in LOCK_OPEN or path in CALL_STEPS or path == "/call-status":
+            if path in LOCK_OPEN or path in CALL_STEPS or path in ("/call-status", PAYPAL_HOOK):
                 return False
             if lock_ok(self.headers.get("Authorization", ""), lock):
                 return False
@@ -468,6 +505,9 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_tr
         def do_POST(self):
             if self._lock_blocks():
                 return None
+            if urllib.parse.urlparse(self.path).path == PAYPAL_HOOK:   # PayPal, not a judge: owner's own allowance
+                with JA.acting_as("", judge_xai):
+                    return self._paypal_hook()
             with JA.acting_as(self._session_judge_key(), judge_xai):
                 return self._do_post()
 
@@ -485,6 +525,25 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_tr
             if not self._logged_in() and not url.path.startswith(OPEN_PATHS):
                 return self._redirect("/login")      # every private page sends you to the login form
             return super().do_GET()
+
+        def _paypal_hook(self):
+            """PayPal sandbox webhook. No login; acctwatch's own checks instead. Plain-text answers only."""
+            plain = {"Content-Security-Policy": "default-src 'none'", "Cache-Control": "no-store"}
+            if not self._host_ok():
+                return self._deny("wrong host", 421)
+            if watch is None:
+                return self._send("not set up", 503, plain, "text/plain; charset=utf-8")
+            from . import acctwatch as W
+            t0 = time.perf_counter()
+            raw = self._body(W.MAX_BODY)
+            if raw is None:
+                return self._send("request too large", 413, plain, "text/plain; charset=utf-8")
+            try:
+                code, why, _res = watch.receive(dict(self.headers.items()), raw, t0)
+            except Exception as e:      # never a stack trace (or a header) in the reply
+                gate.audit.write("acctwatch_error", action_id="-", error=type(e).__name__)
+                code, why = 500, "error"
+            return self._send(str(why)[:200], code, plain, "text/plain; charset=utf-8")
 
         def _do_post(self):
             url = urllib.parse.urlparse(self.path)

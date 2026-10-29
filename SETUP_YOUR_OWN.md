@@ -258,6 +258,38 @@ so it is a backup, not the alarm.
 
 Timings (webhook received, verified, checked, call sent) are saved in `acctwatch_latency.jsonl`.
 
+### On your Render copy (no tunnel needed)
+
+Your Render copy can take PayPal's webhooks itself, at `https://bridge-warden.onrender.com/paypal-webhook`
+(use your own service name if it is different). It is **off** until you fill in all three settings below.
+Sandbox only.
+
+1. Open https://developer.paypal.com, then **Apps & Credentials**, then make sure **Sandbox** is picked.
+   Open your app (or make one). Copy its **Client ID** and **Secret**.
+2. In that app, under **Webhooks**, click **Add Webhook**. Paste
+   `https://bridge-warden.onrender.com/paypal-webhook` as the URL. Pick **All Events** (or at least the
+   payout, refund, capture, dispute and account limitation events). Save it.
+3. PayPal now shows a **Webhook ID** for it. Copy that.
+4. In Render, open your service, then **Environment**, and fill in:
+   - `PAYPAL_CLIENT_ID` = the sandbox Client ID
+   - `PAYPAL_SANDBOX_SECRET` = the sandbox Secret
+   - `BW_PAYPAL_WEBHOOK_ID` = the Webhook ID
+5. Optional, for the xAI second look: check `XAI_API_KEY` is set, and set `XAI_ZDR_CONFIRMED=1` only after you
+   turned on Zero Data Retention for your xAI team. Without both, the fixed rules still work, with no AI.
+6. Save. Render restarts the service with the new settings.
+
+What happens to each event: the same checks as above (size cap, PayPal headers, 5 minute window, never seen
+before, verified by PayPal itself with the raw body). No login is needed for this one address, because PayPal
+cannot log in. Then the fixed rules decide. If xAI is set up, events the rules did **not** flag get a second look
+from xAI. xAI only sees a scrubbed summary: the event type, amount, status and a cleaned note, with no email,
+no name and none of your private words. xAI can only make things **stricter**: it can turn an event red, but it
+can never clear a red one. If xAI is slow or fails, the rules result stands. Red means the red light, the history
+entry and your alert (call or email), the same as everything else. Every xAI look is in History
+(`acctwatch_ai_check`).
+
+Free Render plan: the service sleeps after 15 minutes idle and forgets its history when it does. A sleeping
+service can be slow to answer the first webhook. PayPal retries a webhook that did not get a good answer.
+
 
 ## Lawful use
 

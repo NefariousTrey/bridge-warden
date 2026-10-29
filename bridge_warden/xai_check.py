@@ -306,8 +306,10 @@ class XaiChecker:
         self._zdr_state = (str(hv).lower() == "true")
         return str(hv)
 
-    def review(self, payload: dict) -> dict:
-        """Returns {"called": bool, "skipped"/"error"/"parsed", "zdr_header": ...}. Never raises."""
+    def review(self, payload: dict, system: str | None = None) -> dict:
+        """Returns {"called": bool, "skipped"/"error"/"parsed", "zdr_header": ...}. Never raises.
+        system: optional prompt for a different kind of data (acctwatch uses EVENT_PROMPT for PayPal events).
+        Same key, ZDR checks, rate limit, breaker and judge allowance either way."""
         out = {"called": False, "model": self.cfg["model"]}
         why = self.skip_reason()
         why = why or self._budget_reason()
@@ -322,7 +324,7 @@ class XaiChecker:
                     return out
             body = {
                 "model": self.cfg["model"],
-                "messages": ruled([{"role": "system", "content": SYSTEM_PROMPT},
+                "messages": ruled([{"role": "system", "content": system or SYSTEM_PROMPT},
                                    {"role": "user", "content": wrap_payload(payload)}]),
                 "temperature": 0,
                 "max_completion_tokens": 200,
