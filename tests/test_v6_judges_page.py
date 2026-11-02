@@ -38,7 +38,7 @@ def check_guide(body):
     t = _text(body)
     for must in ("Judge Guide", "Try it in 6 steps", "What the lights mean", "Red never goes straight to green.",
                  "Where AG Studio shows up", "Tested in sandbox with sample data to verify it works as intended.",
-                 "[YOUTUBE_LINK]", "[REPO_LINK]", "Free for judges through Dec 15, 2026.",
+                 "[YOUTUBE_LINK]", "https://github.com/NefariousTrey/bridge-warden", "Free for judges through Dec 15, 2026.",
                  "Judge login: in the Devpost testing notes.", "Test my alert",
                  "Judge mode runs the whole flow without a phone.", "The voice call is optional (your own Twilio",
                  "First load can take about a minute.", "Turn on Dev mode", "Add TEST sell", "Raise TEST red",
@@ -128,7 +128,7 @@ def test_judge_testing_docs_match_page():
         assert "cross" + "roads" not in t.lower()
     t = (ROOT / "JUDGE_TESTING.md").read_text(encoding="utf-8")          # the one true guide (Oct 27 audit fix)
     for must in ("Tested in sandbox with sample data to verify it works as intended.", "[YOUTUBE_LINK]",
-                 "[REPO_LINK]", "Dec 15", "Judge login: in the Devpost testing notes.",
+                 "https://github.com/NefariousTrey/bridge-warden", "Dec 15", "Judge login: in the Devpost testing notes.",
                  "Red never goes straight to green.", "AG Studio", "/judges"):
         assert must in t, must
     assert "../JUDGE_TESTING.md" in (ROOT / "proof" / "JUDGE_TESTING.md").read_text(encoding="utf-8")   # pointer only

@@ -704,7 +704,7 @@ The repo was slimmed to the app, tests, licenses and how-to docs. Some lines abo
 - **Run notes** (`proof/ACCTWATCH_E2E_RESULT_PC_20261027.md`): not shipped. How to run that check:
   `proof/scripts/ACCTWATCH_E2E.md`.
 - **Judges:** start with the Judge Guide page, **/judges**, or `JUDGE_TESTING.md`.
-- Code: [REPO_LINK]
+- Code: https://github.com/NefariousTrey/bridge-warden
 
 Made by @Nefarious_Trey,  
 with Grok.

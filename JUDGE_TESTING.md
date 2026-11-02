@@ -139,7 +139,7 @@ They only see redacted sample data. If the AI is off, the answer says "the AI is
 ## Video and code
 
 - Demo video: [YOUTUBE_LINK]
-- Code: [REPO_LINK]
+- Code: https://github.com/NefariousTrey/bridge-warden
 
 ## Easier to read?
 
