@@ -101,6 +101,18 @@ def is_judge(given, env=None) -> bool:
 
 JUDGE_CALL_CAP = 3            # real voice test calls per judge key (server-side, persisted)
 JUDGE_CAP_SAY = "You've used your 3 demo test calls. Thanks for testing Bridge Warden!"
+# JUDGEFIX 2026-11-01: on the hosted demo a logged-in judge NEVER reaches Twilio. A real call would ring the
+# owner's own phone (BW_OWNER_PHONE), which is useless to the judge and costs the owner. So while a judge is
+# acting (judge_ai thread-local, set by hosted.py for that one request) the Twilio adapter reports not ready:
+# no call, no text, no Twilio read. Test my alert sends a hosted judge to Hear the call (/hear) instead.
+JUDGE_NO_PHONE_SAY = ("Judge demo: no phone call is placed. Here is the same call, in your browser. "
+                      "Nothing happens to your money.")
+
+
+def judge_acting() -> bool:
+    """True while a hosted judge's request is running (never for the owner, never on a background thread)."""
+    from . import judge_ai as JA
+    return bool(JA.current()[0])
 JUDGE_CAP_FILE = "judge_calls.json"   # in the audit folder; holds a random salt + HMAC tags, never the key
 
 
@@ -306,6 +318,8 @@ class TwilioCallAdapter(CallAdapter):
 
     @property
     def ready(self) -> bool:
+        if judge_acting():   # JUDGEFIX: a hosted judge never reaches Twilio (no call, no text, no read)
+            return False
         return bool(SID.match(self._sid) and self._tok and E164.match(self._from) and E164.match(self._to))
 
     def place_call(self, text: str, name: str = "", voice=None) -> dict:
@@ -315,7 +329,8 @@ class TwilioCallAdapter(CallAdapter):
         with a Worker it rides as &nm= on the signed /voice URL, so Twilio's signature covers it."""
         if not self.ready:
             return {"would": "call owner", "dialed": False, "cost": 0,
-                    "note": "Twilio is not set up on this computer, so this was a dry run."}
+                    "note": ("Judge demo: no phone call is placed." if judge_acting() else
+                             "Twilio is not set up on this computer, so this was a dry run.")}
         lines = [x.strip() for x in re.split(r"(?<=[.?!])\s+(?=[A-Z])", text) if x.strip()][:30]
         v = self._voice if voice is None else voice_of(voice)
         base = call_base(self._base)
@@ -1021,8 +1036,8 @@ class FraudDrill:
                                   note=COOLDOWN_SAY)
             return {"started": False, "wait": self.wait_left()}
         adapter = call_adapter(self.gate.engine.p.get("notify", {}) or {}, env=self.env, sender=self.sender, force=True)
-        if dev_locked(self.gate):
-            adapter = DryRunCallAdapter()   # Dev mode: the drill runs, but no phone rings
+        if dev_locked(self.gate) or judge_acting():
+            adapter = DryRunCallAdapter()   # Dev mode / hosted judge: the drill runs, but no phone rings
         judge = is_judge(judge_key, self.env)
         self.ai_judge_key = judge_key.strip() if judge else ""   # call replies count against this judge's xAI allowance
         if judge and getattr(adapter, "real", False) and getattr(adapter, "ready", False):

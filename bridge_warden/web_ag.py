@@ -10,6 +10,7 @@ import math
 
 from . import ag_agent as AG
 from . import help_chat as H
+from . import judge_ai as JA
 from . import money_map as MM
 
 CHAT_KEEP = 12          # messages kept per lane (in memory only; History keeps a redacted line per question)
@@ -146,10 +147,30 @@ def chat_box(app, lane: str, act_form_nonce, hidden) -> str:
             f'<form method="post" action="/act">{hidden("token", tok)}<label for="q-{lane}">Ask, or type '
             f'\u201cnext\u201d for the next step</label><input id="q-{lane}" name="q" maxlength="300" '
             'autocomplete="off" placeholder="next"><div class="row"><button class="btn btn-ai" type="submit">Ask'
-            '</button></div></form><p class="fine">Steps and \u201cnext\u201d are free (no AI). A question uses your own '
-            'xAI key, so it is billed to you. Answers are kept short to keep it cheap. Under each answer we show what '
-            'xAI says it used. xAI does not report your remaining credit, so we say so instead of guessing.</p>'
+            '</button></div></form><p class="fine">Steps and \u201cnext\u201d are free (no AI). ' + _ai_cost_words() +
+            '</p>'
             '</section>')
+
+
+def _ai_cost_words() -> str:
+    """JUDGEFIX 2026-11-01: who pays for a chat question. A hosted judge uses our key (free, counted); the owner
+    uses their own key. Never 'billed to you' for a judge."""
+    key, counter = JA.current()
+    if key and counter is not None:
+        return (f"A question uses real xAI on our key, free to you. You have {counter.left(key)} of "
+                f"{counter.limit} judge AI messages left. Under each answer we show what xAI says it used.")
+    return ("A question uses your own xAI key, so it is billed to you. Answers are kept short to keep it cheap. "
+            "Under each answer we show what xAI says it used. xAI does not report your remaining credit, so we say "
+            "so instead of guessing.")
+
+
+def _studio_cost_words() -> str:
+    key, counter = JA.current()
+    if key and counter is not None:
+        return (f"Each answer uses real xAI on our key, free to you ({counter.left(key)} of {counter.limit} "
+                "judge AI messages left). Under each answer is what xAI says it used.")
+    return ("Each answer uses your own xAI key through this server; under each answer is what xAI says it used. "
+            "Remaining credit: " + H.NO_LIMIT + ".")
 
 
 def section(app, nonce, act_form, hidden, studio: bool = False) -> str:
@@ -185,9 +206,8 @@ def section(app, nonce, act_form, hidden, studio: bool = False) -> str:
         out.append('<h3>Ask the BW AG Grid agent (AG Studio chat)</h3>'
                    '<p class="fine bw-studio-note">History lane: past and ongoing patterns, spending, subscriptions and '
                    'audit flags. Built with AG Studio by AG Grid (commercial; see NOTICE). It reads redacted data only '
-                   '(groups, months, amounts). Its tools are read-only: it can point at a button, never press it. Each '
-                   'answer uses your own xAI key through this server; under each answer is what xAI says it used. '
-                   'Remaining credit: ' + e(H.NO_LIMIT) + '.</p>'
+                   '(groups, months, amounts). Its tools are read-only: it can point at a button, never press it. '
+                   + e(_studio_cost_words()) + ' With no money data it says so, and does not ask xAI.</p>'
                    '<iframe id="bw-studio-frame" class="bw-studio" src="/ag-studio/panel" loading="lazy" '
                    'title="BW AG Grid agent, AG Studio dashboard and chat" '
                    'sandbox="allow-scripts allow-same-origin"></iframe>')
@@ -231,7 +251,8 @@ def chat_turn(app, lane: str, form: dict):
     q = form.get("q", [""])[0]
     st = app.__dict__.setdefault("help_chat_state", {}).setdefault(lane, {"step": 0})
     rep = money_report(app) if lane == H.HISTORY else None
-    r = H.ask(gate, lane, q, st, rep)
+    r = H.ask(gate, lane, q, st, rep, ai=app.chat_ai() if hasattr(app, "chat_ai") else None,
+              by="judge (web)" if JA.current()[0] else "owner (web)")
     st["step"] = r.get("step", st.get("step", 0))
     msgs = app.__dict__.setdefault("help_chat_msgs", {}).setdefault(lane, [])
     msgs.append({"q": q or "(show step)", "a": r["answer"], "by_ai": r["by_ai"], "usage": r["usage"],

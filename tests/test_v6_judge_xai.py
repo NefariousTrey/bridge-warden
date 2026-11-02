@@ -139,6 +139,7 @@ def _studio(s, ck):
 def test_hosted_judges_get_real_xai_until_their_cap(hj, capsys):
     s, app, env, mock, tmp_path = hj
     assert app.gate.ai is not None and app.gate.ai.skip_reason() is None        # key + ZDR from env
+    app.real_gate.dev.set(True)    # JUDGEFIX 2026-11-01: with no money data the chat answers locally, so use samples
     j1 = _login(s, J1)
     st, _, body = _studio(s, j1)                    # preflight + 1 answer = 2 = the cap
     assert st == 200, body

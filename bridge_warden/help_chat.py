@@ -184,7 +184,8 @@ def check_answer(text: str, report: dict | None, gate) -> list:
     return AG.check_ai_text(text, "hold", nums, key="chat", where="chat answer")
 
 
-def ask(gate, lane: str, question: str, state: dict, report: dict | None = None, by: str = "owner (web)") -> dict:
+def ask(gate, lane: str, question: str, state: dict, report: dict | None = None, by: str = "owner (web)",
+        ai=None) -> dict:
     """One turn. state: {'step': int} for this lane (kept by the caller). Returns {'answer', 'by_ai', 'usage',
     'step', 'guide', 'warn'}. Never raises on AI trouble; never acts."""
     from .xai_check import redact_description
@@ -210,7 +211,7 @@ def ask(gate, lane: str, question: str, state: dict, report: dict | None = None,
                          ai_used=False, routed=kind, advisory_only=True)
         return out
     step = g["steps"][n] if n < len(g["steps"]) else ""
-    ai = getattr(gate, "ai", None)
+    ai = ai if ai is not None else getattr(gate, "ai", None)   # JUDGEFIX: the caller may pass the chat client
     res = (ai.advise(context(gate, lane, report, step), red_q, scope=SCOPE[lane])
            if ai is not None and hasattr(ai, "advise") else {"called": False, "skipped": "no_api_key"})
     if res.get("text"):
@@ -222,6 +223,8 @@ def ask(gate, lane: str, question: str, state: dict, report: dict | None = None,
         why = res.get("skipped") or res.get("error") or "no answer"
         if why == "judge_ai_limit":       # judge_ai.SKIP: friendly words, not a code
             why = "Judge AI limit reached, showing sample answer"
+        elif why == "no_api_key":         # JUDGEFIX: plain words, true on Render and on a computer
+            why = "the AI is off right now"
         out["answer"] = (f"Step {n + 1} of {len(g['steps'])}: {step}" if step else g["steps"][0]) + \
             f" (AI not used: {str(why)[:60]}.)"
     out["usage"] = usage_line(res)

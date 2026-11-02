@@ -36,15 +36,21 @@ def check_guide(body):
     assert f"<style>{web.STYLE}</style>" in body                                  # same stylesheet (CSP hash)
     assert '<a href="/judges" aria-current="page">' in body                       # nav tab is active
     t = _text(body)
-    for must in ("Judge Guide", "Try it in 5 steps", "What the lights mean", "Red never goes straight to green.",
+    for must in ("Judge Guide", "Try it in 6 steps", "What the lights mean", "Red never goes straight to green.",
                  "Where AG Studio shows up", "Tested in sandbox with sample data to verify it works as intended.",
                  "[YOUTUBE_LINK]", "[REPO_LINK]", "Free for judges through Dec 15, 2026.",
                  "Judge login: in the Devpost testing notes.", "Test my alert",
-                 "Judge mode runs the whole flow without a phone.", "The voice call is optional (your own Twilio"):
+                 "Judge mode runs the whole flow without a phone.", "The voice call is optional (your own Twilio",
+                 "First load can take about a minute.", "Turn on Dev mode", "Add TEST sell", "Raise TEST red",
+                 "I’ve seen this", "It’s fixed", "Hear the call", "/hear",
+                 "Test my alert opens Hear the call too. It never rings a phone.",
+                 "All judges share one demo copy."):
         assert must in t, must
     assert body.count('<ol class="jg-steps"') == 1
     steps = re.search(r'<ol class="jg-steps"[^>]*>(.*?)</ol>', body, re.S).group(1)
-    assert steps.count("<li>") == 5
+    assert steps.count("<li>") == 6
+    for old in ("3 real test calls", "Got it, I", "fixed, confirm", "Type the name you want the call to use"):
+        assert old not in t, old                                   # JUDGEFIX: the old, wrong judge path is gone
     for c in ("green", "yellow", "red"):
         assert f"/assets/dots/bw-dot-trey-{c}-full-glyph-48.png" in body
     assert 'action="/judges/theme"' in body and body.count('name="t" value=') == 2
@@ -191,13 +197,14 @@ def test_top_box_facts_match_the_code():
     assert top < b.index("Bridge Warden watches the payments")             # the box is at the top
     for x in web.JUDGE_TOP_FACTS:
         assert web.html.escape(x) in b, x
-    assert notify.JUDGE_CALL_CAP == 3                                       # "3 real test calls"
+    assert notify.JUDGE_CALL_CAP == 3            # still the cap for LOCAL judge-key test calls (not on the page)
+    assert "3 real test calls" not in b                                     # JUDGEFIX: hosted judges get no calls
     assert net.PINNED_HOSTS == frozenset({"api-m.sandbox.paypal.com", "api.x.ai"})   # "PayPal is sandbox only"
     assert "TWILIO_ACCOUNT_SID" in judge.OWNER_SECRET_ENV                  # judge mode never has Twilio
     assert not re.search(r"\$\s?\d|per minute|/min\b|cents", _text(b), re.I)   # no prices
     for f in (ROOT / "JUDGE_TESTING.md",):
         t = f.read_text(encoding="utf-8")
-        assert t.index("Good to know") < t.index("Try it in 5 steps") if "Try it in 5 steps" in t else True
+        assert t.index("Good to know") < t.index("Try it in 6 steps")
         for x in web.JUDGE_TOP_FACTS:
             assert x in t, (f.name, x)
 
@@ -205,7 +212,7 @@ def test_top_box_facts_match_the_code():
 def test_top_box_ai_line_matches_the_judge_cap(monkeypatch):
     """Line 2: real xAI on our key, up to 1,000 messages per judge (BW_JUDGE_XAI_CAP, default 1000)."""
     from bridge_warden import judge_ai as JA
-    line = ("All AI is real xAI: the AI check, help chats, the AG chat panel, summaries and call replies. "
+    line = ("All AI is real xAI: help chats, Ask AI about this, the AG chat panel and the money check summary. "
             "Free to you on our key (up to 1,000 messages per judge in all).")      # judge_ai.py: one cap for every use
     assert web.JUDGE_TOP_FACTS[1] == line and JA.DEFAULT_CAP == 1000
     monkeypatch.delenv("BW_JUDGE_XAI_CAP", raising=False)

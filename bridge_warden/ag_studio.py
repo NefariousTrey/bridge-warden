@@ -46,7 +46,13 @@ STUDIO_RULES = ("You are the BW AG Grid agent inside Bridge Warden's History pag
                 "subscriptions and Bridge Warden audit flags. You are read-only: you can look at data and arrange the "
                 "dashboard, but you can never approve, ignore, acknowledge, turn the light green, release a hold or "
                 "move money. Only the owner can, by clicking the buttons on the History page. If asked, point them "
-                "to the button. Keep replies to 3 short sentences. Never invent amounts.")
+                "to the button. Keep replies to 3 short sentences. Never invent amounts. If a tool returns no rows "
+                "or no data, say there is no data yet. Never guess a group, a month or an amount.")
+# JUDGEFIX 2026-11-01: with no money data at all, xAI is not asked (it once guessed "Groceries is the biggest
+# group" from nothing). This fixed reply goes back instead, in the same Responses shape the panel reads.
+NO_DATA_SAY = ("There is no money data here yet, so I can't answer that. Turn on Dev mode in Settings to see "
+               "sample data, then ask again.")
+NO_DATA_USAGE = "Not sent to xAI (no data yet). No cost."
 
 _cache: dict = {}
 
@@ -143,10 +149,10 @@ def license_key(env=None) -> str:
 
 
 def config(app, env=None) -> dict:
-    ai = getattr(app.gate, "ai", None)
+    ai = app.chat_ai() if hasattr(app, "chat_ai") else getattr(app.gate, "ai", None)
     why = None
     if ai is None:
-        why = "no xAI key set (XAI_API_KEY): the chat panel explains this instead of answering"
+        why = "the AI is off right now (no xAI key set): the chat panel explains this instead of answering"
     else:
         why = ai.skip_reason()
     return {"license_key": license_key(env), "ai_ready": why is None, "ai_note": why or "",
@@ -183,14 +189,29 @@ def _clean_request(raw: bytes):
     return body, None
 
 
-def proxy(gate, raw: bytes, by: str = "owner (web)"):
-    """POST /ag-studio/v1/responses -> (http status, dict). Same-origin + login checked by the caller."""
+def no_data_reply() -> dict:
+    """A local answer in the Responses shape (no xAI call, no cost)."""
+    return {"id": "bw-local-no-data", "object": "response", "status": "completed", "model": "bw-local",
+            "output": [{"type": "message", "id": "bw-local-msg", "status": "completed", "role": "assistant",
+                        "content": [{"type": "output_text", "text": NO_DATA_SAY, "annotations": []}]}],
+            "bw_usage": NO_DATA_USAGE}
+
+
+_MISSING = object()
+
+
+def proxy(gate, raw: bytes, by: str = "owner (web)", ai=_MISSING, has_data: bool = True):
+    """POST /ag-studio/v1/responses -> (http status, dict). Same-origin + login checked by the caller.
+    ai: the chat's xAI client (default: gate.ai). has_data False: answer locally, never ask xAI to guess."""
     body, bad = _clean_request(raw)
     if bad:
         gate.audit.write(EVENT, action_id="-", by=by, sent=False, why=bad)
         return 400, {"error": {"message": "Not sent to xAI: " + bad + "."}}
-    ai = getattr(gate, "ai", None)
-    why = "no xAI key set" if ai is None else (ai.skip_reason() or ai._budget_reason())
+    if not has_data:
+        gate.audit.write(EVENT, action_id="-", by=by, sent=False, why="no_data")
+        return 200, no_data_reply()
+    ai = getattr(gate, "ai", None) if ai is _MISSING else ai
+    why = "the AI is off right now (no xAI key set)" if ai is None else (ai.skip_reason() or ai._budget_reason())
     if not why and ai.cfg.get("require_zdr", True):
         if ai._zdr_state is None:
             try:

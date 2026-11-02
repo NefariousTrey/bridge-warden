@@ -642,13 +642,17 @@ JUDGE_LOGIN_NOTE = "Judge login: in the Devpost testing notes."
 JUDGE_FREE_UNTIL = "Free for judges through Dec 15, 2026."
 SANDBOX_LINE = "Tested in sandbox with sample data to verify it works as intended."
 JUDGE_TOP_FACTS = (   # Trey, Oct 27: plain box at the top. Each line checked against the code (see tests).
-    "Your judge key gives you 3 real test calls, free to you.",
-    ("All AI is real xAI: the AI check, help chats, the AG chat panel, summaries and call replies. "
+    # JUDGEFIX 2026-11-01: cold start first; no "3 real test calls" (a hosted judge never gets a phone call).
+    "First load can take about a minute. The free demo sleeps when nobody uses it.",
+    ("All AI is real xAI: help chats, Ask AI about this, the AG chat panel and the money check summary. "
      "Free to you on our key (up to 1,000 messages per judge in all)."),      # judge_ai.py: one cap covers every use
+    "No phone needed. No real phone calls. Hear the call plays the alert call in your browser.",
     "PayPal is sandbox only. No real money moves.",
-    "Judge mode runs the whole flow without a phone.",
+    "All judges share one demo copy. Please turn Dev mode off when you are done.",
     "To run it yourself: it is open source. Bring your own Twilio and xAI keys.",
 )
+JUDGE_TEST_ALERT_LINE = "On this demo, Test my alert opens Hear the call too. It never rings a phone."
+JUDGE_LOCAL_LINE = "On your own computer (judge mode), use the scenario buttons on Home instead of Dev mode."
 
 
 def judge_top_facts() -> tuple:
@@ -672,15 +676,20 @@ def judges_body(video: str | None = None, repo: str | None = None) -> str:
     repo = (repo or os.environ.get("BW_JUDGE_REPO_URL", "") or JUDGE_REPO_LINK).strip()
     dot = lambda c, alt: (f'<img src="/assets/dots/bw-dot-trey-{c}-full-glyph-48.png" width="48" height="48" '
                           f'alt="{alt}">')
-    steps = (
-        ("Sign in.", "Open the demo link. Sign in with the judge login.", JUDGE_LOGIN_NOTE),
-        ("Look at the light.", "Home shows one big light at the top.", "Green means all is fine."),
-        ("Press \u201cTest my alert\u201d.", "Go to Settings. Find Alerts.",
-         "Type the name you want the call to use. Then press Test my alert."),
-        ("Try a risky payment.", "Send a risky sandbox payment. For example, the gift-card scam.",
-         "Bridge Warden blocks it. The light turns red."),
-        ("Clear it, one step at a time.", "Press \u201cGot it, I\u2019ve seen the blocked ones\u201d. The light turns yellow.",
-         "Then press \u201cIt\u2019s fixed, confirm\u201d. The light turns green."),
+    steps = (   # JUDGEFIX 2026-11-01: the path tested on the hosted demo. Dev mode first; real button names.
+        ("Sign in.", "Open the demo link. The first load can take about a minute.",
+         "Paste your judge key in the Login key box. Press Log in. " + JUDGE_LOGIN_NOTE),
+        ("Look at the light.", "Home shows one big light at the top.",
+         "Green means all is fine. A fresh copy has no payments yet."),
+        ("Turn on Dev mode.", "Go to Settings, then Dev mode. Press Turn on Dev mode.",
+         "Every page now shows sample data, marked TEST. Nothing reaches PayPal."),
+        ("Try a risky payment.", "Under Dev mode, press Add TEST sell. It is the gift-card scam.",
+         "Bridge Warden blocks it. See it in History, with the reasons."),
+        ("Clear the light, one step at a time.",
+         "Under Dev mode, press Raise TEST red. The light turns red.",
+         "Press \u201cI\u2019ve seen this\u201d. It turns yellow. Then press \u201cIt\u2019s fixed\u201d. It turns green."),
+        ("Hear the call.", "Open Hear the call (/hear). Press Start the call.",
+         "Your browser plays the alert call. No phone rings."),
     )
     st = "".join(f'<li><div><b class="jg-do">{e(a)}</b><p>{e(b)}</p><p>{e(c)}</p></div></li>' for a, b, c in steps)
     lights = (f'<li class="g">{dot("green", "Green light")}<div><b>Green</b>: all is fine. Safe payments go through.</div></li>'
@@ -693,11 +702,14 @@ def judges_body(video: str | None = None, repo: str | None = None) -> str:
         f'<ol class="jg-facts">{"".join(f"<li>{e(x)}</li>" for x in judge_top_facts())}</ol></section>'
         '<p class="lead">Bridge Warden watches the payments your AI agent makes with PayPal.</p>'
         '<p class="lead">It lets safe ones through, stops risky ones, and tells you right away.</p>'
+        f'<p class="jg-call"><a class="btn" href="/hear">{icon("phone")}Hear the call</a></p>'
         f'<p class="jg-tag">{e(SANDBOX_LINE)}</p>'
         f'<div class="jg-box"><p><b>{e(JUDGE_FREE_UNTIL)}</b></p><p>{e(JUDGE_LOGIN_NOTE)}</p>'
-        f'<p>{e(NO_PHONE_LINE)}</p></div>'
-        '<h2 id="jg-try">Try it in 5 steps</h2>'
+        f'<p>{e(NO_PHONE_LINE)}</p><p>{e(JUDGE_TEST_ALERT_LINE)}</p></div>'
+        f'<h2 id="jg-try">Try it in {len(steps)} steps</h2>'
         f'<ol class="jg-steps" aria-labelledby="jg-try">{st}</ol>'
+        '<p>When you are done, go to Settings and press Turn off Dev mode.</p>'
+        f'<p>{e(JUDGE_LOCAL_LINE)}</p>'
         '<h2 id="jg-lights">What the lights mean</h2>'
         f'<ul class="jg-lights" aria-labelledby="jg-lights">{lights}</ul>'
         '<p class="jg-rule">Red never goes straight to green.</p>'
@@ -705,7 +717,9 @@ def judges_body(video: str | None = None, repo: str | None = None) -> str:
         '<h2 id="jg-ag">Where AG Studio shows up</h2>'
         '<p>Open <b>History</b>. The big table of money moves is AG Grid.</p>'
         '<p>Below it is the BW AG Grid agent. It is an AG Studio dashboard and chat.</p>'
-        '<p>Ask it about the flagged payments. It reads only the sandbox sample data.</p>'
+        '<p>Turn on Dev mode first. A fresh copy has no money moves, so History is empty without it.</p>'
+        '<p>Ask it about spending or subscriptions. It reads only redacted sample data.</p>'
+        '<p>With no data, it says so. It does not guess.</p>'
         '<h2 id="jg-more">Video and code</h2>'
         f'<ul class="jg-links">{_judge_link("Demo video", video)}{_judge_link("Code", repo)}</ul>'
         '<h2 id="jg-look">Easier to read?</h2>'
@@ -749,12 +763,13 @@ def hear_csp() -> str:
 HEAR_HEADERS = {"Permissions-Policy": "camera=(), microphone=(self), geolocation=(), payment=()"}
 
 
-def hear_page(dev: bool = False) -> str:
+def hear_page(dev: bool = False, from_test: bool = False) -> str:
     from .notify import call_demo_data
     data = json.dumps(call_demo_data()).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     sits = call_demo_data()["situations"]
     opts = "".join(f'<option value="{e(k)}">{e(v["name"])}</option>' for k, v in sits.items())
-    body = (f'<h1>{icon("phone")} Hear the call</h1>'
+    sent_here = (f'<p class="msg ok" role="status">{e(N.JUDGE_NO_PHONE_SAY)}</p>' if from_test else "")
+    body = (f'<h1>{icon("phone")} Hear the call</h1>{sent_here}'
             '<p class="msg warn"><b>Demo. Nothing happens to your money.</b> No phone number needed. '
             'Nothing you do here is sent anywhere.</p>'
             '<p>This is what Bridge Warden says when it calls you about fraud. Pick what happened, then start. '
@@ -885,6 +900,16 @@ class WebApp:
     @property
     def real_gate(self):
         return self.__dict__["real_gate"]
+
+    def chat_ai(self):
+        """JUDGEFIX 2026-11-01: the xAI client for the CHATS only (Ask AI about this, help chats, AG Studio chat).
+        Normal view: the gate's own client. Dev mode on the hosted demo: the sample gate has no AI, so the chats
+        use the real gate's xAI client (judges: our key, counted per judge). The chats only ever see redacted
+        made-up sample data there. Locally, Dev mode stays AI-free as before. None = the AI is off right now."""
+        ai = getattr(self.gate, "ai", None)
+        if ai is None and getattr(self, "hosted", None) and self.dev_view():
+            ai = getattr(self.real_gate, "ai", None)
+        return ai
 
     @property
     def alert_test(self):
@@ -1072,6 +1097,8 @@ def call_usage_line(app, rec: dict) -> str:
     sid = rec.get("call_sid")
     if not sid:
         return "Call usage: Twilio did not give a call id, so no cost can be shown."
+    if N.judge_acting():          # JUDGEFIX: a hosted judge never reads the owner's Twilio account
+        return "Call usage: not shown in the judge demo (no phone calls here)."
     cache = app.__dict__.setdefault("call_usage_cache", {})
     hit = cache.get(sid)
     now = app.clock()
@@ -1573,7 +1600,8 @@ EVENT_WORDS = {
     "alert_test_call": ("phone", "TEST call: see note."),
     "alert_test_refused": ("bell", "TEST not started. " + N.COOLDOWN_SAY),
     "judge_cap_reached": ("bell", "TEST not started. Demo test-call limit reached (no call placed)."),
-    "hosted_login": ("bell", "Logged in to your own hosted copy (Render) with your login key."),
+    "hosted_login": ("bell", "Someone logged in to this hosted copy (Render) with a valid key (owner or judge key)."),
+    "alert_test_judge_demo": ("bell", "Judge demo: Test my alert opened Hear the call. No phone call, no Twilio."),
     "hosted_login_refused": ("bell", "Someone tried a wrong login key on your hosted copy. Nothing was opened."),
     "alert_test_choice": ("bell", "TEST: you made a choice in the drill."),
     "alert_test_ended": ("bell", "TEST drill ended. Nothing happened to your money."),
@@ -1800,8 +1828,10 @@ def settings(app) -> str:
     tv = ('<label class="fine" for="test-voice">Voice for this test call (optional)</label>'
           '<select class="pick" id="test-voice" name="call_voice"><option value="" selected>My saved voice</option>'
           f'{vopts("")}</select>')
-    test_btn = (_act_form(app, "alert:test", "Test my alert", "bell", "btn", extra=cn + tv + jk,
-                          aria="Test my alert (simulated, no real payment)")
+    jd = N.judge_acting()        # JUDGEFIX: hosted judge: Test my alert is a practice run that opens /hear
+    test_btn = (_act_form(app, "alert:test", "Test my alert", "bell", "btn", extra="" if jd else cn + tv + jk,
+                          aria=("Test my alert (judge demo: opens Hear the call, no phone)" if jd else
+                                "Test my alert (simulated, no real payment)"))
                 + ('<p class="fine" id="test-note" role="status">Test started.</p>' if started else ""))  # nothing else (Trey)
     out.append(f'<h2>{icon("bell")} Alerts</h2><div class="panel"><ul class="list"><li><span class="what">'
                '<b>Desktop alerts in this browser</b><span id="alerts-note">Turn on to get a desktop alert when a '
@@ -1837,8 +1867,11 @@ def settings(app) -> str:
                'to PayPal. For up to 15 minutes every money action waits. Your light turns red and your desktop alert '
                'pops up. If calls are set up, your phone rings once, with no warning, and asks '
                'what you want to do. The call ends with &ldquo;This was a test&rdquo;. The drill ends as soon as you '
-               'act in the app, when you tap End drill, or after 15 minutes.</span></span>'
-               f'{test_btn}</li>'
+               'act in the app, when you tap End drill, or after 15 minutes.'
+               + (' <b>Judge demo:</b> here it opens Hear the call instead. No phone rings, no call or text is '
+                  'sent, nothing is spent. Your name, voice and retry choices are the owner&rsquo;s, so they are '
+                  'view-only for judges.' if jd else '') +
+               f'</span></span>{test_btn}</li>'
                f'<li><span class="what"><b>{icon("phone")} Hear the call (demo)</b><span>Hear what the call says and '
                'try the menu in this browser. Demo. Nothing happens to your money. No phone number needed.</span>'
                f'</span><a class="btn" href="/hear">{icon("phone")}Hear the call</a></li></ul></div>')
@@ -1974,7 +2007,7 @@ DEV_MOVES = {
 
 
 # ---------------------------------------------------------------- money check (read-only)
-SKIP_WORDS = {"no_ai": "AI not connected", "no_api_key": "no xAI key on this computer", "disabled": "AI is off in your settings",
+SKIP_WORDS = {"no_ai": "AI not connected", "no_api_key": "the AI is off right now (no xAI key set)", "disabled": "AI is off in your settings",
               "ai_off": "AI summary is off in your settings", "zdr_not_confirmed": "zero data retention not confirmed",
               "zdr_header_not_true": "xAI did not confirm zero data retention", "rate_limited": "AI rate limit reached",
               "judge_ai_limit": "Judge AI limit reached, showing sample answer"}
@@ -2312,7 +2345,8 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
                 return self._send(ROBOTS_TXT, ctype="text/plain; charset=utf-8",
                                   extra={"Content-Security-Policy": "default-src 'none'"})
             if url.path == "/hear":                       # public demo page: no login, nothing sent anywhere
-                return self._send(hear_page(dev=dev_on(app)), extra={**HEAR_HEADERS, "Content-Security-Policy": hear_csp()})
+                fr = urllib.parse.parse_qs(url.query).get("from", [""])[0] == "test"
+                return self._send(hear_page(dev=dev_on(app), from_test=fr), extra={**HEAR_HEADERS, "Content-Security-Policy": hear_csp()})
             if url.path == "/judges":                     # Judge Guide: public, nothing private on it
                 return self._send(judges_page(dev=dev_on(app), footer=self._judges_footer()))
             if url.path == "/hear.js":
@@ -2478,7 +2512,12 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
                 return self._send(json.dumps({"error": {"message": "Too many questions. Wait a few minutes. No AI "
                                                                    "call, no cost."}}),
                                   code=429, ctype="application/json")
-            code, body = STUDIO.proxy(app.gate, raw)
+            try:                    # JUDGEFIX: no money data -> say so, never let xAI guess a group or an amount
+                has_data = bool(WA.studio_data(app)["rows"])
+            except Exception:
+                has_data = False
+            code, body = STUDIO.proxy(app.gate, raw, ai=app.chat_ai(), has_data=has_data,
+                                      by="judge (web)" if self._session_judge_key() else "owner (web)")
             return self._send(json.dumps(body), code=code, ctype="application/json", extra={"Cache-Control": "no-store"})
 
         def _studio_light(self):
@@ -2698,6 +2737,12 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
                     app.say("Email did not go out. Use Download proof instead.", "warn")
                 return self._redirect("/history")
             if purpose == "alert:test":
+                if self._session_judge_key() or N.judge_acting():
+                    # JUDGEFIX 2026-11-01: a hosted judge NEVER starts a real drill. No Twilio, no call or text to
+                    # the owner's phone, no cooldown used, no AI spent. It is a practice run: hear the call instead.
+                    gate.audit.write("alert_test_judge_demo", action_id="-", by="judge (web)", dialed=False,
+                                     note="hosted judge: sent to Hear the call, no phone, no Twilio")
+                    return self._redirect("/hear?from=test")   # note shown on /hear (flash is shared, so not used)
                 r = app.alert_test.start(judge_key=(self._session_judge_key() or   # hosted judge login: always counted
                                                     form.get("judge_key", [""])[0][:200]),
                                          call_name=form.get("call_name", [""])[0][:200],   # this call only, never logged
@@ -2761,6 +2806,12 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
                     except Exception as ex:
                         app.say(f"Not changed: {display_safe(str(ex), 300)}", "bad")
                 return self._redirect("/settings", ck)
+            if purpose in ("retry:set", "voice:set", "name:set") and (self._session_judge_key() or N.judge_acting()):
+                # JUDGEFIX (shared demo): these are the owner's saved call settings. One judge must not change
+                # them for the owner or for the next judge. View-only for a hosted judge.
+                app.say("Judge demo: call name, voice and retries are the owner's settings, so they are view-only "
+                        "for judges. Nothing changed.")
+                return self._redirect("/settings")
             if purpose == "retry:set":   # MISSEDCALL: retry times for a missed alert call
                 if getattr(app, "judge", None) is not None:
                     app.say("Judge demo: test calls never call again.")
@@ -2898,7 +2949,7 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
             terms = gate.engine.p.get("private_terms", [])
             ctx = chat_context(item, terms)
             red_q = redact_description(q, str(item.get("payee") or ""), terms)[:300]
-            ai = getattr(gate, "ai", None)
+            ai = app.chat_ai()       # JUDGEFIX: xAI on the hosted demo when the key is set (also in Dev mode)
             res = ai.advise(ctx, red_q) if ai is not None and hasattr(ai, "advise") else {"called": False,
                                                                                           "skipped": "no_api_key"}
             by_ai = bool(res.get("text"))
