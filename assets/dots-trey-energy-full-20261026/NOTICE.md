@@ -1,4 +1,4 @@
-# Trey's energy status dots — full version (inner disc kept)
+# Trey's energy status dots, full version (inner disc kept)
 
 Art by @Nefarious_Trey.
 

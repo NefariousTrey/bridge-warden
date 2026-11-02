@@ -7,9 +7,9 @@ Code: Apache License 2.0 (see `LICENSE` and `NOTICE`). Copyright 2026 Douglas Gi
 The status dots are MIT licensed, separate from the Apache 2.0 code and separate from the all-rights-reserved
 logo art. Each folder has its own `LICENSE` (MIT) and `NOTICE.md`:
 
-- `assets/dots-trey-energy-20261026/` — Trey's energy-ring status dots. Art by @Nefarious_Trey.
-- `assets/dots-trey-cvd-20261026/` — Trey's colour-blind status orbs. Art by @Nefarious_Trey.
-- `assets/dots-trey-energy-full-20261026/` — Trey's energy status dots, full version (circle cut). Art by @Nefarious_Trey.
+- `assets/dots-trey-energy-20261026/`: Trey's energy-ring status dots. Art by @Nefarious_Trey.
+- `assets/dots-trey-cvd-20261026/`: Trey's colour-blind status orbs. Art by @Nefarious_Trey.
+- `assets/dots-trey-energy-full-20261026/`: Trey's energy status dots, full version (circle cut). Art by @Nefarious_Trey.
 
 Copyright 2026 Douglas Gibbons III
 Made by @Nefarious_Trey,
@@ -17,7 +17,7 @@ with Grok.
 
 Anyone who reuses the dots must keep that copyright line and the MIT permission notice (the folder's `LICENSE`).
 
-## Not covered — all rights reserved
+## Not covered: all rights reserved
 
 - The Bridge Warden logo, name and brand marks (the shield/bridge mark and the "Bridge Warden" wordmark,
   e.g. `brand` in `bridge_warden/ui_assets.py` and any logo image files). Apache 2.0 section 6 also

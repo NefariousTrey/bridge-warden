@@ -539,7 +539,7 @@ class AccountWatch:
 
 # ---------------------------------------------------------------- backup poller (OFF by default)
 class TransactionPoller:
-    """Reads Transaction Search (needs the PayPal app permission reporting/search/read, which Trey decides; NOT
+    """Reads Transaction Search (needs the PayPal app permission reporting/search/read, which the app owner decides; NOT
     added). PayPal: new transactions can take up to ~3 hours to appear. Same checks and red light as webhooks."""
     LAG_NOTE = "PayPal Transaction Search can lag up to ~3 hours, so this is a backup, not the alarm."
 

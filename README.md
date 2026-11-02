@@ -390,7 +390,7 @@ with Grok.
 - **Status light** is now Trey's energy-ring art (plain ring, 64 px on screen, 96/128 px files):
   green = all clear, red = issue / payment held, **yellow = paused / attention** (yellow replaces the old gray).
   (Since 2026-10-27: Off shows red, not yellow. See "Paused is yellow, Off is red" below.)
-  Alt text: "All clear", "Issue — payment held", "Paused / attention". The screen-reader word is now "Yellow".
+  Alt text: "All clear", "Issue: payment held", "Paused / attention". The screen-reader word is now "Yellow".
 - **Color-blind mode** (Settings, default **off**, one tap either way): swaps the big light for Trey's yellow orbs
   with a hidden symbol: X = issue, ! = attention, check = all clear (96 px on screen, 128/256 px files).
   Saved in `policy.json` as `"ui": {"colorblind_mode": true}`, with a copy in `policy_history/` and a
@@ -531,6 +531,8 @@ Render, under your service, Environment.
 
 
 ## Lawful use
+
+Bridge Warden is for adults (18 and over). PayPal accounts also require 18+.
 
 Do not use Bridge Warden to break the law or to harm anyone. Use it honestly. It is here to help protect your own money.
 
@@ -686,7 +688,7 @@ Corrections from the v6 audit. The text before each edit is kept in a dated back
   "turn it back on to go green" are corrected. Tests: `tests/test_v6_red_never_green.py`,
   `tests/test_v5_pauseoff.py`.
 - **Paths.** Build-box paths and the PC run notes were removed from the shipped files.
-- **Demo video.** The final cut is `bw_demo_v8_20261027.mp4`, 2:58. The public YouTube link is added at submission.
+- **Demo video.** The final cut is `bw_demo_v9_20261028.mp4`, 2:58. The public YouTube link is added at submission.
 
 ## Correction (Oct 27, 2026): files not in this repo
 

@@ -364,9 +364,12 @@ def raise_light(gate, finding: dict, *, by: str = SOURCE, alerts=None) -> dict |
         gate.audit.write("verdict", action_id=aid, verdict=v.to_dict(), proposal_hash=h,
                          clock_at=gate.clock().isoformat())
         try:
-            if alerts is None:
-                from .notify import Notifier
-                alerts = Notifier(gate).alerts()
+            from . import notify as N
+            if N.judge_acting():   # PREFLIP 2026-11-02: a judge's raise never reaches Twilio or email
+                from . import alerts as AL
+                alerts = AL.Alerts(gate, caller=N.DryRunCallAdapter(), email=AL.DryRunEmail(), retries=False)
+            elif alerts is None:
+                alerts = N.Notifier(gate).alerts()
             out["alert"] = alerts.fire(aid, source=SOURCE, wait=False)
         except Exception as ex:      # the in-app red still stands
             out["alert_error"] = type(ex).__name__

@@ -5,10 +5,10 @@ This is the one judge guide for Bridge Warden. (`proof/JUDGE_TESTING.md` only po
 ## Good to know
 
 1. First load can take about a minute. The free demo sleeps when nobody uses it.
-2. All AI is real xAI: help chats, Ask AI about this, the AG chat panel and the money check summary. Free to you on our key (up to 1,000 messages per judge in all).
+2. All AI is real xAI: help chats, Ask AI about this, the AG chat panel and the money check summary. Free to you on our key (1,000 messages in all, shared by every judge).
 3. No phone needed. No real phone calls. Hear the call plays the alert call in your browser.
 4. PayPal is sandbox only. No real money moves.
-5. All judges share one demo copy. Please turn Dev mode off when you are done.
+5. All judges share one demo copy: Dev mode, TEST rows and alerts. Another judge may change or clear them. Please turn Dev mode off when you are done.
 6. Want a real phone call? Press Deploy to Render below. Your own free copy, with your own Twilio.
 
 More on these:
@@ -26,7 +26,7 @@ It lets safe ones through, stops risky ones, and tells you right away.
 
 **Tested in sandbox with sample data to verify it works as intended.**
 
-Free for judges through Dec 15, 2026.
+Free for judges through Dec 15, 2026. The judge key stops working on Dec 16, 2026.
 
 Judge login: in the Devpost testing notes.
 
@@ -203,6 +203,8 @@ with Grok.
 
 ## Lawful use
 
+Bridge Warden is for adults (18 and over). PayPal accounts also require 18+.
+
 Do not use Bridge Warden to break the law or to harm anyone. Use it honestly. It is here to help protect your own money.
 
 - It treats every user with the same respect.
@@ -226,9 +228,10 @@ Dev mode has a button to simulate this (**Simulate check**, marked TEST; PayPal 
 
 ## The AI on the hosted judge demo
 
-- Log in with your own judge key (same box as the login key). Your AI use is counted for your key only.
+- Log in with the judge key (same box as the login key). AI use is counted per key, and all judges share one key,
+  so the cap is shared by every judge.
 - The help chats, the AG chat panel and the money check summary use real xAI on our key.
-  It is free to you, up to 1,000 xAI messages per judge.
+  It is free to you, up to 1,000 xAI messages in all, shared by every judge (it resets when the service restarts).
 - After that, you see the sample answer with the note "Judge AI limit reached, showing sample answer".
   Nothing more is sent to xAI, so it never costs more.
 - Your judge key is never stored. Only a salted fingerprint of it is counted.

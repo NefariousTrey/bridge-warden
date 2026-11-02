@@ -209,7 +209,7 @@ def test_normal_mode_green_light_is_the_green_full_dot(s):
 def test_normal_mode_red_light_when_a_payment_is_held(s):
     s.gate.propose(ProposedAction("payout", "120.00", "USD", D_, "logo design invoice"))
     src, alt, _, _, sec = light(s.get("/")[1])
-    assert src.endswith("bw-dot-trey-red-full-96.png") and alt == "Issue \u2014 payment held"
+    assert src.endswith("bw-dot-trey-red-full-96.png") and alt == "Issue: payment held"
     assert "Status light Red" in sec
 
 
@@ -237,7 +237,7 @@ def test_list_rows_get_24px_glyph_dots_in_both_modes(s):
 def test_switch_is_off_by_default_and_shown_in_settings(s):
     page = s.get("/settings")[1]
     assert "Color-blind mode" in page and "Turn on color-blind mode" in page
-    assert "bw-dot-trey-cvd-red-x-96.png" in page and 'alt="Issue \u2014 payment held"' in page
+    assert "bw-dot-trey-cvd-red-x-96.png" in page and 'alt="Issue: payment held"' in page
     assert "ui" not in C.load_file(s.pf) and s.app.colorblind() is False
 
 
@@ -254,7 +254,7 @@ def test_switch_on_saves_policy_history_and_log_then_off_reverses(s):
     assert "bw-dot-trey-cvd-green-check-256.webp 2x" in webp and 'width="96"' in light(s.get("/")[1])[4]
     s.gate.propose(ProposedAction("payout", "120.00", "USD", D_, "logo design invoice"))
     src, alt, *_ = light(s.get("/")[1])
-    assert src.endswith("bw-dot-trey-cvd-red-x-128.png") and alt == "Issue \u2014 payment held"
+    assert src.endswith("bw-dot-trey-cvd-red-x-128.png") and alt == "Issue: payment held"
     s.post("/act", token=token(s.get("/settings")[1], "Turn off color-blind mode"))
     assert C.load_file(s.pf)["ui"] == {"colorblind_mode": False}
     assert len([r for r in s.gate.audit.records() if r["event"] == "ui_pref_changed"]) == 2

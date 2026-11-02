@@ -210,7 +210,7 @@ def run_check(gate, reader=None, cfg: dict | None = None, now: datetime | None =
             note = _why(ex)
             if getattr(ex, "status", None) in (401, 403):
                 note = ("PayPal said no. This app needs the Transaction Search permission "
-                        "(scope reporting/search/read). Trey decides; Bridge Warden did not add it.")
+                        "(scope reporting/search/read). The app owner decides; Bridge Warden did not add it.")
             rep["sources"].append({"name": "PayPal transactions", "ok": False, "note": note})
         n_po = 0
         for s in h["sent"]:

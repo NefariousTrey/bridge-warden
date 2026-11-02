@@ -539,6 +539,9 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_tr
                 return None
             if lock and urllib.parse.urlparse(self.path).path == "/robots.txt":
                 return self._send(LOCK_ROBOTS_TXT, ctype="text/plain; charset=utf-8")
+            if urllib.parse.urlparse(self.path).path == PAYPAL_HOOK:    # PREFLIP 2026-11-02: POST only
+                return self._send("Method not allowed. PayPal webhooks use POST.", 405, {"Allow": "POST"},
+                                  "text/plain; charset=utf-8")
             with JA.acting_as(self._session_judge_key(), judge_xai):     # a judge's AI use counts against their key
                 return self._do_get()
 

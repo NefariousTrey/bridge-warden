@@ -9,7 +9,7 @@ How it works (hosted copy only, judges log in with their own judge key):
     judge's allowance FIRST. No allowance left = nothing is sent; the caller shows its sample answer with the note
     LIMIT_NOTE. So a judge can never cost more than the cap.
   * Cap: env BW_JUDGE_XAI_CAP (default 1000). The judge key is never stored or logged: it is turned into an HMAC
-    tag with a random per-install salt (same as the 3 real test calls in notify.JudgeCalls).
+    tag with a random per-install salt (the same method as notify.JudgeCalls; judges place no real calls).
   * Saved in the data folder (judge_xai.json, atomic writes). Unreadable file = treated as used up (fail safe).
     On a paid Render disk the count lasts. On Render FREE (no disk) the file is lost when the service restarts,
     sleeps or redeploys, and each judge's count starts again from 0 (see JUDGE_TESTING.md).

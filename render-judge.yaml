@@ -9,6 +9,7 @@ services:
     name: bridge-warden-judge-demo
     runtime: python
     plan: free
+    region: oregon   # Render's default region, same as the live demo
     # Standard library only. AG Studio is fetched ONLY if BW_AG_STUDIO_LICENSE_KEY is set (the key is never echoed).
     buildCommand: 'python --version && if [ -n "${BW_AG_STUDIO_LICENSE_KEY:-}" ]; then bash scripts/fetch_ag_studio.sh || echo "AG Studio not fetched (optional)"; fi'
     startCommand: "python -m bridge_warden judge --public"

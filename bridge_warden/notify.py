@@ -61,11 +61,40 @@ JUDGE_KEY_MIN = 16             # a configured key shorter than this is ignored (
 JUDGE_KEYS_MAX = 200           # per-judge keys: plenty for a judging panel; more lines are ignored
 
 
+JUDGE_UNTIL_ENV = "BW_JUDGE_UNTIL"    # PREFLIP 2026-11-02: from this date (US Eastern) judge keys stop working
+JUDGE_UNTIL_SHIPPED = "2026-12-16"    # judging is free through Dec 15, 2026
+JUDGE_UNTIL_DEFAULT = JUDGE_UNTIL_SHIPPED
+
+
+def judge_until(env=None):
+    """The first date (a datetime.date, US Eastern) on which judge keys no longer work. Env BW_JUDGE_UNTIL as
+    YYYY-MM-DD (default 2026-12-16). A bad value falls back to the default, so it can never extend judging."""
+    from datetime import date
+    env = os.environ if env is None else env
+    try:
+        d = date.fromisoformat(str(env.get(JUDGE_UNTIL_ENV) or "").strip())
+    except ValueError:
+        d = None
+    dflt = date.fromisoformat(JUDGE_UNTIL_DEFAULT)
+    return d if d is not None else dflt
+
+
+def judging_over(env=None, today=None) -> bool:
+    """True on or after BW_JUDGE_UNTIL (US Eastern): then every judge key is refused."""
+    if today is None:
+        from zoneinfo import ZoneInfo
+        today = datetime.now(ZoneInfo("America/New_York")).date()
+    return today >= judge_until(env)
+
+
 def judge_keys(env=None) -> list:
     """Every configured judge key (per-judge keys). BW_JUDGE_KEY (one key) plus every line of the file(s)
     named by BW_JUDGE_KEY_FILE (several files may be joined with os.pathsep). One key per line; blank lines
-    and lines starting with "#" are skipped; a key shorter than 16 characters is ignored. Never logged."""
+    and lines starting with "#" are skipped; a key shorter than 16 characters is ignored. Never logged.
+    From BW_JUDGE_UNTIL on (default 2026-12-16, US Eastern) there are no judge keys at all."""
     env = os.environ if env is None else env
+    if judging_over(env):
+        return []
     raw = [str(env.get(JUDGE_KEY_ENV) or "")]
     for f in str(env.get(JUDGE_KEY_FILE_ENV) or "").split(os.pathsep):
         if f.strip():

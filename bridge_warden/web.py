@@ -326,7 +326,7 @@ function poll(){fetch('/status.json',{credentials:'same-origin',cache:'no-store'
    var base='/assets/dots/bw-dot-trey-'+nm+'-',z=cv?['128','256']:['96','128'];
    im.src=base+z[0]+'.png';im.srcset=base+z[1]+'.png 2x';
    if(so){so.srcset=base+z[0]+'.webp 1x, '+base+z[1]+'.webp 2x';}
-   im.alt=({red:'Issue \u2014 payment held',yellow:'Paused / attention',green:'All clear'})[k];}
+   im.alt=({red:'Issue: payment held',yellow:'Paused / attention',green:'All clear'})[k];}
   var b=sec.querySelector('.big'),sr=sec.querySelector('.big .sr');
   if(b&&b.lastChild){b.lastChild.textContent=d.state==='red'?'Needs you. Refresh to see what.':
   (d.state==='gray'?'Paused.':'Guarding. All fine.');}
@@ -515,7 +515,7 @@ DOT_FILES = {f.name: f for d in DOT_DIRS if d.is_dir() for f in sorted(d.iterdir
 DOT_TYPES = {"png": "image/png", "webp": "image/webp"}
 _DOT_CACHE: dict = {}
 LIGHT_COLOR = {"green": "green", "red": "red", "gray": "yellow"}      # 'gray' (paused/off) now shows yellow
-LIGHT_ALT = {"green": "All clear", "red": "Issue \u2014 payment held", "gray": "Paused / attention"}
+LIGHT_ALT = {"green": "All clear", "red": "Issue: payment held", "gray": "Paused / attention"}
 CVD_ORB = {"green": "cvd-green-check", "red": "cvd-red-x", "gray": "cvd-yellow-bang"}
 KIND_DOT = {"safe": "green", "held": "yellow", "blocked": "red", "gray": "yellow"}
 
@@ -640,15 +640,17 @@ JUDGE_VIDEO_LINK = "[YOUTUBE_LINK]"
 JUDGE_REPO_LINK = "https://github.com/NefariousTrey/bridge-warden"   # filled 2026-11-02 (repo goes public Nov 4)
 JUDGE_LOGIN_NOTE = "Judge login: in the Devpost testing notes."
 JUDGE_FREE_UNTIL = "Free for judges through Dec 15, 2026."
+JUDGE_KEY_STOP = "The judge key stops working on Dec 16, 2026."   # PREFLIP: matches notify.JUDGE_UNTIL_SHIPPED
+ADULTS_LINE = "Bridge Warden is for adults (18 and over). PayPal accounts also require 18+."
 SANDBOX_LINE = "Tested in sandbox with sample data to verify it works as intended."
 JUDGE_TOP_FACTS = (   # Trey, Oct 27: plain box at the top. Each line checked against the code (see tests).
     # JUDGEFIX 2026-11-01: cold start first; no "3 real test calls" (a hosted judge never gets a phone call).
     "First load can take about a minute. The free demo sleeps when nobody uses it.",
     ("All AI is real xAI: help chats, Ask AI about this, the AG chat panel and the money check summary. "
-     "Free to you on our key (up to 1,000 messages per judge in all)."),      # judge_ai.py: one cap covers every use
+     "Free to you on our key (1,000 messages in all, shared by every judge)."),      # judge_ai.py: one cap covers every use
     "No phone needed. No real phone calls. Hear the call plays the alert call in your browser.",
     "PayPal is sandbox only. No real money moves.",
-    "All judges share one demo copy. Please turn Dev mode off when you are done.",
+    "All judges share one demo copy: Dev mode, TEST rows and alerts. Another judge may change or clear them. Please turn Dev mode off when you are done.",
     "Want a real phone call? Press Deploy to Render below. Your own free copy, with your own Twilio.",
 )
 # DEPLOYBUTTON 2026-11-02: one click makes a full Bridge Warden on the judge's OWN free Render account (render.yaml).
@@ -729,8 +731,8 @@ def judges_body(video: str | None = None, repo: str | None = None) -> str:
         '<p class="lead">It lets safe ones through, stops risky ones, and tells you right away.</p>'
         f'<p class="jg-call"><a class="btn" href="/hear">{icon("phone")}Hear the call</a></p>'
         f'<p class="jg-tag">{e(SANDBOX_LINE)}</p>'
-        f'<div class="jg-box"><p><b>{e(JUDGE_FREE_UNTIL)}</b></p><p>{e(JUDGE_LOGIN_NOTE)}</p>'
-        f'<p>{e(NO_PHONE_LINE)}</p><p>{e(JUDGE_TEST_ALERT_LINE)}</p></div>'
+        f'<div class="jg-box"><p><b>{e(JUDGE_FREE_UNTIL)}</b> {e(JUDGE_KEY_STOP)}</p><p>{e(JUDGE_LOGIN_NOTE)}</p>'
+        f'<p>{e(NO_PHONE_LINE)}</p><p>{e(JUDGE_TEST_ALERT_LINE)}</p><p>{e(ADULTS_LINE)}</p></div>'
         f'<h2 id="jg-try">Try it in {len(steps)} steps</h2>'
         f'<ol class="jg-steps" aria-labelledby="jg-try">{st}</ol>'
         '<p>When you are done, go to Settings and press Turn off Dev mode.</p>'
@@ -1456,7 +1458,7 @@ def report_page(app, test: bool) -> str:
                '<li><b>Copy the summary below.</b> Names, emails and numbers are already removed.</li>'
                '<li><b>Open PayPal yourself:</b> type the address in your browser or use the PayPal app. '
                'Don&rsquo;t use links from texts or emails.<ul>')
-    out += [f'<li><b class="mono">{a}</b> &mdash; {d}</li>' for a, d in REPORT_WHERE]
+    out += [f'<li><b class="mono">{a}</b>: {d}</li>' for a, d in REPORT_WHERE]
     out.append('</ul></li><li><b>Paste the summary</b> into the report and send it.</li></ol>'
                '<label for="report">Incident summary (select all, then copy)</label>'
                f'<textarea id="report" readonly rows="18">{html.escape(txt[:8000])}</textarea>')
@@ -1793,7 +1795,7 @@ def settings(app) -> str:
         r = calls[-1]
         what = ("call placed" if r.get("dialed") else "would call owner (no call made)")
         last_call = (f'<span class="fine">Last {"test" if r.get("label") == "TEST" else "fraud"} call: '
-                     f'{e(D.local_time(r["at"], tz))} &mdash; {what}. {e(call_usage_line(app, r))}</span>')
+                     f'{e(D.local_time(r["at"], tz))}: {what}. {e(call_usage_line(app, r))}</span>')
     wait = app.alert_test.wait_left()
     started = wait or app.alert_test.active() or app.alert_test.pending()
     pn = app.preferred_name()
@@ -1845,7 +1847,7 @@ def settings(app) -> str:
                "would_email_owner": "Email (not sent)", "acctwatch_event": "PayPal event",
                "state_check_alert": "Check needed: PayPal and the log do not match"}
     feed = [r for r in app.gate.audit.records() if r.get("event") in feed_ev][-6:]
-    feed_html = "".join(f'<span class="fine">{e(D.local_time(r["at"], tz))} &mdash; {e(feed_ev[r["event"]])}'
+    feed_html = "".join(f'<span class="fine">{e(D.local_time(r["at"], tz))}: {e(feed_ev[r["event"]])}'
                         f'{" (SIMULATED)" if r.get("simulated") else ""}</span>' for r in reversed(feed))
     retry_li = (f'<li><span class="what"><b>{icon("phone")} Missed call? Call again: {e(rtext)}</b><span>If you '
                 'do not pick up (or the line is busy), Bridge Warden shows the alert here, emails you if email is set '
@@ -2728,7 +2730,8 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
             if purpose == "money:check":
                 return self._money_check()
             if purpose == "ag:scan":                       # v6: read-only scan; may RAISE the light, never lower it
-                r = AG.run_scan(gate, WA.money_report(app), by="owner (web)")
+                jd = bool(self._session_judge_key() or N.judge_acting())   # PREFLIP: label judge scans as judge
+                r = AG.run_scan(gate, WA.money_report(app), by="judge (web)" if jd else "owner (web)")
                 n = len(r.get("raised") or [])
                 app.say(f"The {AG.NAME} checked your History. " + (f"It raised {n} issue{'s' if n != 1 else ''} for you."
                         if n else "Nothing new needs you."), "warn" if n else "ok")

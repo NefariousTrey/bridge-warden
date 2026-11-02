@@ -238,10 +238,15 @@ class Alerts:
     def dev(self) -> bool:
         return self.N.dev_locked(self.gate)
 
+    def judge(self) -> bool:
+        """PREFLIP 2026-11-02: a hosted judge is acting in THIS thread (never true on a background thread)."""
+        return self.N.judge_acting()
+
     def _caller(self):
         if self.caller is None:
             return None
-        return self.N.DryRunCallAdapter() if self.dev() else self.caller
+        # Dev mode or a hosted judge: dry run, no phone rings (checked again at every send, retries included)
+        return self.N.DryRunCallAdapter() if (self.dev() or self.judge()) else self.caller
 
     def voice_ready(self) -> bool:
         c = self.caller
@@ -250,8 +255,8 @@ class Alerts:
     def email_ready(self) -> bool:
         return bool(getattr(self.email, "ready", False))
 
-    def _email(self, aid, subject, why, out, body=EMAIL_BODY):
-        em = DryRunEmail() if self.dev() else self.email
+    def _email(self, aid, subject, why, out, body=EMAIL_BODY, dry=False):
+        em = DryRunEmail() if (dry or self.dev()) else self.email   # dry: a judge or dry-run alert (PREFLIP)
         try:
             res = em.send(subject, body)
         except Exception as ex:   # never let email break anything
@@ -312,17 +317,19 @@ class Alerts:
         (no voice) and the call right here. Returns what happened per channel."""
         voice = self.voice_ready()
         email_now = self.email_ready() and not voice
+        judge = self.judge()      # PREFLIP: read once, in the request thread (the email thread can't see it)
         out = {"in_app": True}
         self.gate.audit.write("alert_raised", action_id="-", for_action=aid, source=source,
-                              channels=["in_app"] + (["call"] if voice else []) + (["email"] if email_now else []))
+                              channels=["in_app"] + (["call"] if voice else []) + (["email"] if email_now else []),
+                              **({"judge_demo": True} if judge else {}))
         th = None
         if email_now:
-            th = threading.Thread(target=self._email, args=(aid, EMAIL_SUBJECT, "alert", out), daemon=True,
-                                  name="bw-alert-email")
+            th = threading.Thread(target=self._email, args=(aid, EMAIL_SUBJECT, "alert", out),
+                                  kwargs={"dry": judge}, daemon=True, name="bw-alert-email")
             th.start()
         if self.caller is not None:
             caller, res = self._place(aid, 0, out, mark, outside_batch=outside_batch, reader=reader)
-            self._after_call(aid, 0, caller, res, out)
+            self._after_call(aid, 0, caller, res, out, judge=judge)
         elif outside_batch is not None:     # no voice: still re-check the outside payout (log only)
             from .callaudit import check_outside
             out["outside_check"] = check_outside(self.gate, outside_batch, read=reader, for_action=aid)
@@ -330,13 +337,19 @@ class Alerts:
             th.join(15)
         return out
 
-    def _after_call(self, aid, attempt, caller, res, out):
-        """Track the call so a miss can be followed up. Dry run = simulated miss (no real call anywhere)."""
+    def _after_call(self, aid, attempt, caller, res, out, judge=False):
+        """Track the call so a miss can be followed up. Dry run = simulated miss (no real call anywhere).
+        PREFLIP 2026-11-02: a dry-run or judge alert NEVER queues a retry. A retry runs later on the
+        background thread, where no judge context and maybe no Dev mode exist, so it could reach Twilio.
+        The entry also carries the flags, and tick() refuses any flagged entry (defense in depth)."""
         if self.queue is None:
             return
-        sim = not getattr(caller, "real", False) or not res.get("dialed")
+        judge = bool(judge or self.judge())
+        dry = not getattr(caller, "real", False)
+        sim = dry or not res.get("dialed")
         sid = res.get("call_sid") if CALL_SID.match(str(res.get("call_sid") or "")) else None
-        mins = saved_retry_minutes(self.gate) if self.retries else []
+        no_retry = judge or dry
+        mins = [] if no_retry else (saved_retry_minutes(self.gate) if self.retries else [])
         now = self.clock()
 
         def put(d):
@@ -344,8 +357,13 @@ class Alerts:
                                "retry_minutes": mins}
             e.update({"state": "ringing", "call_sid": sid, "simulated": bool(sim) and not sid,
                       "dialed_at": now.isoformat(), "attempts": attempt + 1})
+            if no_retry:
+                e.update(retry_minutes=[], dry_run=bool(dry), judge=bool(e.get("judge") or judge))
             d[aid] = e
         self.queue.update(put)
+        if no_retry:
+            self.gate.audit.write("alert_retry_skipped", action_id="-", for_action=aid,
+                                  why="judge demo" if judge else "dry run", note="no retry calls for a dry run")
         if sim and not sid:   # no real ringing phone: dry run, error, or not dialed -> treat as missed at once
             self.on_status(aid=aid, status="no-answer" if not res.get("error") else "failed",
                            simulated=not getattr(caller, "real", False), out=out)
@@ -365,6 +383,7 @@ class Alerts:
             if key is None or d[key].get("state") != "ringing":
                 return None
             e = d[key]
+            res["dry"] = bool(e.get("judge") or e.get("dry_run"))
             if answered:
                 e.update(state="done", done_why="answered", done_at=now.isoformat())
                 return key, "answered", False, None
@@ -376,7 +395,7 @@ class Alerts:
             e.update(state="waiting_retry" if nxt else "done", next_at=nxt.isoformat() if nxt else None,
                      emailed=True, last_status=answered_by or status)
             if not nxt:
-                e.update(done_why="no_more_retries", done_at=now.isoformat())
+                e.update(done_why="dry_run_no_retry" if res["dry"] else "no_more_retries", done_at=now.isoformat())
             return key, "missed", email_due, nxt
         got = self.queue.update(upd) if self.queue else None
         if got is None:
@@ -388,8 +407,13 @@ class Alerts:
         self.gate.audit.write("alert_missed_call", action_id="-", for_action=key, status=answered_by or status,
                               simulated=bool(simulated), next_retry_at=nxt.isoformat() if nxt else None,
                               label="SIMULATED" if simulated else "")
+        dry_entry = bool(res.get("dry"))
+        dry_mail = bool(dry_entry or self.judge())
         res = out if out is not None else {}
-        final = nxt is None            # last call missed: stop calling, ONE final message instead of the missed email
+        # last call missed: stop calling, ONE final message instead of the missed email.
+        # PREFLIP: a dry-run or judge alert never retries, so its single simulated miss is NOT a real
+        # "we couldn't reach you" final (that would pin the owner's light red for a simulation).
+        final = nxt is None and not dry_entry
         if final:
             self.gate.audit.write("alert_final_notice", action_id="-", for_action=key, text=FINAL_TEXT,
                                   simulated=bool(simulated), label="SIMULATED" if simulated else "",
@@ -397,7 +421,8 @@ class Alerts:
         if email_due and self.email_ready():
             args = ((key, FINAL_SUBJECT, "final_notice", res, FINAL_BODY) if final
                     else (key, MISSED_SUBJECT, "missed_call", res))
-            th = threading.Thread(target=self._email, args=args, daemon=True, name="bw-alert-email")
+            th = threading.Thread(target=self._email, args=args, kwargs={"dry": dry_mail}, daemon=True,
+                                  name="bw-alert-email")
             th.start()
             th.join(15)
         return {"missed": True, "next_at": nxt.isoformat() if nxt else None, "final": final}
@@ -452,6 +477,12 @@ class Alerts:
                     return False          # someone else already took this step
                 x.update(state="dialing", next_at=None)
                 return True
+            if e.get("judge") or e.get("dry_run") or self.judge():   # PREFLIP: never re-dial a dry/judge alert
+                self.queue.update(lambda d, a=aid: d[a].update(state="done", done_why="dry_run_no_retry",
+                                                               next_at=None, done_at=now.isoformat()))
+                self.gate.audit.write("alert_retry_stopped", action_id="-", for_action=aid,
+                                      why="judge demo or dry run: no retry calls")
+                continue
             if not self.queue.update(claim):
                 continue
             attempt = e.get("attempts", 1)

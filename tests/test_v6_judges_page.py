@@ -44,7 +44,7 @@ def check_guide(body):
                  "First load can take about a minute.", "Turn on Dev mode", "Add TEST sell", "Raise TEST red",
                  "I’ve seen this", "It’s fixed", "Hear the call", "/hear",
                  "Test my alert opens Hear the call too. It never rings a phone.",
-                 "All judges share one demo copy."):
+                 "All judges share one demo copy:"):
         assert must in t, must
     assert body.count('<ol class="jg-steps"') == 1
     steps = re.search(r'<ol class="jg-steps"[^>]*>(.*?)</ol>', body, re.S).group(1)
@@ -210,15 +210,15 @@ def test_top_box_facts_match_the_code():
 
 
 def test_top_box_ai_line_matches_the_judge_cap(monkeypatch):
-    """Line 2: real xAI on our key, up to 1,000 messages per judge (BW_JUDGE_XAI_CAP, default 1000)."""
+    """Line 2: real xAI on our key, up to 1,000 messages, one shared judge cap (BW_JUDGE_XAI_CAP, default 1000)."""
     from bridge_warden import judge_ai as JA
     line = ("All AI is real xAI: help chats, Ask AI about this, the AG chat panel and the money check summary. "
-            "Free to you on our key (up to 1,000 messages per judge in all).")      # judge_ai.py: one cap for every use
+            "Free to you on our key (1,000 messages in all, shared by every judge).")      # judge_ai.py: one cap for every use
     assert web.JUDGE_TOP_FACTS[1] == line and JA.DEFAULT_CAP == 1000
     monkeypatch.delenv("BW_JUDGE_XAI_CAP", raising=False)
     assert web.html.escape(line) in web.judges_body()
     monkeypatch.setenv("BW_JUDGE_XAI_CAP", "250")
-    assert "(up to 250 messages per judge in all)" in web.judges_body()
+    assert "(250 messages in all, shared by every judge)" in web.judges_body()
     for f in (ROOT / "JUDGE_TESTING.md",):
         assert "2. " + line in f.read_text(encoding="utf-8")
     y = (ROOT / "render.yaml").read_text(encoding="utf-8")

@@ -43,3 +43,11 @@ def engine(policy):
 @pytest.fixture
 def gate(engine, tmp_path):
     return Gate(engine, AuditLog(tmp_path / "audit.jsonl"), FakePayPal(), clock=lambda: NOON_ET)
+
+
+@pytest.fixture(autouse=True)
+def _judging_not_over(monkeypatch):
+    """PREFLIP 2026-11-02: judge keys stop working on BW_JUDGE_UNTIL (default 2026-12-16). Keep the suite
+    date-proof: tests run as if judging is still open unless a test sets BW_JUDGE_UNTIL itself."""
+    from bridge_warden import notify as N
+    monkeypatch.setattr(N, "JUDGE_UNTIL_DEFAULT", "2099-01-01")

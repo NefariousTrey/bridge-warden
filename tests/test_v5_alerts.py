@@ -237,7 +237,8 @@ def test_retries_off(gate):
     assert al.tick() == [] and tw.n == 1
 
 
-def test_dev_mode_simulates_miss_and_retries_with_no_real_call(setup):
+def test_dev_mode_simulates_miss_and_never_queues_a_retry(setup):
+    """PREFLIP 2026-11-02: a dry-run alert never queues a retry (a later retry could reach real Twilio)."""
     s = setup
     dev_on(s)
     r = s.gate.propose(ProposedAction("payout", "250.00", "USD", "support-desk@personal.example.com", GIFT))
@@ -246,12 +247,13 @@ def test_dev_mode_simulates_miss_and_retries_with_no_real_call(setup):
     al.fire(r["action_id"])
     miss = [x for x in s.gate.audit.records() if x["event"] == "alert_missed_call"]
     assert miss and miss[-1]["simulated"] and miss[-1]["label"] == "SIMULATED"
+    assert any(x["event"] == "alert_retry_skipped" for x in s.gate.audit.records())
     now[0] += timedelta(minutes=15)
-    assert al.tick() == [r["action_id"]]
+    assert al.tick() == []
     now[0] += timedelta(minutes=15)
-    assert al.tick() == [r["action_id"]]
+    assert al.tick() == []
     assert tw.calls == [] and FakeSMTP.sent == []                     # no real call, no real email
-    assert len([x for x in s.gate.audit.records() if x["event"] == "would_email_owner"]) == 3   # one per miss, dry run
+    assert len([x for x in s.gate.audit.records() if x["event"] == "would_email_owner"]) == 1   # final notice, dry run
 
 
 # ---------------------------------------------------------------- settings

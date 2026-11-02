@@ -68,7 +68,8 @@ def test_blueprint_uses_only_fields_in_render_docs():
     assert "description" not in body
     for k in re.findall(r"^\s+(?:- )?([A-Za-z]+):", body, re.M):
         assert k in {"services", "type", "name", "runtime", "plan", "buildCommand", "startCommand",
-                     "healthCheckPath", "autoDeployTrigger", "envVars", "key", "value", "generateValue", "sync"}, k
+                     "healthCheckPath", "autoDeployTrigger", "envVars", "key", "value", "generateValue", "sync",
+                     "region"}, k   # PREFLIP: region is in the blueprint spec (default oregon)
     for k in OPTIONAL:
         assert re.search(r"- key: " + k + r"\s+#", _yaml()), k     # every asked box has a plain description
 
