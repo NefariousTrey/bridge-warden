@@ -6,6 +6,10 @@ with Grok.
 Bridge Warden can **phone you** when it sees fraud. You use **your own** Twilio and **your own** phone.
 Bridge Warden pays for nothing and never sees your Twilio password.
 
+**Fastest way:** [Deploy to Render](https://render.com/deploy?repo=https://github.com/NefariousTrey/bridge-warden) makes your own copy on your own free Render account.
+Render asks for your phone and your own Twilio details (all optional; type `none` to skip). Without Twilio, Test my
+alert plays the call in your browser. Details: [JUDGE_TESTING.md](JUDGE_TESTING.md) ("Your own copy, in one click").
+
 **Just want to hear it?** You do not need any of this. Open `/hear` in Bridge Warden. It plays the call
 in your browser. No phone, no number, nothing sent.
 

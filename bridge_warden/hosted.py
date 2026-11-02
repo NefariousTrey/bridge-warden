@@ -362,12 +362,51 @@ def hosted_watch(gate, env, sender=None, verifier=None, paypal_sender=None):
     return watch
 
 
+# DEPLOYBUTTON 2026-11-02: the Deploy to Render form may not let a box stay empty, so "none" (and friends) count
+# as empty for the boxes it asks about. Only these keys; never BW_LOGIN_KEY or BW_CALL_LINK_KEY.
+SKIP_WORDS = ("none", "skip", "-", "n/a", "na", "no", "blank", "empty")
+PROMPTED_OPTIONAL = ("BW_OWNER_PHONE", "TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM_NUMBER", "XAI_API_KEY",
+                     *PAYPAL_ENV, "BW_SITE_LOCK_PASSWORD", "BW_PREFERRED_NAME", "BW_CALL_VOICE")
+DEMO_ENV = "BW_DEMO_DATA"       # "on" (render.yaml) = a fresh copy opens in Dev mode with sample data. Unset = off.
+
+
+def drop_skip_words(env) -> list:
+    """Remove optional values typed as "none" etc. Returns the key names removed (names only, never values)."""
+    gone = []
+    for k in PROMPTED_OPTIONAL:
+        if str(env.get(k, "")).strip().lower() in SKIP_WORDS and str(env.get(k, "")).strip():
+            env.pop(k, None)
+            gone.append(k)
+    return gone
+
+
+def demo_on(env) -> bool:
+    return str(env.get(DEMO_ENV, "")).strip().lower() in ("1", "on", "yes", "true")
+
+
+def start_demo(app, env) -> bool:
+    """First start of a Deploy to Render copy: Dev mode on with sample data (marked TEST, nothing reaches PayPal
+    or a phone). Only when BW_DEMO_DATA is on AND Dev mode was never set in this data folder, so turning Dev
+    mode off stays off until the folder is wiped (the free plan wipes it on restart)."""
+    if not demo_on(env):
+        return False
+    real = app.real_gate
+    dev = real.dev
+    if dev.path is None or Path(dev.path).exists():
+        return False
+    dev.set(True, "green")
+    real.audit.write("dev_mode_on", action_id="-", label="TEST", by="first start (BW_DEMO_DATA)")
+    app.sample_gate()
+    return True
+
+
 def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_transport=None,
                  paypal_verifier=None, paypal_sender=None):
     """Returns (server, app). Your own Bridge Warden on your own public host (Render)."""
     from . import web
     from .cli import build_gate
     env = os.environ if env is None else env
+    drop_skip_words(env)                                 # "none" typed in the Deploy to Render form = empty
     cfg = hosted_settings(env)
     if not str(env.get("BW_CALL_URL", "")).strip():
         env["BW_CALL_URL"] = "https://" + cfg["host"]          # calls come back to THIS app (no Worker)
@@ -384,6 +423,7 @@ def serve_hosted(port: int, env=None, bind: str = "0.0.0.0", sender=None, xai_tr
     app.hosted = cfg
     watch = hosted_watch(gate, env, sender=sender, verifier=paypal_verifier, paypal_sender=paypal_sender)
     app.paypal_watch = watch                             # None = /paypal-webhook is off ("not set up")
+    start_demo(app, env)                                 # BW_DEMO_DATA=on: fresh copy opens in Dev mode
     free = free_plan(env, cfg["data"])
     guard = LoginGuard(cfg["login_key"])
     lock = site_lock(env)                                # "" = no site lock

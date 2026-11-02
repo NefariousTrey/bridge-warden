@@ -119,4 +119,8 @@ def test_render_blueprints_list_the_lock_as_a_secret():
     root = Path(__file__).resolve().parent.parent
     for f in ("render.yaml",):
         y = (root / f).read_text(encoding="utf-8")
-        assert re.search(r"- key: BW_SITE_LOCK_PASSWORD\s+(#[^\n]*)?\n\s+sync: false", y)
+        # DEPLOYBUTTON 2026-11-02: no longer asked by the Deploy form (fewer boxes). Still a secret: never a value,
+        # and documented as an optional add-later setting.
+        assert "- key: BW_SITE_LOCK_PASSWORD" not in y or re.search(
+            r"- key: BW_SITE_LOCK_PASSWORD\s+(#[^\n]*)?\n\s+sync: false", y)
+        assert "BW_SITE_LOCK_PASSWORD" in y.split("services:")[0]

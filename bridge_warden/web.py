@@ -649,8 +649,23 @@ JUDGE_TOP_FACTS = (   # Trey, Oct 27: plain box at the top. Each line checked ag
     "No phone needed. No real phone calls. Hear the call plays the alert call in your browser.",
     "PayPal is sandbox only. No real money moves.",
     "All judges share one demo copy. Please turn Dev mode off when you are done.",
-    "To run it yourself: it is open source. Bring your own Twilio and xAI keys.",
+    "Want a real phone call? Press Deploy to Render below. Your own free copy, with your own Twilio.",
 )
+# DEPLOYBUTTON 2026-11-02: one click makes a full Bridge Warden on the judge's OWN free Render account (render.yaml).
+# The button only works while the GitHub repo is public. A text link (the page's CSP blocks outside images).
+DEPLOY_URL = "https://render.com/deploy?repo=https://github.com/NefariousTrey/bridge-warden"
+DEPLOY_STEPS = (
+    "Press Deploy to Render. Sign in to Render (a free account is fine).",
+    "Render asks for a few boxes. All are optional. Type none in any box you want to skip.",
+    "Your phone and your own Twilio account details and Twilio number give you a real phone call. "
+    "No Twilio: Test my alert plays the call in your browser.",
+    "Your own xAI key is optional. No key: the local safety rules still check every payment.",
+    "Your login key is made for you. Find it in Render: open your service, then Environment.",
+    "Your copy opens in Dev mode with sample data marked TEST. Nothing reaches PayPal.",
+    "For a real phone call, turn Dev mode off in Settings, then press Test my alert.",
+)
+DEPLOY_COST_LINE = ("Render's free plan costs nothing. Real calls are billed by Twilio to your own Twilio account. "
+                    "A Twilio trial is free but can only call numbers you verified.")
 JUDGE_TEST_ALERT_LINE = "On this demo, Test my alert opens Hear the call too. It never rings a phone."
 JUDGE_LOCAL_LINE = "On your own computer (judge mode), use the scenario buttons on Home instead of Dev mode."
 
@@ -669,6 +684,16 @@ def _judge_link(label: str, url: str) -> str:
     if url.startswith("https://") and '"' not in url and "<" not in url:
         return f'<li><b>{e(label)}:</b> <a href="{e(url)}" rel="noopener">{e(url)}</a></li>'
     return f'<li><b>{e(label)}:</b> <span class="mono">{e(url)}</span></li>'
+
+
+def _twilio_ready(app) -> bool:
+    """True if this copy's Twilio settings are complete (SID, token, from-number, owner phone). Read from the
+    environment, not the call-on-fraud switch, so an owner who turned that switch off keeps today's behavior."""
+    try:
+        d = app.alert_test
+        return bool(N.TwilioCallAdapter(env=d.env, sender=d.sender).ready)
+    except Exception:
+        return False
 
 
 def judges_body(video: str | None = None, repo: str | None = None) -> str:
@@ -710,6 +735,11 @@ def judges_body(video: str | None = None, repo: str | None = None) -> str:
         f'<ol class="jg-steps" aria-labelledby="jg-try">{st}</ol>'
         '<p>When you are done, go to Settings and press Turn off Dev mode.</p>'
         f'<p>{e(JUDGE_LOCAL_LINE)}</p>'
+        '<h2 id="jg-own">Your own copy, in one click</h2>'
+        f'<p class="jg-call"><a class="btn btn-primary" id="jg-deploy" href="{e(DEPLOY_URL)}" rel="noopener">'
+        f'{icon("approve")}Deploy to Render</a></p>'
+        f'<ol class="jg-facts" aria-labelledby="jg-own">{"".join(f"<li>{e(x)}</li>" for x in DEPLOY_STEPS)}</ol>'
+        f'<p>{e(DEPLOY_COST_LINE)}</p>'
         '<h2 id="jg-lights">What the lights mean</h2>'
         f'<ul class="jg-lights" aria-labelledby="jg-lights">{lights}</ul>'
         '<p class="jg-rule">Red never goes straight to green.</p>'
@@ -763,12 +793,17 @@ def hear_csp() -> str:
 HEAR_HEADERS = {"Permissions-Policy": "camera=(), microphone=(self), geolocation=(), payment=()"}
 
 
-def hear_page(dev: bool = False, from_test: bool = False) -> str:
+NO_TWILIO_SAY = ("This copy has no Twilio yet, so no phone rings. Here is the same call, in your browser. "
+                 "To get a real call, add your own Twilio details in Render (Environment).")
+
+
+def hear_page(dev: bool = False, from_test: bool = False, no_twilio: bool = False) -> str:
     from .notify import call_demo_data
     data = json.dumps(call_demo_data()).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     sits = call_demo_data()["situations"]
     opts = "".join(f'<option value="{e(k)}">{e(v["name"])}</option>' for k, v in sits.items())
-    sent_here = (f'<p class="msg ok" role="status">{e(N.JUDGE_NO_PHONE_SAY)}</p>' if from_test else "")
+    sent_here = (f'<p class="msg ok" role="status">{e(N.JUDGE_NO_PHONE_SAY)}</p>' if from_test else
+                 f'<p class="msg ok" role="status">{e(NO_TWILIO_SAY)}</p>' if no_twilio else "")
     body = (f'<h1>{icon("phone")} Hear the call</h1>{sent_here}'
             '<p class="msg warn"><b>Demo. Nothing happens to your money.</b> No phone number needed. '
             'Nothing you do here is sent anywhere.</p>'
@@ -2345,8 +2380,8 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
                 return self._send(ROBOTS_TXT, ctype="text/plain; charset=utf-8",
                                   extra={"Content-Security-Policy": "default-src 'none'"})
             if url.path == "/hear":                       # public demo page: no login, nothing sent anywhere
-                fr = urllib.parse.parse_qs(url.query).get("from", [""])[0] == "test"
-                return self._send(hear_page(dev=dev_on(app), from_test=fr), extra={**HEAR_HEADERS, "Content-Security-Policy": hear_csp()})
+                fv = urllib.parse.parse_qs(url.query).get("from", [""])[0]
+                return self._send(hear_page(dev=dev_on(app), from_test=fv == "test", no_twilio=fv == "notwilio"), extra={**HEAR_HEADERS, "Content-Security-Policy": hear_csp()})
             if url.path == "/judges":                     # Judge Guide: public, nothing private on it
                 return self._send(judges_page(dev=dev_on(app), footer=self._judges_footer()))
             if url.path == "/hear.js":
@@ -2743,6 +2778,12 @@ def make_handler(gate, login_key: str | None = None, app: WebApp | None = None):
                     gate.audit.write("alert_test_judge_demo", action_id="-", by="judge (web)", dialed=False,
                                      note="hosted judge: sent to Hear the call, no phone, no Twilio")
                     return self._redirect("/hear?from=test")   # note shown on /hear (flash is shared, so not used)
+                if getattr(app, "hosted", None) and not _twilio_ready(app):
+                    # DEPLOYBUTTON 2026-11-02: a Deploy to Render copy with no Twilio yet. No drill, no call:
+                    # the same call plays in the browser. With Twilio set, nothing changes.
+                    gate.audit.write("alert_test_no_twilio", action_id="-", label="TEST", by="owner (web)",
+                                     dialed=False, note="no Twilio on this copy: sent to Hear the call")
+                    return self._redirect("/hear?from=notwilio")
                 r = app.alert_test.start(judge_key=(self._session_judge_key() or   # hosted judge login: always counted
                                                     form.get("judge_key", [""])[0][:200]),
                                          call_name=form.get("call_name", [""])[0][:200],   # this call only, never logged

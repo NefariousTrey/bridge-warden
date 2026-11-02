@@ -483,13 +483,15 @@ does not replace it.
 
 Our prize target is **AG Grid** (the History grid). Render is **only** an easy way to host your own copy.
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/YOUR_USER/YOUR_REPO)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/NefariousTrey/bridge-warden)
 
-(Replace `YOUR_USER/YOUR_REPO` with your fork. `render.yaml` must stay at the repo root.
+(For a fork, change the repo in that link to yours. `render.yaml` must stay at the repo root.
 Docs: https://render.com/docs/deploy-to-render and https://render.com/docs/blueprint-spec .)
 
 - Render asks you for: your Twilio Account SID, Auth Token and phone number, your own phone, your preferred
   name, and the call voice (blank = "man", Twilio's free voice; or `Polly.Joanna`).
+  (Since 2026-11-02 Render no longer asks for the name and voice. Add `BW_PREFERRED_NAME` or `BW_CALL_VOICE`
+  later under Environment if you want them. See the 2026-11-02 update below.)
 - Render makes two random secrets for you: `BW_LOGIN_KEY` (paste it on the login page) and `BW_CALL_LINK_KEY`.
 - Your copy answers the call menu itself (`/voice`, `/gather`, `/other`, `/walk`), so you do **not** need the
   Cloudflare Worker. Each call link is signed and expires (same check as the Worker); Twilio's own signature is
@@ -503,6 +505,29 @@ Docs: https://render.com/docs/deploy-to-render and https://render.com/docs/bluep
 Made by @Nefarious_Trey,  
 with Grok.  
 Copyright 2026 Douglas Gibbons III.
+
+
+## Update 2026-11-02: one-click Deploy to Render, with your own Twilio
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/NefariousTrey/bridge-warden)
+
+One click makes a full Bridge Warden on **your own** free Render account. Render asks for a few boxes, all
+optional (type `none` to skip one): your phone, your own Twilio Account SID, Auth Token and phone number, your own
+xAI key, and your PayPal sandbox app and webhook. Your login password (`BW_LOGIN_KEY`) is made for you: find it in
+Render, under your service, Environment.
+
+- **The real phone call is still here.** It uses **your own** Twilio account, so you set up Twilio yourself
+  (console.twilio.com: Account SID, Auth Token, a Twilio number). A Twilio trial is free but only calls numbers
+  you verified in Twilio, and plays a short trial message first. The shared judge demo never rings a phone.
+- No Twilio yet: **Test my alert** opens Hear the call, the same call in your browser.
+- No xAI key: the local safety rules still check every payment. (AI calls also need `XAI_ZDR_CONFIRMED=1`.)
+- No PayPal boxes: `/paypal-webhook` is off.
+- A fresh copy opens in **Dev mode** with sample data marked TEST (`BW_DEMO_DATA=on`). Turn Dev mode off in
+  Settings to use your own data, and for a real Test my alert phone call (Dev mode never rings a phone).
+- Costs: Render free plan $0 (sleeps after 15 minutes idle; history is lost on sleep or redeploy). Twilio bills
+  **your** Twilio account for real calls. xAI bills **your** key if you add one. PayPal sandbox is free.
+- The button only works while this GitHub repo is public.
+- Steps and the full box list: [JUDGE_TESTING.md](JUDGE_TESTING.md) ("Your own copy, in one click").
 
 
 ## Lawful use

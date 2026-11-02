@@ -137,7 +137,7 @@ def test_judge_testing_docs_match_page():
 def test_render_blueprint_free_and_secrets_not_synced():
     y = (ROOT / "render.yaml").read_text(encoding="utf-8")
     assert re.search(r"^\s+plan: free$", y, re.M) and "disk:" not in re.sub(r"#.*", "", y)
-    keys = dict(re.findall(r"- key: (\S+)\n\s+((?:sync: false|generateValue: true|value: \S+))", y))
+    keys = dict(re.findall(r"- key: (\S+)[^\n]*\n\s+((?:sync: false|generateValue: true|value: \S+))", y))
     for k in ("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM_NUMBER", "BW_OWNER_PHONE"):
         assert keys[k] == "sync: false"
     for k in ("BW_LOGIN_KEY", "BW_CALL_LINK_KEY"):

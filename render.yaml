@@ -1,42 +1,61 @@
-# Bridge Warden: YOUR OWN copy on Render. Used by the "Deploy to Render" button (this file must stay at the repo root).
+# Bridge Warden: YOUR OWN copy on Render, in one click. Used by the "Deploy to Render" button:
+#   https://render.com/deploy?repo=https://github.com/NefariousTrey/bridge-warden
 # Made by @Nefarious_Trey, with Grok.  Copyright 2026 Douglas Gibbons III.  Apache-2.0 (see LICENSE).
+# This file must stay at the repo root. The button only works while the repo is public.
 #
-# Render is only how YOU host your copy. Nothing here is deployed by Bridge Warden, and nobody else sees your keys.
+# Render is only how YOU host your copy, on YOUR own free Render account. Nobody else sees your keys.
 # Docs: Blueprint spec https://render.com/docs/blueprint-spec
 #       Deploy to Render button https://render.com/docs/deploy-to-render
 #       Free instances https://render.com/docs/free
-# The judge demo Blueprint moved to render-judge.yaml.
+# The old judge demo Blueprint is render-judge.yaml.
 #
-# What you fill in when you deploy (sync: false = Render asks you once, at Blueprint creation):
-#   TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER  your own Twilio account (you pay Twilio; call logs
-#                                                             stay in YOUR Twilio account only)
-#   BW_OWNER_PHONE     your phone, like +15551234567
-#   BW_PREFERRED_NAME  what the call calls you ("Hi Trey"). Blank = plain greeting.
-#   PAYPAL_CLIENT_ID, PAYPAL_SANDBOX_SECRET, BW_PAYPAL_WEBHOOK_ID  optional: your PayPal SANDBOX app and its webhook,
-#                      so PayPal's own events (outside Bridge Warden) reach POST /paypal-webhook. Blank = route off.
-#   BW_CALL_VOICE      blank or "man" = Twilio's free voice. "Google.en-US-Chirp3-HD-Charon" = our pick (Twilio bills about $0.039/call + minutes).
-# Made for you (generateValue: true = random 256-bit value, never in this file):
-#   BW_LOGIN_KEY       paste it on the login page. Find it: your service > Environment.
-#   BW_CALL_LINK_KEY   signs the short-lived call links, so only YOUR calls can use the call menu.
+# WHAT RENDER ASKS YOU (sync: false = Render asks once, when you deploy). EVERY ONE IS OPTIONAL.
+# If Render will not let a box stay empty, type: none   (Bridge Warden treats "none" as empty.)
+#   BW_OWNER_PHONE       your own phone for the alert call, like +15551234567. none = no phone call.
+#   TWILIO_ACCOUNT_SID   your Twilio Account SID (starts with AC). From console.twilio.com. none = no Twilio.
+#   TWILIO_AUTH_TOKEN    your Twilio Auth Token (secret). none = no Twilio.
+#   TWILIO_FROM_NUMBER   your Twilio phone number, like +15557654321. none = no Twilio.
+#                        No Twilio (or any of the four is none): Test my alert plays the call in your browser
+#                        (Hear the call). A Twilio trial can only call numbers you verified in Twilio.
+#   XAI_API_KEY          your xAI key (secret). none = no AI: the local safety rules still check every payment.
+#                        AI calls also need XAI_ZDR_CONFIRMED=1 (add it yourself after you turn on Zero Data
+#                        Retention for your xAI team). Without it: local rules only.
+#   PAYPAL_CLIENT_ID, PAYPAL_SANDBOX_SECRET, BW_PAYPAL_WEBHOOK_ID   your PayPal SANDBOX app and webhook, so
+#                        PayPal's own events reach POST /paypal-webhook. none = that route is off.
+# MADE FOR YOU (generateValue: true = a random 256-bit value, never in this file):
+#   BW_LOGIN_KEY         your login password. Find it: Render > your service > Environment > BW_LOGIN_KEY.
+#                        Paste it on your copy's login page.
+#   BW_CALL_LINK_KEY     signs the short-lived call links, so only YOUR calls can use the call menu.
+# SET FOR YOU (safe defaults):
+#   BW_DEMO_DATA=on      first start opens in Dev mode with sample payments marked TEST, so every page has
+#                        something to show. Turn Dev mode off in Settings to use your own data (and for a real
+#                        Test my alert phone call: Dev mode never rings a phone).
+#   BW_FREE_PLAN=on      shows "Free Render copy: download your proof often" on every page.
+#   BW_DATA_DIR=bw-data  where history and settings live (lost on restart on the free plan, see below).
 #
-# Optional, NOT in the list below (add them yourself in Render > your service > Environment, only if you want them):
+# Optional, add them yourself later in Render > your service > Environment:
+#   BW_PREFERRED_NAME    what the call calls you ("Hi Trey"). Blank = plain greeting.
+#   BW_CALL_VOICE        blank or "man" = Twilio's free voice. "Google.en-US-Chirp3-HD-Charon" = our pick
+#                        (Twilio bills about $0.039/call + minutes).
+#   BW_SITE_LOCK_PASSWORD  whole site behind a password (HTTP user "bw"), for a private test copy.
 #   BW_SMTP_HOST, BW_SMTP_PORT, BW_SMTP_USER, BW_SMTP_PASSWORD, BW_ALERT_EMAIL_FROM, BW_ALERT_EMAIL_TO
-#                      free email alerts and "Email me my proof", from YOUR own mail account (secret: the password)
-#   BW_PUBLIC_HOST     only for your own domain (Render sets RENDER_EXTERNAL_HOSTNAME for you)
+#                        free email alerts and "Email me my proof", from YOUR own mail account (secret: the password)
+#   BW_PUBLIC_HOST       only for your own domain (Render sets RENDER_EXTERNAL_HOSTNAME for you)
 #   BW_CALL_DETECT_MACHINE  "on" = Twilio answering-machine check (Twilio may bill extra)
 #   BW_JUDGE_VIDEO_URL, BW_JUDGE_REPO_URL  links shown on the Judge Guide page (/judges)
-#   XAI_ZDR_CONFIRMED  "1" = you turned on Zero Data Retention for your xAI team (needed before any xAI call;
-#                      every reply is still checked for the ZDR header). XAI_API_KEY itself is in the list below.
+#   XAI_ZDR_CONFIRMED    "1" = you turned on Zero Data Retention for your xAI team (needed before any xAI call;
+#                        every reply is still checked for the ZDR header).
 #   BW_AG_STUDIO_LICENSE_KEY  your AG Studio key (secret). If set, the build also runs scripts/fetch_ag_studio.sh
-#                      (needs npm; the key itself is never printed). Not set = no AG Studio, everything else works.
+#                        (needs npm; the key itself is never printed). Not set = no AG Studio, everything else works.
 #   BW_JUDGE_KEY or BW_JUDGE_KEY_FILE  judge keys (secret), only if you run a judge demo. Each judge logs in with one.
-#   BW_JUDGE_XAI_CAP   xAI messages per judge key on YOUR xAI key (default 1000). After that: sample answers.
+#   BW_JUDGE_XAI_CAP     xAI messages per judge key on YOUR xAI key (default 1000). After that: sample answers.
 #   BW_CALL_MAX_SECONDS  hard max length of a real call (Twilio TimeLimit, default 1800 = 30 minutes)
 # PORT and RENDER_EXTERNAL_HOSTNAME are set by Render. Never put a real value for a secret in this file.
 #
-# FREE plan: no disk. Your history, audit log and settings live in BW_DATA_DIR on the service's own disk and are
-# LOST when the service spins down (after 15 minutes idle), restarts or redeploys. Your Twilio settings (above)
-# are kept. To keep history: a paid plan plus a disk (see the commented lines below).
+# FREE plan ($0): no disk. Your history, audit log and settings live in BW_DATA_DIR on the service's own disk and
+# are LOST when the service spins down (after 15 minutes idle), restarts or redeploys. The first visit after a
+# sleep takes about a minute. Your Render environment values (above) are kept. To keep history: a paid plan plus a
+# disk (see the commented lines below).
 services:
   - type: web
     name: bridge-warden
@@ -50,36 +69,33 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.7"
-      - key: BW_LOGIN_KEY
+      - key: BW_LOGIN_KEY            # your login password, made for you (Environment tab)
         generateValue: true
       - key: BW_CALL_LINK_KEY
         generateValue: true
-      - key: TWILIO_ACCOUNT_SID
+      - key: BW_OWNER_PHONE          # your phone, like +15551234567 (or none)
         sync: false
-      - key: TWILIO_AUTH_TOKEN
+      - key: TWILIO_ACCOUNT_SID      # your Twilio Account SID, starts with AC (or none)
         sync: false
-      - key: TWILIO_FROM_NUMBER
+      - key: TWILIO_AUTH_TOKEN       # your Twilio Auth Token, secret (or none)
         sync: false
-      - key: BW_OWNER_PHONE
+      - key: TWILIO_FROM_NUMBER      # your Twilio phone number, like +15557654321 (or none)
         sync: false
-      - key: BW_PREFERRED_NAME
+      - key: XAI_API_KEY             # optional: your own xAI key for the AI checks and chats (or none = local rules)
         sync: false
-      - key: BW_CALL_VOICE
-        sync: false
-      - key: XAI_API_KEY             # optional: your own xAI key for the AI checks and chats (blank = no AI)
-        sync: false
-      # Optional: watch your PayPal SANDBOX account (POST /paypal-webhook). All three blank = that route is off.
+      # Optional: watch your PayPal SANDBOX account (POST /paypal-webhook). All three none = that route is off.
       # Your sandbox app at developer.paypal.com > Apps & Credentials (Sandbox): Client ID and Secret.
-      - key: PAYPAL_CLIENT_ID        # optional: sandbox app Client ID
+      - key: PAYPAL_CLIENT_ID        # optional: sandbox app Client ID (or none)
         sync: false
-      - key: PAYPAL_SANDBOX_SECRET   # optional: sandbox app Secret (secret, never printed)
+      - key: PAYPAL_SANDBOX_SECRET   # optional: sandbox app Secret, secret (or none)
         sync: false
-      - key: BW_PAYPAL_WEBHOOK_ID    # optional: the Webhook ID PayPal shows after you add
+      - key: BW_PAYPAL_WEBHOOK_ID    # optional: the Webhook ID PayPal shows after you add (or none)
         sync: false                  # https://<your service>.onrender.com/paypal-webhook to the sandbox app
-      - key: BW_SITE_LOCK_PASSWORD   # optional: private test copy, whole site behind a password (user "bw")
-        sync: false
       - key: BW_DATA_DIR
         value: bw-data
+      # First start opens in Dev mode with sample data marked TEST. Nothing reaches PayPal or a phone.
+      - key: BW_DEMO_DATA
+        value: "on"
       # Shows "Free Render copy: download your proof often" on every page. Set to off with a paid disk.
       - key: BW_FREE_PLAN
         value: "on"

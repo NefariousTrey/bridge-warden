@@ -56,6 +56,8 @@ def scan_text(name: str, text: str) -> list:
                 continue  # judge mode: its OWN page address (Origin check / printed link); never fetched
             if name == "notify.py" and base.startswith("https://api.twilio.com/2010-04-01/Accounts/"):
                 continue  # experimental call-on-fraud: owner's own Twilio, opt-in only (net.OPT_IN_HOSTS)
+            if name == "web.py" and base == "https://render.com/deploy?repo=https://github.com/NefariousTrey/bridge-warden":
+                continue  # /judges Deploy to Render link: a plain link the judge clicks, never fetched by BW
             if name == "paypal_client.py" and "api-m.paypal.com" in base:
                 continue  # mentioned only to refuse it
             problems.append(f"{name}:{n}: URL not on the allowlist: {base}")

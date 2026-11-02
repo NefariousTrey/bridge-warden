@@ -229,10 +229,12 @@ def test_render_yaml_self_host_blueprint():
     assert re.search(r"^\s+plan: free$", y, re.M)
     assert 'startCommand: "python -m bridge_warden hosted"' in y
     assert "healthCheckPath: /healthz" in y and 'autoDeployTrigger: "off"' in y
-    blocks = dict(re.findall(r"- key: (\S+)\n\s+((?:sync: false|generateValue: true|value: \S+))", y))
-    for k in ("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM_NUMBER", "BW_OWNER_PHONE",
-              "BW_PREFERRED_NAME", "BW_CALL_VOICE"):
+    blocks = dict(re.findall(r"- key: (\S+)[^\n]*\n\s+((?:sync: false|generateValue: true|value: \S+))", y))
+    for k in ("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM_NUMBER", "BW_OWNER_PHONE"):
         assert blocks[k] == "sync: false", k
+    # DEPLOYBUTTON 2026-11-02: name and voice are no longer asked (fewer boxes); documented as add-later.
+    head = y.split("services:")[0]
+    assert "BW_PREFERRED_NAME" in head and "BW_CALL_VOICE" in head
     assert blocks["BW_LOGIN_KEY"] == blocks["BW_CALL_LINK_KEY"] == "generateValue: true"
     assert "judge" not in re.sub(r"#.*", "", y)
     assert (ROOT / "render-judge.yaml").exists()

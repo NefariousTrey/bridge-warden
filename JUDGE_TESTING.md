@@ -9,7 +9,7 @@ This is the one judge guide for Bridge Warden. (`proof/JUDGE_TESTING.md` only po
 3. No phone needed. No real phone calls. Hear the call plays the alert call in your browser.
 4. PayPal is sandbox only. No real money moves.
 5. All judges share one demo copy. Please turn Dev mode off when you are done.
-6. To run it yourself: it is open source. Bring your own Twilio and xAI keys.
+6. Want a real phone call? Press Deploy to Render below. Your own free copy, with your own Twilio.
 
 More on these:
 
@@ -64,6 +64,40 @@ On this demo, Test my alert opens Hear the call too. It never rings a phone.
 When you are done, go to **Settings** and press **Turn off Dev mode**.
 
 On your own computer (judge mode), use the scenario buttons on Home instead of Dev mode.
+
+## Your own copy, in one click (Deploy to Render)
+
+[Deploy to Render](https://render.com/deploy?repo=https://github.com/NefariousTrey/bridge-warden)
+
+This makes a full Bridge Warden on **your own** free Render account, from `render.yaml` in this repo.
+
+1. Press Deploy to Render. Sign in to Render (a free account is fine).
+2. Render asks for a few boxes. All are optional. Type none in any box you want to skip.
+3. Your phone and your own Twilio account details and Twilio number give you a real phone call. No Twilio: Test my alert plays the call in your browser.
+4. Your own xAI key is optional. No key: the local safety rules still check every payment.
+5. Your login key is made for you. Find it in Render: open your service, then Environment.
+6. Your copy opens in Dev mode with sample data marked TEST. Nothing reaches PayPal.
+7. For a real phone call, turn Dev mode off in Settings, then press Test my alert.
+
+Render's free plan costs nothing. Real calls are billed by Twilio to your own Twilio account. A Twilio trial is free but can only call numbers you verified.
+
+What Render asks (all optional; type `none` to skip a box):
+
+| Box | What to put | If you skip it |
+|---|---|---|
+| `BW_OWNER_PHONE` | your phone, like `+15551234567` | no phone call |
+| `TWILIO_ACCOUNT_SID` | your Twilio Account SID (starts with AC) | Test my alert plays the call in your browser |
+| `TWILIO_AUTH_TOKEN` | your Twilio Auth Token | same |
+| `TWILIO_FROM_NUMBER` | your Twilio phone number | same |
+| `XAI_API_KEY` | your own xAI key | local safety rules only |
+| `PAYPAL_CLIENT_ID`, `PAYPAL_SANDBOX_SECRET`, `BW_PAYPAL_WEBHOOK_ID` | your PayPal sandbox app and webhook | `/paypal-webhook` is off |
+
+Made for you: `BW_LOGIN_KEY` (your login key: paste it on the login page) and `BW_CALL_LINK_KEY`. Set for you: `BW_DEMO_DATA=on`
+(opens in Dev mode with sample data), `BW_FREE_PLAN=on`, `BW_DATA_DIR=bw-data`.
+
+Why your own Twilio: the shared judge demo never rings a phone. Real calls need a Twilio account, and each person
+uses their own, so calls and call logs stay in their own account. The button only works while the GitHub repo is
+public. On the free plan the copy sleeps after 15 minutes idle and forgets its history when it does.
 
 ## What the lights mean
 
