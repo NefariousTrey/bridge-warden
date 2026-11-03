@@ -98,9 +98,7 @@ By default the call uses Twilio's free basic voice (`man`). No extra cost, but i
 CALL_VOICE = "Google.en-US-Chirp3-HD-Charon"
 ```
 or in the Cloudflare dashboard, open Workers, then bridge-warden-call, then Settings, then Variables, and add the plain-text variable `CALL_VOICE`. If you place calls without the Worker, set `BW_CALL_VOICE` the same way on your computer.
-Natural voices cost a small Twilio fee per 100 characters spoken, billed to your own Twilio account ([Twilio voice pricing](https://www.twilio.com/en-us/voice/pricing/us), as of Aug 2026):
-- `Polly.Joanna` (Standard): $0.0008 per 100 characters, about $0.02 to $0.03 for a full call.
-- `Polly.Joanna-Neural` (Neural): $0.0032 per 100 characters, about $0.07 to $0.13 for a full call.
+Bridge Warden's natural voices are Google Chirp3-HD voices. They cost a small Twilio fee per 100 characters spoken, billed to your own Twilio account ([Twilio voice pricing](https://www.twilio.com/en-us/voice/pricing/us), as of Aug 2026):
 - **Call voice (our Worker):** `Google.en-US-Chirp3-HD-Charon` (Google Generative): about $0.039 per call (~300 characters) plus Twilio's per-minute call price (about $0.014 a minute in the US). Use the exact Twilio form `Google.<locale>-Chirp3-HD-<Name>`.
 - Leave it unset (or `man`) for the free voice. An unknown voice name falls back to the free voice.
 [Voice list](https://www.twilio.com/docs/voice/twiml/say/text-speech)
@@ -111,9 +109,7 @@ Natural voices cost a small Twilio fee per 100 characters spoken, billed to your
 | Tier | Example | About per call (~300 characters) |
 |---|---|---|
 | Free | `man`, `woman` (robotic) | free |
-| Standard | `Polly.Joanna`, `Polly.Matthew` | ~$0.0024 |
-| Neural | `Polly.Joanna-Neural` | ~$0.0096 |
-| Generative | `Google.en-US-Chirp3-HD-Charon` (our pick), `Polly.Matthew-Generative` | ~$0.039 |
+| Chirp (Google Generative) | `Google.en-US-Chirp3-HD-Charon` (our pick), `Google.en-US-Chirp3-HD-Aoede`, `Google.en-US-Chirp3-HD-Kore` | ~$0.039 |
 
 Every call also pays Twilio's minute price (about $0.014 a minute in the US). Twilio bills your own account.
 - **Default** means you have not picked a voice, so the server setting below is used. Bridge Warden's own Worker uses Charon.
@@ -121,7 +117,7 @@ Every call also pays Twilio's minute price (about $0.014 a minute in the US). Tw
 - **The Test my alert form** has its own voice box, used for that one test call only and never saved. Judges use this one.
 - The pick is saved as `"call_voice"` in your `policy.json`, and Settings only accepts voices from the list. If you edit the file by hand and the name is unknown, the call falls back to the free voice. The voice rides on the signed call link, so nobody can change it in the middle of a call.
 
-**By hand (server default).** Set `CALL_VOICE` on your Worker (see above) or `BW_CALL_VOICE` on your computer or Render to any name from [Twilio's voice list](https://www.twilio.com/docs/voice/twiml/say/text-speech), for example `Polly.Joanna-Neural`. This is the voice used when nothing is picked in Settings.
+**By hand (server default).** Set `CALL_VOICE` on your Worker (see above) or `BW_CALL_VOICE` on your computer or Render to `man`, `woman` or any Chirp3-HD name from [Twilio's voice list](https://www.twilio.com/docs/voice/twiml/say/text-speech) in the form `Google.<locale>-Chirp3-HD-<Name>`, for example `Google.en-US-Chirp3-HD-Kore`. Other names fall back to the free voice. This is the voice used when nothing is picked in Settings.
 
 ## Part 4 (optional). Call your Twilio number and hear the demo
 

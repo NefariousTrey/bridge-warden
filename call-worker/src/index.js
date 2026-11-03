@@ -186,11 +186,11 @@ export function walkLead(kind, test, choice) {
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");   // + cleanName
 const say = (t) => `<Say voice="man">${esc(String(t).slice(0, 600))}</Say>`;
 // VOICE 2026-10-26: the voice is a setting (CALL_VOICE, a plain Worker var, not a secret). Default "man" =
-// Twilio's free Basic voice. A natural voice (Polly / Google) costs a small Twilio text-to-speech fee per
+// Twilio's free Basic voice. A natural voice (Google Chirp3-HD only, since 2026-11-03) costs a small Twilio text-to-speech fee per
 // 100 characters, billed to the owner's own Twilio: https://www.twilio.com/en-us/voice/pricing/us
 // Only known voice-name shapes are allowed; anything else falls back to the free "man" voice.
 export const FREE_VOICE = "man";
-const VOICE_OK = /^(man|woman|alice|Polly\.[A-Z][A-Za-z\u00C0-\u017F]{1,20}(-(Neural|Generative))?|Google\.[a-z]{2,3}-[A-Z]{2}-(Standard|Wavenet|Neural2|Chirp3-HD)-[A-Za-z]{1,12})$/;
+const VOICE_OK = /^(man|woman|alice|Google\.[a-z]{2,3}-[A-Z]{2}-Chirp3-HD-[A-Za-z]{1,12})$/;
 export const voiceOf = (env) => {
   const v = String((env && env.CALL_VOICE) || "").trim();
   return VOICE_OK.test(v) ? v : FREE_VOICE;

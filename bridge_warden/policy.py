@@ -80,7 +80,7 @@ def validate(p) -> dict:
     if "call_retry_minutes" in p and not valid_call_retry_minutes(p["call_retry_minutes"]):
         errs.append("call_retry_minutes must be a list of up to 3 whole minutes, each 1 to 120 ([] = no retries)")
     if "call_voice" in p and not valid_call_voice(p["call_voice"]):
-        errs.append("call_voice must be empty or a Twilio voice name like Google.en-US-Chirp3-HD-Charon, Polly.Joanna or man")
+        errs.append("call_voice must be empty or a Twilio voice name like Google.en-US-Chirp3-HD-Charon (Google Chirp3-HD) or man")
     if "preferred_name" in p and not valid_preferred_name(p["preferred_name"]):
         errs.append("preferred_name must be empty or up to 40 letters, spaces, hyphens or apostrophes")
     q = p.get("quiet_hours", [0, 6])

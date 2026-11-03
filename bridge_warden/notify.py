@@ -218,11 +218,10 @@ class DryRunCallAdapter(CallAdapter):
 
 
 # VOICE 2026-10-26: the <Say> voice is a setting. Default "man" = Twilio's free Basic voice. Natural voices
-# (Polly.* / Google.*) cost a small Twilio text-to-speech fee per 100 characters, billed to the owner's own
+# (Google Chirp3-HD only, since 2026-11-03) cost a small Twilio text-to-speech fee per 100 characters, billed to the owner's own
 # Twilio: https://www.twilio.com/en-us/voice/pricing/us . Same rule as call-worker/src/index.js (CALL_VOICE).
 FREE_VOICE = "man"
-VOICE_OK = re.compile(r"^(man|woman|alice|Polly\.[A-Z][A-Za-z\u00C0-\u017F]{1,20}(-(Neural|Generative))?|"
-                      r"Google\.[a-z]{2,3}-[A-Z]{2}-(Standard|Wavenet|Neural2|Chirp3-HD)-[A-Za-z]{1,12})$")
+VOICE_OK = re.compile(r"^(man|woman|alice|Google\.[a-z]{2,3}-[A-Z]{2}-Chirp3-HD-[A-Za-z]{1,12})$")
 
 
 def voice_of(v) -> str:
@@ -234,17 +233,16 @@ def voice_of(v) -> str:
 # Settings (policy.json "call_voice"). Same allow-list as the Worker. Twilio's list: https://www.twilio.com/docs/voice/twiml/say/text-speech
 # Cost = Twilio text-to-speech for a ~300-character call, billed to the owner's own Twilio, plus minutes (~$0.014/min US).
 DEFAULT_VOICE = "Google.en-US-Chirp3-HD-Charon"
-VOICE_TIER_COST = {"Free": "$0", "Standard": "~$0.0024", "Neural": "~$0.0096", "Generative": "~$0.039"}
+VOICE_TIER_COST = {"Free": "$0", "Generative": "~$0.039"}   # Free = Twilio basic; Generative = Google Chirp3-HD
 MINUTE_COST = "~$0.014/min"
 VOICE_CHOICES = (   # (Twilio voice id, plain label) -- the Settings picker; every id passes VOICE_OK
     ("Google.en-US-Chirp3-HD-Charon", "Charon (Google, male) - our pick"),
     ("Google.en-US-Chirp3-HD-Aoede", "Aoede (Google, female)"),
     ("Google.en-US-Chirp3-HD-Puck", "Puck (Google, male)"),
-    ("Polly.Matthew-Generative", "Matthew (Amazon, male)"),
-    ("Polly.Joanna-Neural", "Joanna (Amazon, female)"),
-    ("Polly.Matthew-Neural", "Matthew (Amazon, male)"),
-    ("Polly.Joanna", "Joanna (Amazon, female)"),
-    ("Polly.Matthew", "Matthew (Amazon, male)"),
+    ("Google.en-US-Chirp3-HD-Kore", "Kore (Google, female)"),
+    ("Google.en-US-Chirp3-HD-Fenrir", "Fenrir (Google, male)"),
+    ("Google.en-US-Chirp3-HD-Leda", "Leda (Google, female)"),
+    ("Google.en-US-Chirp3-HD-Orus", "Orus (Google, male)"),
     ("man", "Basic man (Twilio, robotic)"),
     ("woman", "Basic woman (Twilio, robotic)"),
 )
@@ -254,11 +252,7 @@ def voice_tier(v) -> str:
     v = voice_of(v)
     if v in ("man", "woman", "alice"):
         return "Free"
-    if v.endswith("-Generative") or "-Chirp3-HD-" in v:
-        return "Generative"
-    if v.endswith("-Neural") or "-Neural2-" in v or "-Wavenet-" in v:
-        return "Neural"
-    return "Standard"
+    return "Generative"   # every other allowed voice is Google Chirp3-HD
 
 
 def voice_cost(v) -> str:

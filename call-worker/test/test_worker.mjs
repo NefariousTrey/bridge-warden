@@ -235,15 +235,16 @@ console.log("linktoken tests ok");
   assert.equal(FREE_VOICE, "man");
   assert.equal(voiceOf({}), "man");
   assert.equal(voiceOf(undefined), "man");
-  for (const ok of ["Polly.Joanna", "Polly.Joanna-Neural", "Polly.Matthew-Generative", "Google.en-US-Neural2-F",
-    "Google.en-US-Chirp3-HD-Aoede", "Google.en-US-Standard-C", "woman", "alice"]) assert.equal(voiceOf({ CALL_VOICE: ok }), ok);
-  for (const bad of ['Polly.Joanna" onload="x', "Polly.<b>", "ElevenLabs.x", "Polly.joanna", "Polly.Joanna-Neural2",
+  for (const ok of ["Google.en-US-Chirp3-HD-Leda", "Google.en-US-Chirp3-HD-Kore", "Google.en-US-Chirp3-HD-Fenrir", "Google.en-GB-Chirp3-HD-Orus",
+    "Google.en-US-Chirp3-HD-Aoede", "woman", "alice"]) assert.equal(voiceOf({ CALL_VOICE: ok }), ok);
+  for (const bad of ['Google.en-US-Chirp3-HD-Leda" onload="x', "Google.<b>", "ElevenLabs.x", "Google.en-us-Chirp3-HD-Leda",
+    "Google.en-US-Neural2-F", "Google.en-US-Standard-C", "Google.en-US-Wavenet-D",
     "x".repeat(200), " "]) assert.equal(voiceOf({ CALL_VOICE: bad }), "man", bad);
   const base = voiceTwiml(B, true, false, "unauthorized", "Trey");
   assert.equal(applyVoice(base, "man"), base);
-  assert.equal(applyVoice(base, 'Polly.x" a="'), base);                     // bad name = untouched
-  const j = applyVoice(base, "Polly.Joanna");
-  assert.ok(!j.includes('voice="man"') && j.includes('<Say voice="Polly.Joanna" language="en-US">Hello Trey, this is Bridge Warden.'));
+  assert.equal(applyVoice(base, 'Google.x" a="'), base);                     // bad name = untouched
+  const j = applyVoice(base, "Google.en-US-Chirp3-HD-Leda");
+  assert.ok(!j.includes('voice="man"') && j.includes('<Say voice="Google.en-US-Chirp3-HD-Leda" language="en-US">Hello Trey, this is Bridge Warden.'));
   assert.ok(j.includes(CALL_MENU) && j.split("<Say ").length === base.split("<Say ").length);   // same words, same Says
   // through the Worker: link-signed /voice with CALL_VOICE set -> 200 + new voice; without a link -> 403.
   const KEY = "link-key-test-0123456789abcdef", T = Math.floor(Date.now() / 1000);
@@ -251,16 +252,16 @@ console.log("linktoken tests ok");
     ApiVersion: "2010-04-01", Direction: "outbound-api" };
   const u = new URL(B + "/voice?t=1&n=1&nm=Trey"); u.searchParams.set("e", String(T + 600));
   u.searchParams.set("s", await linkSig(KEY, linkMessage(u.pathname, u.searchParams, P)));
-  const envV = { ...env, CALL_LINK_KEY: KEY, CALL_VOICE: "Polly.Joanna" };
+  const envV = { ...env, CALL_LINK_KEY: KEY, CALL_VOICE: "Google.en-US-Chirp3-HD-Leda" };
   const rv = await post(u.pathname + u.search, P, {}, envV), bv = await rv.text();
   assert.equal(rv.status, 200);
-  assert.ok(bv.includes('<Say voice="Polly.Joanna" language="en-US">Hello Trey, this is Bridge Warden.') && !bv.includes('voice="man"'));
+  assert.ok(bv.includes('<Say voice="Google.en-US-Chirp3-HD-Leda" language="en-US">Hello Trey, this is Bridge Warden.') && !bv.includes('voice="man"'));
   assert.ok((bv.match(/<\?xml/g) || []).length === 1 && /action="[^"]*s=/.test(bv));
   assert.equal((await post("/voice?t=1&n=1&nm=Trey", P, {}, envV)).status, 403);
   // header-signed path (no link key) gets the voice too; no setting = the free voice.
   const hs = await twilioSignature(env.TWILIO_AUTH_TOKEN, B + "/voice?t=1&n=1", P);
-  const rh = await post("/voice?t=1&n=1", P, { "X-Twilio-Signature": hs }, { ...env, CALL_VOICE: "Polly.Joanna-Neural" });
-  assert.ok(rh.status === 200 && (await rh.text()).includes('voice="Polly.Joanna-Neural"'));
+  const rh = await post("/voice?t=1&n=1", P, { "X-Twilio-Signature": hs }, { ...env, CALL_VOICE: "Google.en-US-Chirp3-HD-Kore" });
+  assert.ok(rh.status === 200 && (await rh.text()).includes('voice="Google.en-US-Chirp3-HD-Kore"'));
   const rf = await post("/voice?t=1&n=1", P, { "X-Twilio-Signature": hs }, env);
   assert.ok(rf.status === 200 && (await rf.text()).includes('<Say voice="man">Hello, this is Bridge Warden.'));
 }
@@ -271,30 +272,30 @@ console.log("voice tests ok");
 {
   const { callVoice, carryVoice } = await import("../src/index.js");
   const E = { CALL_VOICE: "Google.en-US-Chirp3-HD-Charon" };
-  assert.equal(callVoice(new URL(B + "/voice?t=1&v=Polly.Joanna-Neural"), E), "Polly.Joanna-Neural");
-  assert.equal(callVoice(new URL(B + "/voice?t=1&v=" + encodeURIComponent('Polly.x" a="')), E), "man");
+  assert.equal(callVoice(new URL(B + "/voice?t=1&v=Google.en-US-Chirp3-HD-Kore"), E), "Google.en-US-Chirp3-HD-Kore");
+  assert.equal(callVoice(new URL(B + "/voice?t=1&v=" + encodeURIComponent('Google.x" a="')), E), "man");
   assert.equal(callVoice(new URL(B + "/voice?t=1&v=Google.evil"), E), "man");
   assert.equal(callVoice(new URL(B + "/voice?t=1"), E), E.CALL_VOICE);
   assert.equal(callVoice(new URL(B + "/voice?t=1"), {}), "man");
-  const cv = carryVoice(`<Gather action="${B}/gather?t=1&amp;n=1"/><Redirect>https://evil.example/gather?t=1</Redirect>`, B, "Polly.Joanna");
-  assert.ok(cv.includes(`${B}/gather?t=1&amp;n=1&amp;v=Polly.Joanna"`) && cv.includes("https://evil.example/gather?t=1<"));
-  assert.equal(carryVoice(`<a action="${B}/gather?t=1&amp;v=man">`, B, "Polly.Joanna"), `<a action="${B}/gather?t=1&amp;v=man">`);
+  const cv = carryVoice(`<Gather action="${B}/gather?t=1&amp;n=1"/><Redirect>https://evil.example/gather?t=1</Redirect>`, B, "Google.en-US-Chirp3-HD-Leda");
+  assert.ok(cv.includes(`${B}/gather?t=1&amp;n=1&amp;v=Google.en-US-Chirp3-HD-Leda"`) && cv.includes("https://evil.example/gather?t=1<"));
+  assert.equal(carryVoice(`<a action="${B}/gather?t=1&amp;v=man">`, B, "Google.en-US-Chirp3-HD-Leda"), `<a action="${B}/gather?t=1&amp;v=man">`);
   const KEY = "link-key-test-0123456789abcdef", T = Math.floor(Date.now() / 1000);
   const P = { AccountSid: "ACtest", To: "+15550001111", From: "+15550002222", CallSid: "CA1", CallStatus: "in-progress",
     ApiVersion: "2010-04-01", Direction: "outbound-api" };
-  const u = new URL(B + "/voice?t=1&n=1&nm=Trey&v=Polly.Joanna-Neural"); u.searchParams.set("e", String(T + 600));
+  const u = new URL(B + "/voice?t=1&n=1&nm=Trey&v=Google.en-US-Chirp3-HD-Kore"); u.searchParams.set("e", String(T + 600));
   u.searchParams.set("s", await linkSig(KEY, linkMessage(u.pathname, u.searchParams, P)));
   const envP = { ...env, CALL_LINK_KEY: KEY, ...E };
   const r = await post(u.pathname + u.search, P, {}, envP), b = await r.text();
   assert.equal(r.status, 200);
-  assert.ok(b.includes('<Say voice="Polly.Joanna-Neural" language="en-US">Hello Trey, this is Bridge Warden.') && !b.includes("Charon"));
+  assert.ok(b.includes('<Say voice="Google.en-US-Chirp3-HD-Kore" language="en-US">Hello Trey, this is Bridge Warden.') && !b.includes("Charon"));
   const act = b.match(/action="([^"]+)"/)[1].replaceAll("&amp;", "&");
-  assert.ok(act.includes("v=Polly.Joanna-Neural") && /[?&]s=/.test(act));               // follow-up carries v, signed
+  assert.ok(act.includes("v=Google.en-US-Chirp3-HD-Kore") && /[?&]s=/.test(act));               // follow-up carries v, signed
   const f = await post(new URL(act).pathname + new URL(act).search, { ...P, Digits: "1" }, {}, envP);
-  assert.ok(f.status === 200 && (await f.text()).includes('voice="Polly.Joanna-Neural"'));
-  const tampered = (u.pathname + u.search).replace("v=Polly.Joanna-Neural", "v=Polly.Matthew-Generative");
+  assert.ok(f.status === 200 && (await f.text()).includes('voice="Google.en-US-Chirp3-HD-Kore"'));
+  const tampered = (u.pathname + u.search).replace("v=Google.en-US-Chirp3-HD-Kore", "v=Google.en-US-Chirp3-HD-Fenrir");
   assert.equal((await post(tampered, P, {}, envP)).status, 403);                         // v is signed
-  assert.equal((await post("/voice?t=1&n=1&v=Polly.Joanna-Neural", P, {}, envP)).status, 403);   // no token
+  assert.equal((await post("/voice?t=1&n=1&v=Google.en-US-Chirp3-HD-Kore", P, {}, envP)).status, 403);   // no token
 }
 console.log("voicepick tests ok");
 // NORECORD 2026-10-27: the Worker never adds call recording, whatever the link says.

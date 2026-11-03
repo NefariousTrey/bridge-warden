@@ -38,7 +38,6 @@ Outside services (you sign up yourself; their terms apply to you):
     used ONLY through Twilio's <Say> (we never call Google directly; Twilio bills it).
     Twilio TTS docs: https://www.twilio.com/docs/voice/twiml/say/text-speech
     Google terms: https://cloud.google.com/terms/service-terms
-    (Amazon Polly voices are also allowed through Twilio if the owner picks one.)
   - Cloudflare Workers (call-worker/, optional, owner deploys with wrangler): the phone
     menu endpoints. Terms: https://www.cloudflare.com/terms/
   - Render (render.yaml / render-judge.yaml blueprints, optional): hosting your own copy.

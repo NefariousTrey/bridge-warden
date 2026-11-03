@@ -201,11 +201,11 @@ def test_not_set_up_without_any_secret(tmp_path):
 
 
 def test_call_voice_choice(tmp_path):
-    env = env_for(tmp_path, BW_CALL_VOICE="Polly.Joanna")
+    env = env_for(tmp_path, BW_CALL_VOICE="Google.en-US-Chirp3-HD-Leda")
     cfg = Ho.hosted_settings(env)
     u = urllib.parse.urlsplit(signed("/voice?t=1&n=1"))
     _, body, _ = Ho.answer_call(cfg, env, u.path, u.query, {"To": "+15550002222", "AccountSid": SID}, "")
-    assert 'voice="Polly.Joanna"' in body
+    assert 'voice="Google.en-US-Chirp3-HD-Leda"' in body
     _, body2, _ = Ho.answer_call(cfg, {}, u.path, u.query, {"To": "+15550002222", "AccountSid": SID}, "")
     assert 'voice="man"' in body2
 

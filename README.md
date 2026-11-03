@@ -489,7 +489,7 @@ Our prize target is **AG Grid** (the History grid). Render is **only** an easy w
 Docs: https://render.com/docs/deploy-to-render and https://render.com/docs/blueprint-spec .)
 
 - Render asks you for: your Twilio Account SID, Auth Token and phone number, your own phone, your preferred
-  name, and the call voice (blank = "man", Twilio's free voice; or `Polly.Joanna`).
+  name, and the call voice (blank = "man", Twilio's free voice; or a Chirp voice like `Google.en-US-Chirp3-HD-Charon`).
   (Since 2026-11-02 Render no longer asks for the name and voice. Add `BW_PREFERRED_NAME` or `BW_CALL_VOICE`
   later under Environment if you want them. See the 2026-11-02 update below.)
 - Render makes two random secrets for you: `BW_LOGIN_KEY` (paste it on the login page) and `BW_CALL_LINK_KEY`.
@@ -656,7 +656,7 @@ Everything below is not ours. Full text with licence links: [NOTICE](NOTICE).
 | PayPal REST APIs (sandbox) | the money moves Bridge Warden guards; webhooks | https://www.paypal.com/us/legalhub/paypal/useragreement-full |
 | xAI API (Grok) | optional second opinion, help chats, AG Studio chat | https://x.ai/legal/terms-of-service-enterprise |
 | Twilio Voice | optional alert call (calls only, no texts) | https://www.twilio.com/en-us/legal/tos |
-| Google Chirp3-HD voice (via Twilio `<Say>`) | the call's voice (Polly optional) | https://cloud.google.com/terms/service-terms |
+| Google Chirp3-HD voice (via Twilio `<Say>`) | the call's voice | https://cloud.google.com/terms/service-terms |
 | Cloudflare Workers + Wrangler | optional phone menu Worker (`call-worker/`) | https://www.cloudflare.com/terms/ ; Wrangler MIT OR Apache-2.0 |
 | Render | optional hosting blueprints | https://render.com/terms |
 | Channel3 | optional price check (own key) | https://www.trychannel3.com/terms |
