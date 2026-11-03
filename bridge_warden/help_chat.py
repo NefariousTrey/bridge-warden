@@ -10,7 +10,7 @@ Both walk you through a fix step by step, the same way the fraud call walks you 
 come from LOCAL rules (free, no AI). "Next" / "done" moves to the next step without any AI call. Only a real
 question goes to xAI, with redacted data, short answers, and the usage the API reports shown under the answer.
 Neither chat can approve, ignore, turn anything green, change a setting or move money. Their answers are text.
-Made by @Nefarious_Trey, with Grok. Copyright 2026 Douglas Gibbons III. Apache-2.0.
+Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
 """
 from __future__ import annotations
 

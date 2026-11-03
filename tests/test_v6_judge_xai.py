@@ -1,4 +1,4 @@
-# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Douglas Gibbons III.  Apache-2.0.
+# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
 """Oct 27 2026 (Trey): the hosted judge demo uses REAL xAI on our key, capped per judge key (BW_JUDGE_XAI_CAP,
 default 1000). At the cap: sample answer + "Judge AI limit reached, showing sample answer", nothing sent, no cost.
 Also: real calls have a hard max length (Twilio TimeLimit, BW_CALL_MAX_SECONDS, default 1800 = 30 minutes).

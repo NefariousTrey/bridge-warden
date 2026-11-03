@@ -1,6 +1,6 @@
 # Asset notice
 
-Code: Apache License 2.0 (see `LICENSE` and `NOTICE`). Copyright 2026 Douglas Gibbons III
+Code: Apache License 2.0 (see `LICENSE` and `NOTICE`). Copyright 2026 Trey (@Nefarious_Trey)
 
 ## The status dots: MIT License (on their own)
 
@@ -11,7 +11,7 @@ logo art. Each folder has its own `LICENSE` (MIT) and `NOTICE.md`:
 - `assets/dots-trey-cvd-20261026/`: Trey's colour-blind status orbs. Art by @Nefarious_Trey.
 - `assets/dots-trey-energy-full-20261026/`: Trey's energy status dots, full version (circle cut). Art by @Nefarious_Trey.
 
-Copyright 2026 Douglas Gibbons III
+Copyright 2026 Trey (@Nefarious_Trey)
 Made by @Nefarious_Trey,
 with Grok.
 
@@ -25,10 +25,10 @@ Anyone who reuses the dots must keep that copyright line and the MIT permission 
 - Trey's Bridge Warden logo icon (shield, key and orb, no words) and the cover art, including
   `bridge_warden/static/bw-mark.png` and `bw-mark@2x.png` (the faint top-right watermark, made from
   `brand/BW_logo_icon_original.jpg`) and the cover images in `brand/`. Art by @Nefarious_Trey.
-  Copyright 2026 Douglas Gibbons III. All rights reserved. NOT covered by the Apache license.
+  Copyright 2026 Trey (@Nefarious_Trey). All rights reserved. NOT covered by the Apache license.
 - Any music or audio used with the project or its demo videos (including Trey's Suno tracks).
 
-These stay © 2026 Douglas Gibbons III, all rights reserved. Please do not reuse them without asking.
+These stay © 2026 Trey (@Nefarious_Trey), all rights reserved. Please do not reuse them without asking.
 
 (Changed from MIT to Apache 2.0 on 2026-10-26, Trey's choice. Old text kept in `ASSETS_NOTICE.md.bak-20261026-apache`.)
 

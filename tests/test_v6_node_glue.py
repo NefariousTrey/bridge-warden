@@ -1,5 +1,5 @@
 """v6: run the node tests for the AG Studio glue (bw-studio.js) when node is installed.
-Made by @Nefarious_Trey, with Grok.  Copyright 2026 Douglas Gibbons III.  Apache 2.0."""
+Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache 2.0."""
 import shutil
 import subprocess
 from pathlib import Path

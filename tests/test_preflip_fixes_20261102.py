@@ -1,5 +1,5 @@
 # Made by @Nefarious_Trey,
-# with Grok.  Copyright 2026 Douglas Gibbons III.  Apache-2.0.
+# with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
 """PREFLIP 2026-11-02 (pre-flip audit, MUST-FIX 1): a hosted judge must never cause a real Twilio call,
 not even later through the missed-call retry that runs on the background thread with no judge context.
 Reproduces the audit's path (judge AG red raise with Dev mode OFF, then a background tick 3 hours later)

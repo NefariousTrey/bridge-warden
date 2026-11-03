@@ -1,7 +1,7 @@
 """Logo v7b (orb-only recolour fixed; the v7 files are kept on disk unused): Trey's two exact logos (sent Oct 26, 2026, ~10 PM ET), cropped tight (shield + key whole) for the header.
 Made by @Nefarious_Trey,
 with Grok.
-Copyright 2026 Douglas Gibbons III. Trey's art: all rights reserved (see ASSETS_NOTICE.md).
+Copyright 2026 Trey (@Nefarious_Trey). Trey's art: all rights reserved (see ASSETS_NOTICE.md).
 
 Reads (never changed):  brand/BW_logo_navy_fill_trey_20261026.png   (navy fill, for pages with the navy header)
                         brand/BW_logo_white_fill_trey_20261026.jpg  (white fill, Guard History + its Why? page)

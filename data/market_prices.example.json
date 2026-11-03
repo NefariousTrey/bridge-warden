@@ -1,6 +1,6 @@
 {
   "_about": "EXAMPLE prices for the Bridge Warden demo only. These are made-up round numbers, NOT real store prices and NOT a claim about what any product costs. Swap this file for a real price source later (see bridge_warden/market_price.py).",
-  "_credit": "Made by @Nefarious_Trey, with Grok. Copyright 2026 Douglas Gibbons III. Apache-2.0 like the code.",
+  "_credit": "Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0 like the code.",
   "source": "example",
   "currency": "USD",
   "items": [

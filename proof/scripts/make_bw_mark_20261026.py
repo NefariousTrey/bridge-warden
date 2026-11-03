@@ -1,7 +1,7 @@
 """Make the Bridge Warden watermark (icon only, no words) from Trey's original art.
 Reads brand/BW_logo_icon_original.jpg (never changed). Removes the outside white, keeps soft edges,
 writes bridge_warden/static/bw-mark.png (128px) and bw-mark@2x.png (256px).
-Made by @Nefarious_Trey, with Grok. Copyright 2026 Douglas Gibbons III. Logo art: all rights reserved."""
+Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey). Logo art: all rights reserved."""
 from pathlib import Path
 import numpy as np
 from PIL import Image

@@ -373,7 +373,7 @@ THREAT_MODEL.md, SECURITY.md   what we defend against and how
 ## License
 
 **Code: Apache License 2.0.** See [LICENSE](LICENSE) and [NOTICE](NOTICE).
-Copyright 2026 Douglas Gibbons III  
+Copyright 2026 Trey (@Nefarious_Trey)  
 Made by @Nefarious_Trey,  
 with Grok.
 
@@ -476,7 +476,7 @@ does not replace it.
   numbers can call in.
 - **Since then:** a real call was placed and answered from a live PayPal sandbox event (Oct 27; see
   "Call me on fraud" above). The app is not deployed publicly.
-- Copyright lines now use the legal name only: "Copyright 2026 Douglas Gibbons III".
+- Copyright lines read: "Copyright 2026 Trey (@Nefarious_Trey)".
 - Tests: `tests/test_v4_hear.py`, `tests/test_v4_call_menu.py`, `node call-worker/test/test_worker.mjs`.
 
 ## Update 2026-10-26 (night): host your own copy on Render (optional)
@@ -504,7 +504,7 @@ Docs: https://render.com/docs/deploy-to-render and https://render.com/docs/bluep
 
 Made by @Nefarious_Trey,  
 with Grok.  
-Copyright 2026 Douglas Gibbons III.
+Copyright 2026 Trey (@Nefarious_Trey).
 
 
 ## Update 2026-11-02: one-click Deploy to Render, with your own Twilio
@@ -670,7 +670,7 @@ Everything below is not ours. Full text with licence links: [NOTICE](NOTICE).
 | Pillow, NumPy, SciPy | one-off art scripts in `proof/scripts/` only | MIT-CMU, BSD-3, BSD-3 |
 | Google Chrome, FFmpeg, Node.js | screenshots, proof video, JS tests (tools, not shipped) | Chrome ToS, LGPL/GPL, MIT |
 
-The call Worker has no npm dependencies. Code: Apache 2.0, Copyright 2026 Douglas Gibbons III.
+The call Worker has no npm dependencies. Code: Apache 2.0, Copyright 2026 Trey (@Nefarious_Trey).
 
 Made by @Nefarious_Trey,  
 with Grok.
@@ -681,7 +681,7 @@ with Grok.
 Corrections from the v6 audit. The text before each edit is kept in a dated backup (not shipped).
 
 - **Credit.** Designed and built by @Nefarious_Trey, with Grok as a coding assistant. The credit reads
-  "Made by @Nefarious_Trey, with Grok." The legal name appears only in the copyright line.
+  "Made by @Nefarious_Trey, with Grok." The copyright line reads "Copyright 2026 Trey (@Nefarious_Trey)".
 - **Red never straight to green, Off included.** Off shows red. Turning Bridge Warden back on now steps to
   **yellow** (paused) with the card "Back on: confirm all is fine". Only the owner's own **It's fixed** click (or
   Ignore with **I'm sure** ticked) turns it green. The lines above that said "goes straight to green" and

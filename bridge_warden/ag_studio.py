@@ -11,7 +11,7 @@ BW_AG_STUDIO_LICENSE_KEY, the watermark goes away; the AI chat panel needs a key
 The chat panel's model is xAI, called ONLY by this server (/ag-studio/v1/responses). Your xAI key never goes to the
 browser and is never logged. The proxy forces the model, caps size and length, needs your login, keeps the same
 Zero Data Retention gate as every other xAI call, and logs only token counts and cost (never text, never keys).
-Made by @Nefarious_Trey, with Grok. Copyright 2026 Douglas Gibbons III. Apache-2.0.
+Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
 """
 from __future__ import annotations
 

@@ -1,7 +1,7 @@
 """v6 History page: the BW AG Grid agent section, the two help chats, and their owner-only buttons.
 Server-rendered and CSP-safe (no inline styles or scripts; SVG charts use attributes only). The page works
 without JavaScript; JS only adds the spending grid and enables Ignore after "I'm sure" is ticked.
-Made by @Nefarious_Trey, with Grok. Copyright 2026 Douglas Gibbons III. Apache-2.0.
+Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
 """
 from __future__ import annotations
 

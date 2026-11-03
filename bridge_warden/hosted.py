@@ -1,6 +1,6 @@
 """Bridge Warden on YOUR OWN Render service ("Deploy to Render" button, render.yaml at the repo root).
 
-Made by @Nefarious_Trey, with Grok.  Copyright 2026 Douglas Gibbons III.  Apache-2.0 (see LICENSE).
+Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0 (see LICENSE).
 
 What runs here: your own dashboard (Home, Money, History, Settings) and the real "Test my alert" phone call
 through YOUR OWN Twilio account. The call menu (/voice, /gather, /other, /walk, /inbound) is served by this same

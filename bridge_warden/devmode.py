@@ -1,4 +1,4 @@
-"""Dev mode (test only). Made by @Nefarious_Trey, with Grok.  Copyright 2026 Douglas Gibbons III.
+"""Dev mode (test only). Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).
 
 While Dev mode is ON:
 - Nothing reaches a real account. The Gate never calls PayPal (no orders, payouts or refunds), every new request

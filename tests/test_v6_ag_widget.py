@@ -1,7 +1,7 @@
 """v6: the "BW Light" AG Studio custom widget (bridge_warden/ag_light.py + static/bw-light-widget.js).
 Its two owner buttons run only Bridge Warden's existing rules: red never goes straight to green, agents can only
 raise the light, and nothing here can approve, ignore, send, release a hold or move money.
-Made by @Nefarious_Trey, with Grok.  Copyright 2026 Douglas Gibbons III.  Apache 2.0.
+Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache 2.0.
 Fakes only: fake PayPal, fake alerts. Nothing real is called."""
 import json
 import shutil

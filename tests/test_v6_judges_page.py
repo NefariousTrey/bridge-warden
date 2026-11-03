@@ -1,4 +1,4 @@
-# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Douglas Gibbons III.  Apache-2.0.
+# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
 """Judge Guide (/judges), Oct 27 2026: a real BW page, public, plain words, big numbered steps, Light/Dark works,
 no keys or logins on it, and linked from the nav, Home, the judge landing and the hosted login page."""
 import re

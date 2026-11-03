@@ -1,5 +1,5 @@
 // Bridge Warden call helper: a tiny Cloudflare Worker for the owner's OWN Twilio test call (CALL_SCRIPT_v5).
-// Copyright 2026 Douglas Gibbons III
+// Copyright 2026 Trey (@Nefarious_Trey)
 // Apache License 2.0 (see ../LICENSE and ../NOTICE).
 //
 // Twilio posts the caller's keypress or speech here, because Twilio can only reach a public https address.

@@ -1,5 +1,5 @@
 /* Bridge Warden v6: the BW AG Grid agent chat panel, built on AG Studio's Agent Framework.
-   Made by @Nefarious_Trey, with Grok. Copyright 2026 Douglas Gibbons III. Apache-2.0 (this file only).
+   Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0 (this file only).
    AG Studio itself is commercial software by AG Grid Ltd; it is NOT part of this repo (scripts/fetch_ag_studio.sh).
    - The model is xAI, reached ONLY through Bridge Warden's own server (/ag-studio/v1/responses). No xAI key here.
    - Data is redacted (groups, months, amounts, flag kinds). No merchant names, emails or ids.

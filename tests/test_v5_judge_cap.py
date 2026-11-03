@@ -1,7 +1,7 @@
 """Judges get at most 3 REAL voice test calls per judge key (server-side, persisted). The 4th is refused politely
 and no call is placed. The 20-minute cooldown and the 93-second judge delay stay. The key is never stored or logged.
 Non-judges are not capped. Offline only: fake timers, a fake 'real' adapter, no network.
-Made by @Nefarious_Trey, with Grok. Copyright 2026 Douglas Gibbons III."""
+Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey)."""
 from test_v4_alert_test import drill, recs  # noqa: F401
 from test_v4_ui import setup, token  # noqa: F401  (fixture)
 from bridge_warden import notify as N

@@ -1,4 +1,4 @@
-# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Douglas Gibbons III.  Apache-2.0.
+# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
 """Light / Dark theme (Trey, Oct 26 2026 10:12 PM ET). Light is the default: white header + white logo.
 Dark: dark header and page + navy logo. Saved per browser (bw_theme cookie) and, for the owner, in policy.json.
 Server-rendered on <html data-theme>, so no flash and no inline styles or scripts (strict CSP)."""

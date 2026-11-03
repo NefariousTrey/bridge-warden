@@ -6,7 +6,7 @@ MIT License (see `LICENSE` in this folder). This covers every image in this fold
 The dots are MIT on their own: separate from the code (Apache 2.0, see `LICENSE` and `NOTICE` at the repo
 root) and separate from the logo art (all rights reserved).
 
-Copyright 2026 Douglas Gibbons III
+Copyright 2026 Trey (@Nefarious_Trey)
 Made by @Nefarious_Trey,
 with Grok.
 

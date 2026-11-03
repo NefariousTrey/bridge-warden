@@ -1,4 +1,4 @@
-# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Douglas Gibbons III.  Apache-2.0.
+# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
 """DEPLOYBUTTON 2026-11-02 (Trey: a one-click Deploy to Render button).
 render.yaml makes a full Bridge Warden on the judge's OWN free Render account. Every box Render asks is optional:
 "none" counts as empty, no Twilio = Hear the call, no xAI = local rules, no PayPal = webhook off, and a fresh copy

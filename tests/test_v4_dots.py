@@ -124,9 +124,9 @@ def test_notices_say_apache_and_logo_music_reserved():
     for d in (ENERGY, CVD, FULL):
         t = (d / "NOTICE.md").read_text(encoding="utf-8")
         assert "Art by @Nefarious_Trey." in t and "MIT License" in t and "all rights reserved" in t.lower()
-        assert "Copyright 2026 Douglas Gibbons III\nMade by @Nefarious_Trey,\nwith Grok.\n" in t
+        assert "Copyright 2026 Trey (@Nefarious_Trey)\nMade by @Nefarious_Trey,\nwith Grok.\n" in t
         lic = (d / "LICENSE").read_text(encoding="utf-8")
-        assert lic.startswith("MIT License\n\nCopyright 2026 Douglas Gibbons III\nMade by @Nefarious_Trey,\nwith Grok.\n")
+        assert lic.startswith("MIT License\n\nCopyright 2026 Trey (@Nefarious_Trey)\nMade by @Nefarious_Trey,\nwith Grok.\n")
         assert "Permission is hereby granted, free of charge" in lic and "WITHOUT WARRANTY OF ANY KIND" in lic
         if (d / "NOTICE.md.bak-20261026-dotsmit").exists():   # backups stay on the build box only (not shipped)
             assert "Apache License, Version 2.0" in (d / "NOTICE.md.bak-20261026-dotsmit").read_text(encoding="utf-8")   # old text kept
@@ -141,7 +141,7 @@ def test_notices_say_apache_and_logo_music_reserved():
     assert "Apache License" in lic and "Version 2.0, January 2004" in lic and "END OF TERMS AND CONDITIONS" in lic
     n = (ROOT / "NOTICE").read_text(encoding="utf-8")
     # 2026-10-26: legal name only on copyright lines (Trey), then the two-line credit (old check in .bak-20261026-judge)
-    assert n.startswith("Bridge Warden\nCopyright 2026 Douglas Gibbons III\nMade by @Nefarious_Trey,\nwith Grok.\n")
+    assert n.startswith("Bridge Warden\nCopyright 2026 Trey (@Nefarious_Trey)\nMade by @Nefarious_Trey,\nwith Grok.\n")
     assert "logo" in n.lower() and "music" in n.lower() and "all rights reserved" in n.lower()
 
 

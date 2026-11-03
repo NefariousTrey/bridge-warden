@@ -2,7 +2,7 @@
 Offline only: fake timers, fake 'real' adapters, dry-run calls, no network. No real key is ever printed.
 Made by @Nefarious_Trey,
 with Grok.
-Copyright 2026 Douglas Gibbons III"""
+Copyright 2026 Trey (@Nefarious_Trey)"""
 import inspect
 import json
 import os

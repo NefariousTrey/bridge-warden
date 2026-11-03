@@ -1,5 +1,5 @@
 /* Bridge Warden v6: the BW AG Grid agent's spending grid (AG Grid Community, MIT, self-hosted).
-   Made by @Nefarious_Trey, with Grok. Copyright 2026 Douglas Gibbons III. Apache-2.0.
+   Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
    Read-only. Progressive enhancement: if this file or AG Grid does not load, the charts and lists stay. No outside calls. */
 (function () {
   var box = document.getElementById('bw-money-grid');

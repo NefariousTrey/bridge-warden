@@ -1,4 +1,4 @@
-# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Douglas Gibbons III.  Apache-2.0.
+# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
 """Oct 27 2026 (Trey): a private hosted test copy. BW_SITE_LOCK_PASSWORD set = every route needs HTTP Basic
 (user "bw", constant-time), except Twilio's signed call webhooks (own checks), /healthz and /robots.txt
 ("Disallow: /"). Every response says noindex (header) and every page has meta noindex. The password is fake."""

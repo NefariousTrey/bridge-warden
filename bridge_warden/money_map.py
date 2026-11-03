@@ -8,7 +8,7 @@ The BW AG Grid agent (History page) uses this to:
     subscriptions you may not use any more ("still use this?": we only see charges, never use).
 Data comes from your Bridge Warden history (always) and, when the read-only money check read them, PayPal
 transactions. In Dev mode / TEST MODE it is made-up SAMPLE data only.
-Made by @Nefarious_Trey, with Grok. Copyright 2026 Douglas Gibbons III. Apache-2.0.
+Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
 """
 from __future__ import annotations
 

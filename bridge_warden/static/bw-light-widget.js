@@ -1,5 +1,5 @@
 /* Bridge Warden v6: "BW Light", an AG Studio custom widget.
-   Made by @Nefarious_Trey, with Grok. Copyright 2026 Douglas Gibbons III. Apache-2.0 (this file only).
+   Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0 (this file only).
    Shows the account's light (red / yellow / green) with Trey's BW dots, the reason, and the last alert.
    Two owner buttons, "I've seen this" and "It's fixed", call Bridge Warden's EXISTING rules on its own server:
    - red never goes straight to green (the server refuses it);
