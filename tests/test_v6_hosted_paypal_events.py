@@ -121,7 +121,7 @@ def test_rate_limit_is_respected(gate):
 
 
 def test_scrubbed_payload_has_no_email_name_or_private_words(gate):
-    gate.engine.p["private_terms"] = ["Gibbons"]
+    gate.engine.p["private_terms"] = ["Sampleton"]
     mock = MockXai(reply("low", "allow"))
     with_ai(gate, mock)
     raw = json.dumps({"id": "WH-0000000000000020", "event_type": "PAYMENT.CAPTURE.COMPLETED",
@@ -129,12 +129,12 @@ def test_scrubbed_payload_has_no_email_name_or_private_words(gate):
                       "resource": {"id": "CAP000000020", "amount": {"value": "5.00", "currency_code": "USD"},
                                    "payer": {"email_address": "maria.gonzalez@example.com",
                                              "name": {"given_name": "Maria", "surname": "Gonzalez"}},
-                                   "note_to_payer": "Hi Trey Gibbons, call 555 867 5309 or maria.gonzalez@example.com"}})
+                                   "note_to_payer": "Hi Jordan Sampleton, call 555 867 5309 or maria.gonzalez@example.com"}})
     w, _, _ = watch(gate)
     w.receive(hdr(), raw.encode())
     [body] = mock.chat_bodies()
     sent = json.dumps(body).lower()
-    for bad in ("maria", "gonzalez", "example.com", "@", "gibbons", "5309", "cap000000020", "wh-0000000000000020"):
+    for bad in ("maria", "gonzalez", "example.com", "@", "sampleton", "5309", "cap000000020", "wh-0000000000000020"):
         assert bad not in sent, bad
     a = records(gate, "acctwatch_ai_check")[-1]
     assert "maria" not in json.dumps(a["redacted_payload"]).lower()
