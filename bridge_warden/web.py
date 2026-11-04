@@ -639,19 +639,25 @@ def judge_landing(dev: bool = False) -> str:
 JUDGE_VIDEO_LINK = "https://youtu.be/gcGDCPxvk98"
 JUDGE_REPO_LINK = "https://github.com/NefariousTrey/bridge-warden"   # filled 2026-11-02 (repo goes public Nov 4)
 JUDGE_LOGIN_NOTE = "Judge login: in the Devpost testing notes."
+# JUDGEFIX 2026-11-04: the site lock covers every page, this guide too. Never put the site login itself here.
+JUDGE_SITE_LOCK_NOTE = ("The whole demo site, this guide included, is behind a site login. "
+                        "The site login and the judge key are both in the Devpost private testing notes.")
 JUDGE_FREE_UNTIL = "Free for judges through Dec 15, 2026."
 JUDGE_KEY_STOP = "The judge key stops working on Dec 16, 2026."   # PREFLIP: matches notify.JUDGE_UNTIL_SHIPPED
 ADULTS_LINE = "Bridge Warden is for adults (18 and over). PayPal accounts also require 18+."
 SANDBOX_LINE = "Tested in sandbox with sample data to verify it works as intended."
 JUDGE_TOP_FACTS = (   # Trey, Oct 27: plain box at the top. Each line checked against the code (see tests).
     # JUDGEFIX 2026-11-01: cold start first; no "3 real test calls" (a hosted judge never gets a phone call).
-    "First load can take about a minute. The free demo sleeps when nobody uses it.",
+    "The free demo server sleeps when idle, so the first load can take about a minute.",
     ("All AI is real xAI: help chats, Ask AI about this, the AG chat panel and the money check summary. "
      "Free to you on our key (1,000 messages in all, shared by every judge)."),      # judge_ai.py: one cap covers every use
     "No phone needed. No real phone calls. Hear the call plays the alert call in your browser.",
     "PayPal is sandbox only. No real money moves.",
     "All judges share one demo copy: Dev mode, TEST rows and alerts. Another judge may change or clear them. Please turn Dev mode off when you are done.",
     "Want a real phone call? Press Deploy to Render below. Your own free copy, with your own Twilio.",
+    # 2026-11-04: AG Studio runs on a trial license during judging.
+    ("The AG Studio dashboard uses a trial license; if it lapses near the end of judging, a small watermark "
+     "appears and everything still works."),
 )
 # DEPLOYBUTTON 2026-11-02: one click makes a full Bridge Warden on the judge's OWN free Render account (render.yaml).
 # The button only works while the GitHub repo is public. A text link (the page's CSP blocks outside images).
@@ -704,7 +710,8 @@ def judges_body(video: str | None = None, repo: str | None = None) -> str:
     dot = lambda c, alt: (f'<img src="/assets/dots/bw-dot-trey-{c}-full-glyph-48.png" width="48" height="48" '
                           f'alt="{alt}">')
     steps = (   # JUDGEFIX 2026-11-01: the path tested on the hosted demo. Dev mode first; real button names.
-        ("Sign in.", "Open the demo link. The first load can take about a minute.",
+        ("Sign in.", "Open the demo link. Enter the site login from the Devpost private testing notes. "
+         "The first load can take about a minute.",
          "Paste your judge key in the Login key box. Press Log in. " + JUDGE_LOGIN_NOTE),
         ("Look at the light.", "Home shows one big light at the top.",
          "Green means all is fine. A fresh copy has no payments yet."),
@@ -732,6 +739,7 @@ def judges_body(video: str | None = None, repo: str | None = None) -> str:
         f'<p class="jg-call"><a class="btn" href="/hear">{icon("phone")}Hear the call</a></p>'
         f'<p class="jg-tag">{e(SANDBOX_LINE)}</p>'
         f'<div class="jg-box"><p><b>{e(JUDGE_FREE_UNTIL)}</b> {e(JUDGE_KEY_STOP)}</p><p>{e(JUDGE_LOGIN_NOTE)}</p>'
+        f'<p>{e(JUDGE_SITE_LOCK_NOTE)}</p>'
         f'<p>{e(NO_PHONE_LINE)}</p><p>{e(JUDGE_TEST_ALERT_LINE)}</p><p>{e(ADULTS_LINE)}</p></div>'
         f'<h2 id="jg-try">Try it in {len(steps)} steps</h2>'
         f'<ol class="jg-steps" aria-labelledby="jg-try">{st}</ol>'

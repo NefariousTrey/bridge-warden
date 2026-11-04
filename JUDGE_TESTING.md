@@ -4,12 +4,13 @@ This is the one judge guide for Bridge Warden. (`proof/JUDGE_TESTING.md` only po
 
 ## Good to know
 
-1. First load can take about a minute. The free demo sleeps when nobody uses it.
+1. The free demo server sleeps when idle, so the first load can take about a minute.
 2. All AI is real xAI: help chats, Ask AI about this, the AG chat panel and the money check summary. Free to you on our key (1,000 messages in all, shared by every judge).
 3. No phone needed. No real phone calls. Hear the call plays the alert call in your browser.
 4. PayPal is sandbox only. No real money moves.
 5. All judges share one demo copy: Dev mode, TEST rows and alerts. Another judge may change or clear them. Please turn Dev mode off when you are done.
 6. Want a real phone call? Press Deploy to Render below. Your own free copy, with your own Twilio.
+7. The AG Studio dashboard uses a trial license; if it lapses near the end of judging, a small watermark appears and everything still works.
 
 More on these:
 
@@ -19,7 +20,8 @@ More on these:
 - Dev mode, Pause and the light are shared by everyone on the demo. If another judge left Dev mode on, just use it.
   Call name, voice and retries are the owner's settings, so they are view-only for judges.
 
-The same guide is a page in the app: open **/judges** (top menu: **Judges**). No sign-in needed to read it.
+The same guide is a page in the app: open **/judges** (top menu: **Judges**).
+The whole demo site, this guide included, is behind a site login. The site login and the judge key are both in the Devpost private testing notes.
 
 Bridge Warden watches the payments your AI agent makes with PayPal.
 It lets safe ones through, stops risky ones, and tells you right away.
@@ -36,6 +38,7 @@ On this demo, Test my alert opens Hear the call too. It never rings a phone.
 ## Try it in 6 steps
 
 1. **Sign in.** Open the demo link. Give it up to a minute the first time.
+   Your browser asks for the site login first. It is in the Devpost private testing notes.
    Paste your judge key in the **Login key** box and press **Log in**.
    Judge login: in the Devpost testing notes.
 
@@ -225,6 +228,14 @@ the log. If something needs attention, the light turns yellow (paused), automati
 approvals still work), you see a plain note in the app, and you get an email if email is set up. It clears
 when you clear it in Settings or a later check comes back clean. A red light is never turned yellow.
 Dev mode has a button to simulate this (**Simulate check**, marked TEST; PayPal is not called).
+
+### Legal notice
+
+**Acceptable Use.** This software may be used only for lawful purposes. You may not use it to harm, harass, defraud, deceive or exploit any person, or to infringe any person's rights, including rights to equal treatment, privacy and personal autonomy.
+
+**Disclaimer of Warranty.** This software is provided "AS IS", without warranty of any kind, express or implied, including warranties of merchantability, fitness for a particular purpose and non-infringement. The authors developed it with reasonable care and due diligence and welcome feedback.
+
+**Limitation of Liability.** In no event shall the authors be liable for any claim, damages or other liability arising from the use or misuse of this software, including any use that violates law or these terms.
 
 ## The AI on the hosted judge demo
 

@@ -1,4 +1,5 @@
-# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
+# Made by @Nefarious_Trey,
+# with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
 """Judge Guide (/judges), Oct 27 2026: a real BW page, public, plain words, big numbered steps, Light/Dark works,
 no keys or logins on it, and linked from the nav, Home, the judge landing and the hosted login page."""
 import re
@@ -41,7 +42,7 @@ def check_guide(body):
                  "https://youtu.be/gcGDCPxvk98", "https://github.com/NefariousTrey/bridge-warden", "Free for judges through Dec 15, 2026.",
                  "Judge login: in the Devpost testing notes.", "Test my alert",
                  "Judge mode runs the whole flow without a phone.", "The voice call is optional (your own Twilio",
-                 "First load can take about a minute.", "Turn on Dev mode", "Add TEST sell", "Raise TEST red",
+                 "The free demo server sleeps when idle, so the first load can take about a minute.", "Turn on Dev mode", "Add TEST sell", "Raise TEST red",
                  "I’ve seen this", "It’s fixed", "Hear the call", "/hear",
                  "Test my alert opens Hear the call too. It never rings a phone.",
                  "All judges share one demo copy:"):
@@ -61,7 +62,11 @@ def check_guide(body):
     assert not re.search(r"\b(sk|xai|ghp|rk)[-_][a-z0-9]{8}", low)
     # short plain sentences: no sentence in the guide body over 20 words
     guide = _text(re.search(r'<div class="jg">(.*?)</main>', body, re.S).group(1))
+    # 2026-11-04: Trey's two exact judge notes are kept word for word, so they are exempt from the 20-word rule.
+    exact = (web.JUDGE_TOP_FACTS[0], web.JUDGE_TOP_FACTS[-1])
     for sent in re.split(r"(?<=[.!?])\s", guide):
+        if any(sent.strip().endswith(x) for x in exact):
+            continue
         assert len(sent.split()) <= 20, sent
 
 

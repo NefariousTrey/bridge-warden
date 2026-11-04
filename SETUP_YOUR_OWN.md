@@ -57,7 +57,8 @@ This is the simple way. The call **speaks** the alert. You make your choice in t
    `"call_on_fraud": {"enabled": true, "provider": "twilio", "experimental": true}`
 3. Start Bridge Warden: `python -m bridge_warden serve --live`
 4. Go to **Settings**, then **Test my alert**. You see "Test started." Your phone rings with no warning,
-   within 20 minutes. One test per 20 minutes.
+   within 20 minutes (the test waits on purpose, so it feels like a real alert). One test per 20 minutes.
+   A real fraud alert does not wait: in the Oct 27, 2026 sandbox run the phone rang about 44 seconds after the payout.
    It is a **test**. Nothing happens to your money.
 
 Leave out any of the 4 values and it is a **dry run**: no call, just a line in the log.
@@ -293,6 +294,8 @@ service can be slow to answer the first webhook. PayPal retries a webhook that d
 
 ## Lawful use
 
+Bridge Warden is for adults (18 and over). PayPal accounts also require 18+.
+
 Do not use Bridge Warden to break the law or to harm anyone. Use it honestly. It is here to help protect your own money.
 
 - It treats every user with the same respect.
@@ -314,6 +317,14 @@ approvals still work), you see a plain note in the app, and you get an email if 
 when you clear it in Settings or a later check comes back clean. A red light stays red until you respond;
 if the problem is not fixed yet, it then steps down to yellow (see "Red, then yellow" below).
 Dev mode has a button to simulate this (marked TEST; PayPal is not called).
+
+### Legal notice
+
+**Acceptable Use.** This software may be used only for lawful purposes. You may not use it to harm, harass, defraud, deceive or exploit any person, or to infringe any person's rights, including rights to equal treatment, privacy and personal autonomy.
+
+**Disclaimer of Warranty.** This software is provided "AS IS", without warranty of any kind, express or implied, including warranties of merchantability, fitness for a particular purpose and non-infringement. The authors developed it with reasonable care and due diligence and welcome feedback.
+
+**Limitation of Liability.** In no event shall the authors be liable for any claim, damages or other liability arising from the use or misuse of this software, including any use that violates law or these terms.
 
 ## Update 2026-10-27: Red, then yellow (pause while you fix)
 
