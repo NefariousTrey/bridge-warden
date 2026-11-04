@@ -696,7 +696,7 @@ The repo was slimmed to the app, tests, licenses and how-to docs. Some lines abo
 **not in this repo** any more. Please use these instead:
 
 - **Demo video, captioned demos, video frames** (`*.mp4`, `proof/demo/`, `proof/video/`, `DEMO_VIDEO_SCRIPT.md`):
-  watch the demo video: [YOUTUBE_LINK]. It is also linked on the Devpost page.
+  watch the demo video: https://youtu.be/gcGDCPxvk98. It is also linked on the Devpost page.
 - **Call scripts** (`proof/demo/CALL_SCRIPT*.md`): the words of the call are in the code,
   `bridge_warden/paypal_steps.json` and `bridge_warden/notify.py`, and the tests check them.
   You can also hear the call in your browser at `/hear` (judge mode).

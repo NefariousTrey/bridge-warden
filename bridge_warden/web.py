@@ -636,7 +636,7 @@ def judge_landing(dev: bool = False) -> str:
 # Public page (no login), same base template as every BW page. Plain words, big numbered steps.
 # Never put keys or real judge logins here. The two links are placeholders until the video and repo are public:
 # swap the values below (or set BW_JUDGE_VIDEO_URL / BW_JUDGE_REPO_URL) when they are live.
-JUDGE_VIDEO_LINK = "[YOUTUBE_LINK]"
+JUDGE_VIDEO_LINK = "https://youtu.be/gcGDCPxvk98"
 JUDGE_REPO_LINK = "https://github.com/NefariousTrey/bridge-warden"   # filled 2026-11-02 (repo goes public Nov 4)
 JUDGE_LOGIN_NOTE = "Judge login: in the Devpost testing notes."
 JUDGE_FREE_UNTIL = "Free for judges through Dec 15, 2026."
