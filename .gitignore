@@ -39,7 +39,7 @@ policy.json
 proof/live-demo-*
 
 # Slim ship set 2026-10-27 (Trey OK): files stay on disk, not in the public repo
-proof/demo/
+proof/demo/*
 proof/ui/
 proof/ui-old-20261026-1020/
 proof/video/
@@ -63,3 +63,10 @@ UI_RESEARCH.md
 assets/dots-proposal-20261026/
 *.mp4
 *.webm
+
+# Public proof (2026-11-04): the cleaned end-to-end run notes and the call scripts are shipped
+!proof/ACCTWATCH_E2E_RESULT_PC_20261027.md
+!proof/demo/CALL_SCRIPT.md
+!proof/demo/CALL_SCRIPT_v2.md
+!proof/demo/CALL_SCRIPT_v3.md
+!proof/demo/CALL_SCRIPT_v4.md

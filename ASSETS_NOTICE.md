@@ -24,7 +24,8 @@ Anyone who reuses the dots must keep that copyright line and the MIT permission 
   gives no trademark rights.
 - Trey's Bridge Warden logo icon (shield, key and orb, no words) and the cover art, including
   `bridge_warden/static/bw-mark.png` and `bw-mark@2x.png` (the faint top-right watermark, made from
-  `brand/BW_logo_icon_original.jpg`) and the cover images in `brand/`. Art by @Nefarious_Trey.
+  Trey's original logo file, which is kept outside this repo), the logo files in `assets/brand/` and the cover
+  images (also kept outside this repo). Art by @Nefarious_Trey.
   Copyright 2026 Trey (@Nefarious_Trey). All rights reserved. NOT covered by the Apache license.
 - Any music or audio used with the project or its demo videos (including Trey's Suno tracks).
 
