@@ -1,6 +1,7 @@
 """Judge AI allowance: real xAI on the owner's key for judges, capped per judge key.
 
-Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0 (see LICENSE).
+Made by @Nefarious_Trey,
+with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0 (see LICENSE).
 
 How it works (hosted copy only, judges log in with their own judge key):
   * Every request a judge makes runs "as" that judge (a thread-local, set by hosted.py for that one request).

@@ -1,5 +1,6 @@
 """Dev mode (test only): lock, simulated states, TEST rows, TEST MODE banner.
-Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).
+Made by @Nefarious_Trey,
+with Grok.  Copyright 2026 Trey (@Nefarious_Trey).
 Only fake PayPal and fake call transports. Nothing real is ever called."""
 import json
 import re

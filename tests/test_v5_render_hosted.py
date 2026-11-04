@@ -1,4 +1,5 @@
-# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
+# Made by @Nefarious_Trey,
+# with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
 """v5: your own copy on Render (render.yaml + `python -m bridge_warden hosted`). Call menu served by the app
 itself (no Cloudflare Worker), with the same Twilio-signature OR signed-link check as the Worker."""
 import http.client
@@ -225,7 +226,7 @@ def test_real_call_points_back_at_this_app_and_is_accepted(srv):
 # ---- the Blueprint files ------------------------------------------------------------------------------------------
 def test_render_yaml_self_host_blueprint():
     y = (ROOT / "render.yaml").read_text(encoding="utf-8")
-    assert "Made by @Nefarious_Trey, with Grok." in y and "Copyright 2026 Trey (@Nefarious_Trey)" in y
+    assert "# Made by @Nefarious_Trey,\n# with Grok." in y and "Copyright 2026 Trey (@Nefarious_Trey)" in y
     assert re.search(r"^\s+plan: free$", y, re.M)
     assert 'startCommand: "python -m bridge_warden hosted"' in y
     assert "healthCheckPath: /healthz" in y and 'autoDeployTrigger: "off"' in y

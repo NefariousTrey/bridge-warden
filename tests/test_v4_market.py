@@ -1,4 +1,5 @@
-"""v4 Market price column (History grid). Made by @Nefarious_Trey, with Grok.
+"""v4 Market price column (History grid). Made by @Nefarious_Trey,
+with Grok.
 Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
 Checks the difference % and ring-flag logic, the EXAMPLE price file, /moves.json and the click-through page."""
 import json

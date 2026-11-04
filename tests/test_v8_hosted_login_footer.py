@@ -1,4 +1,5 @@
-# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
+# Made by @Nefarious_Trey,
+# with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
 """Oct 27 2026 audit fix: the hosted /login page used to keep the local footer "Runs only on this computer."
 (false on Render). Every hosted HTML page, /login included, now says the hosted wording. Fake keys only."""
 import threading

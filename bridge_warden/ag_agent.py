@@ -19,7 +19,8 @@ How it steps down (only YOU):
   * RED -> YELLOW: you click "I've seen this" in the app, or you answer the fraud alert call. Nothing else.
   * YELLOW -> GREEN: you click in the app: "Fixed, confirm" or "Ignore" with the "I'm sure" box ticked.
   * RED can never go straight to GREEN. Nothing steps down by time, by a later scan, or by an AI.
-Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
+Made by @Nefarious_Trey,
+with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
 """
 from __future__ import annotations
 

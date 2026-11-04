@@ -10,7 +10,8 @@ only; nothing new can turn the light green:
 No approve, no send, no release of a hold, no money path. Ignore stays on Home / History (it needs "I'm sure").
 Every click needs the owner's login, the same origin, and a one-time token bound to the light it was shown for.
 The AI chat panel has no tool for this; the browser side also drops clicks that are not a real person's click.
-Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
+Made by @Nefarious_Trey,
+with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
 """
 from __future__ import annotations
 

@@ -1,6 +1,7 @@
 """Make 'blue back' copies of Trey's bw-mark: the big white field inside the shield becomes the header navy
 (#0B1220, --navy in web.py STYLE), so the logo blends into the header. Metal highlights and the orb stay as they are.
-Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).
+Made by @Nefarious_Trey,
+with Grok.  Copyright 2026 Trey (@Nefarious_Trey).
 Reads bw-mark{,-yellow,-red}{,@2x}.png (never changed). Writes NEW files bw-mark-blue{,-yellow,-red}{,@2x}.png.
 Refuses to overwrite."""
 import sys

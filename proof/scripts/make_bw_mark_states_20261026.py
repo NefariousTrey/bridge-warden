@@ -1,5 +1,6 @@
 """Make yellow and red copies of Trey's bw-mark (the lock orb only), so the logo dot can match the status light.
-Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).
+Made by @Nefarious_Trey,
+with Grok.  Copyright 2026 Trey (@Nefarious_Trey).
 Reads bridge_warden/static/bw-mark.png and bw-mark@2x.png (never changed). Writes NEW files:
 bw-mark-yellow.png, bw-mark-yellow@2x.png, bw-mark-red.png, bw-mark-red@2x.png. Refuses to overwrite."""
 import colorsys, sys

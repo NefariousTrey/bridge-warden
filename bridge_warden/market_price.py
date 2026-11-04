@@ -1,4 +1,5 @@
-"""v4 Market price column for the History grid (AG Grid). Made by @Nefarious_Trey, with Grok.
+"""v4 Market price column for the History grid (AG Grid). Made by @Nefarious_Trey,
+with Grok.
 Copyright 2026 Trey (@Nefarious_Trey). Licensed under Apache-2.0 like the rest of the code.
 
 What it does: for each buy, payment or refund it finds a "market price" for the item, works out how far the

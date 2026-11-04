@@ -1,4 +1,5 @@
-# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
+# Made by @Nefarious_Trey,
+# with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0.
 """JUDGEFIX 2026-11-01 (Trey: get it as ready as possible for judging).
 1. A hosted judge's "Test my alert" never reaches Twilio: no call, no text, no Twilio read. It opens /hear.
    The owner's own path still starts the real drill.

@@ -1,6 +1,7 @@
 """v6 web: the BW AG Grid agent on History, the two read-only chats, the money map grid, the AG Studio chat proxy,
 "I'm sure" on Send, Dev-mode TEST issues, and real-only usage lines.
-Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache 2.0.
+Made by @Nefarious_Trey,
+with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache 2.0.
 Fakes only: fake PayPal, fake xAI transport, fake Twilio. Nothing real is called."""
 import html
 import json

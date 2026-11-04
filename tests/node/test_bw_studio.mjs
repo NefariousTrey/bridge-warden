@@ -1,5 +1,6 @@
 // v6: tests for bridge_warden/static/bw-studio.js (the BW AG Grid agent chat glue). Fakes only, no network.
-// Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
+// Made by @Nefarious_Trey,
+// with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
 // Run: node tests/node/test_bw_studio.mjs
 import assert from "node:assert/strict";
 import fs from "node:fs";

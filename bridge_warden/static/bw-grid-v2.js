@@ -1,5 +1,6 @@
 /* Bridge Warden v2: Guard History grid (every buy, payment and refund the Warden checked) with Market price, Difference % and Risk ring (AG Grid Community, MIT,
-   self-hosted). Made by @Nefarious_Trey, with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
+   self-hosted). Made by @Nefarious_Trey,
+   with Grok. Copyright 2026 Trey (@Nefarious_Trey). Apache-2.0.
    Progressive enhancement: if this file or AG Grid does not load, the plain table stays. No outside calls.
    Market prices are EXAMPLE demo prices unless the owner turns on a real source. They only warn. */
 (function () {

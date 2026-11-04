@@ -1,6 +1,7 @@
 # Bridge Warden: YOUR OWN copy on Render, in one click. Used by the "Deploy to Render" button:
 #   https://render.com/deploy?repo=https://github.com/NefariousTrey/bridge-warden
-# Made by @Nefarious_Trey, with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0 (see LICENSE).
+# Made by @Nefarious_Trey,
+# with Grok.  Copyright 2026 Trey (@Nefarious_Trey).  Apache-2.0 (see LICENSE).
 # This file must stay at the repo root. The button only works while the repo is public.
 #
 # Render is only how YOU host your copy, on YOUR own free Render account. Nobody else sees your keys.
