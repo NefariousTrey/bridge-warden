@@ -556,6 +556,14 @@ when you clear it in Settings or a later check comes back clean. A red light sta
 if the problem is not fixed yet, it then steps down to yellow (see "Red, then yellow" below).
 Dev mode has a button to simulate this (marked TEST; PayPal is not called).
 
+### Legal notice
+
+**Acceptable Use.** This software may be used only for lawful purposes. You may not use it to harm, harass, defraud, deceive or exploit any person, or to infringe any person's rights, including rights to equal treatment, privacy and personal autonomy.
+
+**Disclaimer of Warranty.** This software is provided "AS IS", without warranty of any kind, express or implied, including warranties of merchantability, fitness for a particular purpose and non-infringement. The authors developed it with reasonable care and due diligence and welcome feedback.
+
+**Limitation of Liability.** In no event shall the authors be liable for any claim, damages or other liability arising from the use or misuse of this software, including any use that violates law or these terms.
+
 ## Update 2026-10-27: Red, then yellow (pause while you fix)
 
 - **Green:** everything is working.
